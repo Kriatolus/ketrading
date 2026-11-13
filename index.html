@@ -340,6 +340,15 @@ button.on:not(.ghost){border-color:var(--accent);color:var(--accent)}
 .erules li::before{content:'';display:inline-block;width:4px;height:4px;border-radius:50%;background:var(--muted);margin:0 7px 2px 1px}
 .ecard .fgrid{margin-top:10px}
 .ecard .hint{margin-top:8px}
+.sy-a{border-top:1px solid var(--line);margin-top:10px;padding-top:10px}
+.sy-h{display:flex;align-items:center;gap:8px}
+.sy-n{flex:1;min-width:0;height:24px;background:transparent;border:1px solid transparent;border-radius:6px;color:var(--text);font:600 12px inherit;padding:0 4px;margin-left:-4px}
+.sy-n:hover,.sy-n:focus{border-color:var(--border);background:var(--btn);outline:none}
+.sy-x{width:auto;min-width:22px;height:22px;padding:0 6px;border-radius:6px;font-size:13px;line-height:1;color:var(--muted)}
+.sy-x.arm{color:var(--down);font-size:10.5px}
+.sy-r{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:7px}
+.sy-r b{color:var(--text);font-weight:600}.sy-r b.neg{color:var(--down)}
+.sy-btn{width:100%;height:28px;margin-top:9px}
 /* 3D symbol coin */
 #coin{position:absolute;z-index:8;width:58px;height:58px;perspective:420px;cursor:grab;user-select:none;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35))}
 #coin:active{cursor:grabbing}
@@ -570,6 +579,7 @@ button.on:not(.ghost){border-color:var(--accent);color:var(--accent)}
   </div>
   <div class="pane" id="pStats" hidden>
    <div id="evalBox"></div>
+   <div id="syncBox"></div>
    <div class="kpis">
     <div class="kpi"><span>Net P&amp;L</span><b id="dPnl">+0.00</b></div>
     <div class="kpi"><span>Win rate</span><b id="dWr">0.0%</b></div>
@@ -1099,7 +1109,7 @@ function loadRaw(raw, name){
 /* ---------- replay core ---------- */
 function reset(startIdx){
  stopPlay();
- S.pos=null; S.trades=[]; S.realized=0; S.markers=[]; S.dayPnl={}; S.partial=null; S.ticks=null; S.orders=[]; S.alerts=[]; S.evalFail=null; S.evalPrev=null; if(typeof drawOrders==='function'){ drawOrders(); drawAlerts(); }
+ S.pos=null; S.trades=[]; S.realized=0; S.markers=[]; S.dayPnl={}; S.partial=null; S.ticks=null; S.orders=[]; S.alerts=[]; S.evalFail=null; S.evalPrev=null; try{ syncReset(); }catch(e){} if(typeof drawOrders==='function'){ drawOrders(); drawAlerts(); }
  clearLines();
  if(!S.bars.length) return;
  S.cursor = Math.min(Math.max(1, startIdx ?? START), S.bars.length-1);
@@ -1299,6 +1309,7 @@ function closePos(price, i, reason){
  S.trades.push({n:S.trades.length+1, side:p.side>0?'LONG':'SHORT', entryTime:p.time, exitTime:t, entry:p.entry, exit:price,
   points:pts, pnl, reason, bars:i-p.idx, r:p.risk?pts/p.risk:null});
  S.markers.push({time:t, position:p.side>0?'aboveBar':'belowBar', color:'#f5a623', shape:'circle', text:`${reason} ${sg(pnl)}`});
+ try{ syncClose(p,pnl,t); }catch(e){}
  S.pos=null; clearLines();
  try{ tradeFx(reason,pnl,t); }catch(e){}
 }
@@ -1313,6 +1324,7 @@ function openPos(side, fillPx, slOv, tpOv, why, qtyOv){
  const slP=slOv ?? (+$('slPts').value||0), tpP=tpOv ?? (+$('tpPts').value||0);
  S.pos={side, entry:price, idx:i, time:t, qty:qtyOv ?? (+$('qty').value||1), pv:+$('contract').value||1, comm:+$('comm').value||0,
   sl: slP>0 ? price-side*slP : null, tp: tpP>0 ? price+side*tpP : null, risk: slP>0 ? slP : null};
+ try{ S.pos.sync=syncEnter(); }catch(e){ S.pos.sync=[]; }
  S.markers.push({time:t, position:side>0?'belowBar':'aboveBar', color:side>0?SIG.up:SIG.down, shape:side>0?'arrowUp':'arrowDown', text:(why?why+' ':'')+(side>0?'BUY ':'SELL ')+price.toFixed(2)});
  if(!why) msg(''); drawLines(); refresh();
 }
@@ -2981,22 +2993,27 @@ const CAR=(()=>{ const d={stage:'eval',wallet:0,passes:0,blown:0,paid:0,payouts:
 const carSaveLocal=()=>{ try{ localStorage.setItem('ke_career_v1',JSON.stringify(CAR)); }catch(e){} };
 const carSave=()=>{ carSaveLocal(); try{ cloudPush(); }catch(e){} };
 const funded=()=>CAR.stage==='funded';
-function evalCalc(){
- const E=cfg.eval, F=funded(), tgt=+E.target||1250, mll=+E.mll||1000, cons=(!F&&E.plan==='flex')?0.5:0;
- const nowT=S.bars.length ? ((S.partial&&S.raw.length)?replayNow():S.bars[S.cursor].time) : 0, today=cycleDay(nowT);
- const L=F ? CAR.ledger : S.trades.slice().sort((a,b)=>a.exitTime-b.exitTime).map(t=>({d:cycleDay(t.exitTime),pnl:t.pnl}));
+const evalNow=()=>S.bars.length ? ((S.partial&&S.raw.length)?replayNow():S.bars[S.cursor].time) : 0;
+function lucidCalc(L,F,open,today){
+ const E=cfg.eval, tgt=+E.target||1250, mll=+E.mll||1000, cons=(!F&&E.plan==='flex')?0.5:0;
  let bal=EVAL.start, floor=EVAL.start-mll, day=null, breach=false, cyc=new Map(); const lockAt=EVAL.start+EVAL.lock, days=new Map();
  const eod=()=>{ floor=Math.max(floor, Math.min(bal-mll, lockAt)); };
  for(const t of L){ if(day!==null && t.d!==day) eod(); day=t.d; bal+=t.pnl;
   if(t.pay){ cyc=new Map(); continue; }
   days.set(t.d,(days.get(t.d)||0)+t.pnl); cyc.set(t.d,(cyc.get(t.d)||0)+t.pnl); if(bal<=floor) breach=true; }
  if(day!==null && S.bars.length && (F ? today!==day : today>day)) eod();
- const open=S.pos ? S.pos.side*(priceNow()-S.pos.entry)*S.pos.pv*S.pos.qty : 0, eq=bal+open, profit=bal-EVAL.start;
+ const eq=bal+open, profit=bal-EVAL.start;
  const best=Math.max(0,...days.values()), consOk=!cons || best<=cons*Math.max(profit,0)+1e-9;
  const winDays=[...cyc.values()].filter(v=>v>0).length;
  const maxPay=Math.floor(Math.max(0,Math.min(FUND.cap, profit*FUND.pct, bal-floor-1)));
  return {F,today,tgt,mll,bal,eq,open,floor,profit,best,cons,consOk,need:cons?best/cons:0,breach,locked:floor>=lockAt,pass:!F&&profit>=tgt&&consOk,
   winDays,maxPay,canPay:F&&winDays>=FUND.days&&maxPay>=FUND.min};
+}
+function evalCalc(){
+ const F=funded(), today=cycleDay(evalNow());
+ const L=F ? CAR.ledger : S.trades.slice().sort((a,b)=>a.exitTime-b.exitTime).map(t=>({d:cycleDay(t.exitTime),pnl:t.pnl}));
+ const open=S.pos ? S.pos.side*(priceNow()-S.pos.entry)*S.pos.pv*S.pos.qty : 0;
+ return lucidCalc(L,F,open,today);
 }
 function evalBlock(q){
  if(!cfg.eval.on) return false;
@@ -3098,6 +3115,107 @@ function evalUpdate(){
   else a.innerHTML=''; }
 }
 
+/* ---- trade syncer: linked Lucid accounts that copy every entry ---- */
+const SYNC={max:4,prev:{},key:'',last:null};
+if(!Array.isArray(CAR.sync)) CAR.sync=[];
+CAR.sync.forEach(a=>{ if(a.stage!=='funded') a.ledger=[]; if(!Array.isArray(a.ledger)) a.ledger=[]; });   // evaluations restart with the replay, like the main one
+const syncOwned=()=>!!CAR.owned.syncer;
+const syncLive=()=>!!(cfg.eval&&cfg.eval.on&&syncOwned());
+const syncIn=a=>!!(S.pos&&S.pos.sync&&S.pos.sync.includes(a.id));
+const syncOpen=a=>syncIn(a) ? S.pos.side*(priceNow()-S.pos.entry)*S.pos.pv*S.pos.qty : 0;
+const syncCalc=a=>lucidCalc(a.ledger,a.stage==='funded',syncOpen(a),cycleDay(evalNow()));
+function syncEnter(){ return (syncLive()&&!S.evalFail) ? CAR.sync.filter(a=>a.on).map(a=>a.id) : []; }
+function syncClose(p,pnl,t){
+ if(!p.sync||!p.sync.length) return; const d=cycleDay(t); let n=0;
+ for(const a of CAR.sync) if(p.sync.includes(a.id)){ a.ledger.push({d,pnl}); n++; }
+ if(n){ SYNC.last={n,pnl}; carSave(); }
+}
+function syncReset(){ SYNC.prev={}; SYNC.last=null; let ch=false; for(const a of CAR.sync) if(a.stage!=='funded'&&a.ledger.length){ a.ledger=[]; ch=true; } if(ch) carSave(); }
+function syncAdd(){
+ if(CAR.sync.length>=SYNC.max) return;
+ let n=CAR.sync.length+2; const names=new Set(CAR.sync.map(a=>a.name)); while(names.has('Account '+n)) n++;
+ CAR.sync.push({id:'a'+Date.now().toString(36)+Math.floor(Math.random()*1296).toString(36),name:'Account '+n,stage:'eval',ledger:[],on:true,passes:0,blown:0});
+ carSave(); syncUpdate();
+ toast(`<b>Account ${n} linked.</b> It starts a new $25,000 evaluation and copies your next entry.`,4500);
+}
+function syncClaim(id){
+ const a=CAR.sync.find(x=>x.id===id); if(!a) return;
+ if(S.pos){ msg('Close your position before you move an account to funded.'); return; }
+ if(!syncCalc(a).pass) return;
+ a.stage='funded'; a.ledger=[]; a.passes=(a.passes||0)+1; CAR.passes++; delete SYNC.prev[a.id]; carSave(); careerSync(); sfxPlay('cash',true);
+ toast(`<b>${cesc(a.name)} passed.</b> It is now a funded account. Five winning days unlock its first payout.`,5500);
+}
+function syncPayout(id){
+ const a=CAR.sync.find(x=>x.id===id); if(!a) return;
+ if(S.pos){ msg('Close your position before you request a payout.'); return; }
+ const c=syncCalc(a); if(!c.canPay) return;
+ const amt=c.maxPay, net=Math.round(amt*FUND.split*100)/100;
+ a.ledger.push({d:c.today,pnl:-amt,pay:1}); CAR.wallet+=net; CAR.paid+=net; CAR.payouts++; delete SYNC.prev[a.id]; carSave(); careerSync(); sfxPlay('cash',true);
+ toast(`<b>Payout approved on ${cesc(a.name)}.</b> ${usd(amt)} requested, ${usd(net)} (90%) is in your wallet.`,6000);
+}
+function syncUpdate(){
+ if(syncLive()){
+  let dirty=false;
+  for(const a of CAR.sync){
+   const c=syncCalc(a), ex=syncIn(a), ok=!S.pos||ex, k=c.bal-S.realized, pv=SYNC.prev[a.id];
+   let breach=c.breach||c.eq<=c.floor;
+   // scan equity points added since the last check, the same way the main account does
+   if(!breach && pv && pv.ok && ok && Math.abs(pv.k-k)<0.005 && S.eq.length>=pv.n){ for(let i=pv.n;i<S.eq.length;i++) if(S.eq[i].value+pv.k<=pv.floor){ breach=true; break; } }
+   if(breach){
+    const was=a.stage; if(ex) S.pos.sync=S.pos.sync.filter(x=>x!==a.id);
+    a.stage='eval'; a.ledger=[]; a.blown=(a.blown||0)+1; if(was==='funded') CAR.blown++; delete SYNC.prev[a.id]; dirty=true;
+    try{ sfxPlay('sl',true); }catch(e){}
+    toast(`<b>${cesc(a.name)} hit the max loss limit.</b> ${was==='funded'?'The funded account is closed and it':'It'} starts a new evaluation at $25,000.`,6500);
+   } else SYNC.prev[a.id]={n:S.eq.length,floor:c.floor,k,ok};
+  }
+  if(dirty){ carSave(); careerSync(); }
+ }
+ syncRender();
+}
+function syncRender(){
+ const box=$('syncBox'); if(!box) return;
+ const own=syncOwned(), live=syncLive(), A=CAR.sync, C=live?A.map(syncCalc):[];
+ const key=[own,live,CAR.wallet>=1800,A.length,...A.map((a,i)=>[a.id,a.stage,a.on,C[i]?[C[i].pass,C[i].canPay,C[i].maxPay].join('.'):''].join(':'))].join('|');
+ if(key!==SYNC.key){
+  const n=A.filter(a=>a.on).length;
+  box.innerHTML=`<div class="ecard"><div class="ehead"><b>Trade syncer</b><span class="badge ${own&&live&&n?'run':''}">${!own?'LOCKED':!live?'OFF':n?n+' LINKED':'NO ACCOUNTS'}</span></div>`+
+  (!own?`<div class="hint">Link up to ${SYNC.max} extra Lucid 25K accounts to this one. Every entry you take is copied to all of them, and each account passes, gets funded and pays out on its own.</div>
+    <button class="primary sy-btn" id="syUnlock">${CAR.wallet>=1800?'Unlock in the Career shop for $1,800':'Costs $1,800 in the Career shop (two payouts)'}</button>`
+  :!live?`<div class="hint">Turn on Lucid mode above to trade your linked accounts.</div>`
+  :`<div class="hint" id="syLast"></div>`+A.map((a,i)=>`<div class="sy-a"><div class="sy-h"><input class="sy-n" data-nm="${a.id}" maxlength="14" value="${cesc(a.name)}" title="Rename this account"><span class="badge" id="syB_${a.id}"></span><label class="sw" title="Copy trades to this account"><input type="checkbox" data-on="${a.id}" ${a.on?'checked':''}><i></i></label><button class="sy-x" data-rm="${a.id}" title="Remove this account">&times;</button></div>
+    <div class="meter"><div class="l"><span>${a.stage==='funded'?'Winning days this payout cycle':'Profit target'}</span><b id="syP_${a.id}"></b></div><div class="m"><i id="syPb_${a.id}"></i></div></div>
+    <div class="sy-r"><span>Balance <b id="syBal_${a.id}"></b></span><span>Room <b id="syR_${a.id}"></b></span></div>`+
+    (a.stage==='funded' ? `<button class="primary sy-btn" data-pay="${a.id}" ${C[i].canPay?'':'disabled'}>Request payout${C[i].canPay?' '+usd(C[i].maxPay):''}</button>` : C[i].pass ? `<button class="primary sy-btn" data-claim="${a.id}">Move to funded account</button>` : '')+`</div>`).join('')+
+   (A.length<SYNC.max?`<button class="sy-btn" id="syAdd">Link another account (${A.length} of ${SYNC.max})</button>`:'')+
+   `<ul class="erules"><li>Your main account leads. Each linked account takes the same entry, size, stop and target.</li>
+    <li>A new account starts its own $25,000 evaluation, so accounts can be at different stages.</li>
+    <li>Same Lucid rules on each: trailing max loss, 5 winning days, payout up to 50% of profit (max $1,000), you keep 90%.</li>
+    <li>All accounts trade the same direction, so there is no hedging between them.</li>
+    <li>Switching an account on or off applies from your next entry.</li></ul>`)+`</div>`;
+  const q=s=>box.querySelectorAll(s);
+  if($('syUnlock')) $('syUnlock').onclick=()=>careerOpen('Extras');
+  if($('syAdd')) $('syAdd').onclick=syncAdd;
+  q('[data-nm]').forEach(e=>e.onchange=()=>{ const a=A.find(x=>x.id===e.dataset.nm); if(a){ a.name=e.value.trim()||'Account'; carSave(); } });
+  q('[data-on]').forEach(e=>e.onchange=()=>{ const a=A.find(x=>x.id===e.dataset.on); if(a){ a.on=e.checked; carSave(); syncUpdate(); } });
+  q('[data-rm]').forEach(e=>e.onclick=()=>{ if(S.pos){ msg('Close your position before you remove an account.'); return; }
+   if(!e.dataset.arm){ e.dataset.arm='1'; e.textContent='Remove?'; e.classList.add('arm'); return; }
+   CAR.sync=CAR.sync.filter(x=>x.id!==e.dataset.rm); delete SYNC.prev[e.dataset.rm]; carSave(); syncUpdate(); });
+  q('[data-claim]').forEach(e=>e.onclick=()=>syncClaim(e.dataset.claim));
+  q('[data-pay]').forEach(e=>e.onclick=()=>syncPayout(e.dataset.pay));
+  SYNC.key=key;
+ }
+ if(!live) return;
+ const L=$('syLast'); if(L){ const n=A.filter(a=>a.on).length;
+  L.textContent = !A.length ? 'No linked accounts yet. Link one and it copies your next entry.' : SYNC.last ? `Last trade: ${sg(SYNC.last.pnl)} on each of ${SYNC.last.n} linked account${SYNC.last.n===1?'':'s'}.` : `Your next entry is copied to ${n} linked account${n===1?'':'s'}.`; }
+ A.forEach((a,i)=>{ const c=C[i], id=a.id, F=a.stage==='funded'; if(!$('syB_'+id)) return;
+  const st=!a.on?['PAUSED','']:F?['FUNDED','ok']:c.pass?['PASSED','ok']:['EVALUATION','run'];
+  $('syB_'+id).textContent=st[0]; $('syB_'+id).className='badge '+st[1];
+  if(F){ $('syP_'+id).textContent=`${Math.min(c.winDays,FUND.days)} / ${FUND.days}`; $('syPb_'+id).style.width=Math.min(100,c.winDays/FUND.days*100)+'%'; }
+  else { $('syP_'+id).textContent=`${usd(c.profit)} / ${usd(c.tgt)}`; $('syPb_'+id).style.width=Math.max(0,Math.min(100,c.profit/c.tgt*100))+'%'; }
+  $('syBal_'+id).textContent=usd(c.eq); const room=c.eq-c.floor; $('syR_'+id).textContent=usd(Math.max(0,room)); $('syR_'+id).className=room<c.mll*0.25?'neg':''; });
+}
+try{ Object.assign(window.__bt,{SYNC,syncUpdate,syncAdd,syncClaim,syncPayout,evalCalc,lucidCalc}); }catch(e){}
+
 /* ---- split screen: second chart for the pair symbol ---- */
 const chart2El=$('chart2');
 const c2=LC.createChart($('c2Body'),{timeScale:{timeVisible:true,secondsVisible:false,rightOffset:8},crosshair:{mode:0},width:10,height:10});
@@ -3172,6 +3290,7 @@ function liveUI(){
  const q=+$('qty').value||0, pv=+$('contract').value||1, sl=+$('slPts').value||0, tp=+$('tpPts').value||0;
  $('riskLine').innerHTML = (sl||tp) ? `Risk <b>${sl?usd(sl*pv*q):'-'}</b> · Reward <b>${tp?usd(tp*pv*q):'-'}</b>${sl&&tp?` · R:R <b>${(tp/sl).toFixed(2)}</b>`:''}` : 'Set stop loss and take profit points to see your risk in dollars.';
  try{ evalUpdate(); }catch(e){}
+ try{ syncUpdate(); }catch(e){}
  try{ splitUpdate(); }catch(e){}
 }
 ['qty','slPts','tpPts','contract'].forEach(id=>$(id).addEventListener('input',liveUI));
@@ -3441,7 +3560,8 @@ const ITEMS=[
  {id:'super',slot:'car',cat:'Cars',name:'Supercar',price:25000,c:'#f2c14e'},
  {id:'plant',slot:'plant',cat:'Extras',name:'House plant',price:50,c:'#2f9e5b'},
  {id:'dog',slot:'pet',cat:'Extras',name:'Dog',price:900,c:'#c98f5a'},
- {id:'desk',slot:'desk',cat:'Extras',name:'Trading desk',price:1500,c:'#3a4257'}
+ {id:'desk',slot:'desk',cat:'Extras',name:'Trading desk',price:1500,c:'#3a4257'},
+ {id:'syncer',slot:'tool',cat:'Extras',name:'Trade syncer',price:1800,c:'#2f80ff',tool:1}
 ];
 const ITEM=Object.fromEntries(ITEMS.map(i=>[i.id,i]));
 const SLOT_DEF={top:'tee',shoes:'sneak',home:'room'};
@@ -3544,7 +3664,7 @@ function avScene(eq,L){
 }
 
 const CR={tab:'Clothes',try:null};
-function careerSync(){ const w=$('walLb'); if(w) w.textContent=usd(CAR.wallet).replace(/\.00$/,''); if($('career') && !$('career').hidden) careerRender(); }
+function careerSync(){ const w=$('walLb'); if(w) w.textContent=usd(CAR.wallet).replace(/\.00$/,''); if($('career') && !$('career').hidden) careerRender(); try{ syncUpdate(); }catch(e){} }
 function careerScene(){ const eq=eqNow(); if(CR.try){ const it=ITEM[CR.try]; eq[it.slot]=it.id; } $('crTilt').innerHTML=avScene(eq,CAR.look); }
 function careerWave(){ const t=$('crTilt'); t.classList.remove('wave'); void t.offsetWidth; t.classList.add('wave'); }
 function careerRender(){
@@ -3565,7 +3685,7 @@ function careerRender(){
    <div class="hint">Wallet money is game money. It comes only from payouts on the simulated funded account.</div><div class="dl-sub">Online account</div><div id="cloudBox">${cloudAccountHTML()}</div><div class="dl-sub">Leaderboard</div><div id="lbBox" class="hint">Loading...</div>`;
   $('crDash').onclick=()=>{ $('career').hidden=true; if(!cfg.eval.on){ cfg.eval.on=true; saveCfg(); evalBuild(); } sideTab('pStats'); };
   cloudWire();
-  $('crReset').onclick=()=>{ const b=$('crReset'); if(b.dataset.arm){ Object.assign(CAR,{stage:'eval',wallet:0,passes:0,blown:0,paid:0,payouts:0,ledger:[],owned:{},eq:{}}); carSave(); evalBuild(); careerSync(); careerScene(); } else { b.dataset.arm='1'; b.textContent='Click again to erase everything'; } };
+  $('crReset').onclick=()=>{ const b=$('crReset'); if(b.dataset.arm){ Object.assign(CAR,{stage:'eval',wallet:0,passes:0,blown:0,paid:0,payouts:0,ledger:[],owned:{},eq:{},sync:[]}); carSave(); evalBuild(); careerSync(); careerScene(); } else { b.dataset.arm='1'; b.textContent='Click again to erase everything'; } };
  } else if(CR.tab==='Look'){
   const L=CAR.look, sw=(k,vals)=>vals.map(v=>`<button data-lk="${k}" data-v="${v}" class="${L[k]===v?'act':''}" style="background:${v}"></button>`).join('');
   B.innerHTML=`<div class="cr-look"><div><div class="dl-sub" style="margin-top:0">Skin</div><div class="sws">${sw('skin',['#f6d3bd','#e8b796','#d09a72','#a8734f','#7b4f33','#523222'])}</div></div>
@@ -3576,11 +3696,12 @@ function careerRender(){
  } else {
   B.innerHTML=`<div class="cr-grid">${ITEMS.filter(i=>i.cat===CR.tab).map(i=>{ const own=owns(i.id), on=eqNow()[i.slot]===i.id, can=CAR.wallet>=i.price;
    return `<div class="it ${own?'own':''} ${on?'on':''}" data-it="${i.id}"><div class="sw2" style="background:linear-gradient(135deg,${shade(i.c,22)},${shade(i.c,-28)})">${i.slot}</div><b>${i.name}</b><span class="pr">${i.price?usd(i.price).replace(/\.00$/,''):'Free'}${own&&i.price?' · owned':''}</span>
-    <button data-act="${i.id}" class="${own?'':'primary'}" ${!own&&!can?'disabled':''}>${on?(SLOT_DEF[i.slot]?'Wearing':'Take off'):own?'Use':can?'Buy':'Need '+usd(i.price-CAR.wallet).replace(/\.00$/,'')+' more'}</button></div>`; }).join('')}</div>
+    <button data-act="${i.id}" class="${own?'':'primary'}" ${!own&&!can?'disabled':''}>${i.tool&&own?'Open':on?(SLOT_DEF[i.slot]?'Wearing':'Take off'):own?'Use':can?'Buy':'Need '+usd(i.price-CAR.wallet).replace(/\.00$/,'')+' more'}</button></div>`; }).join('')}</div>
    <div class="hint" style="margin-top:12px">Hover an item to try it on your character before you buy.</div>`;
-  B.querySelectorAll('.it').forEach(el=>{ el.onmouseenter=()=>{ CR.try=el.dataset.it; careerScene(); }; el.onmouseleave=()=>{ CR.try=null; careerScene(); }; });
+  B.querySelectorAll('.it').forEach(el=>{ el.onmouseenter=()=>{ if(ITEM[el.dataset.it].tool) return; CR.try=el.dataset.it; careerScene(); }; el.onmouseleave=()=>{ CR.try=null; careerScene(); }; });
   B.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{ const i=ITEM[b.dataset.act];
-   if(!owns(i.id)){ if(CAR.wallet<i.price) return; CAR.wallet=Math.round((CAR.wallet-i.price)*100)/100; CAR.owned[i.id]=1; CAR.eq[i.slot]=i.id; sfxPlay('cash',true); toast(`<b>${i.name}</b> is yours.`,2600); }
+   if(!owns(i.id)){ if(CAR.wallet<i.price) return; CAR.wallet=Math.round((CAR.wallet-i.price)*100)/100; CAR.owned[i.id]=1; if(!i.tool) CAR.eq[i.slot]=i.id; sfxPlay('cash',true); toast(i.tool?'<b>Trade syncer unlocked.</b> Open the Dashboard tab to link accounts.':`<b>${i.name}</b> is yours.`,i.tool?5000:2600); }
+   else if(i.tool){ $('career').hidden=true; if(!cfg.eval.on){ cfg.eval.on=true; saveCfg(); evalBuild(); } sideTab('pStats'); refresh(); return; }
    else if(eqNow()[i.slot]===i.id){ if(SLOT_DEF[i.slot]) return; delete CAR.eq[i.slot]; }
    else CAR.eq[i.slot]=i.id;
    CR.try=null; carSave(); careerSync(); careerScene(); careerWave(); });
@@ -3625,7 +3746,7 @@ function cloudPush(){
  if(!CLOUD.user||!CLOUD.sb) return;
  clearTimeout(CLOUD.timer);
  CLOUD.timer=setTimeout(async()=>{
-  const p={name:CAR.look.name||'You',stage:CAR.stage,wallet:CAR.wallet,passes:CAR.passes,payouts:CAR.payouts,paid:CAR.paid,blown:CAR.blown,owned:CAR.owned,eq:CAR.eq,look:CAR.look,ledger:CAR.ledger,updated_at:new Date().toISOString()};
+  const p={name:CAR.look.name||'You',stage:CAR.stage,wallet:CAR.wallet,passes:CAR.passes,payouts:CAR.payouts,paid:CAR.paid,blown:CAR.blown,owned:CAR.owned,eq:CAR.eq,look:CAR.look,ledger:CAR.ledger,sync:CAR.sync,updated_at:new Date().toISOString()};
   const a=await CLOUD.sb.from('profiles').upsert({id:CLOUD.user.id,...p});
   const b=await CLOUD.sb.from('leaderboard').upsert({id:CLOUD.user.id,name:p.name,paid:p.paid,passes:p.passes});
   CLOUD.err=(a.error||b.error)?(a.error||b.error).message:'';
@@ -3637,6 +3758,7 @@ async function cloudPull(){
  if(r.error){ CLOUD.err=r.error.message; cloudAccountUI(); return; }
  if(r.data){ const d=r.data;
   Object.assign(CAR,{stage:d.stage||'eval',wallet:+d.wallet||0,passes:d.passes||0,payouts:d.payouts||0,paid:+d.paid||0,blown:d.blown||0,owned:d.owned||{},eq:d.eq||{},look:Object.assign({},CAR.look,d.look||{}),ledger:d.ledger||[]});
+  if(Array.isArray(d.sync)){ const loc=Object.fromEntries(CAR.sync.map(a=>[a.id,a])); CAR.sync=d.sync.map(a=>a.stage==='funded'?a:Object.assign({},a,{ledger:loc[a.id]&&loc[a.id].stage!=='funded'?loc[a.id].ledger:[]})); SYNC.prev={}; }
   carSaveLocal(); evalBuild(); careerSync(); }
  else cloudPush();
  cloudAccountUI();
