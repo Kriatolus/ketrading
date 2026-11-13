@@ -383,8 +383,110 @@ button.on:not(.ghost){border-color:var(--accent);color:var(--accent)}
 .dl-row.rd:hover{background:var(--btn)}
 .dl-row.rd.act{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent)}
 .dl-row.rd input{accent-color:var(--accent)}
-#btnCareer{gap:7px;padding:0 10px}
-#btnCareer .wal{font-weight:600;font-variant-numeric:tabular-nums;color:var(--text)}
+#hub{position:fixed;inset:0;z-index:95;background:var(--bg);display:flex;flex-direction:column}
+.hub-top{height:52px;flex:none;display:flex;align-items:center;gap:16px;padding:0 20px;border-bottom:1px solid var(--border);background:var(--panel)}
+.hub-top .grow{flex:1}
+#hubNav{display:flex;gap:2px;height:100%;margin-left:8px}
+#hubNav button{height:100%;border:none;background:none;border-radius:0;padding:0 14px;color:var(--muted);font-size:13px;font-weight:500;border-bottom:2px solid transparent}
+#hubNav button:hover{color:var(--text);background:none}
+#hubNav button.act{color:var(--text);border-bottom-color:var(--accent)}
+.hub-wal{color:var(--muted);font-size:12px}
+.hub-wal b{color:var(--text);font-size:14px;font-weight:600;margin-left:7px;font-variant-numeric:tabular-nums}
+#hubUser{max-width:220px;overflow:hidden;text-overflow:ellipsis;display:block;line-height:26px}
+.hub-body{flex:1;overflow:auto;padding:30px 24px 56px}
+.hub-two{display:grid;grid-template-columns:minmax(300px,400px) 1fr;gap:30px;max-width:1160px;margin:0 auto;align-items:start}
+.hub-side{position:sticky;top:0}
+.hub-narrow{max-width:820px;margin:0 auto}
+.hub-wide{max-width:1160px;margin:0 auto}
+.hub-body h2{font-size:20px;font-weight:600;margin:0 0 4px;letter-spacing:-.01em}
+.hub-body .sub{color:var(--muted);font-size:13px;margin:0 0 20px;line-height:1.55;max-width:640px}
+.hub-body .sec{margin:24px 0 10px;color:var(--muted);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;display:flex;justify-content:space-between}
+.hub-body .sec span{letter-spacing:0;text-transform:none;font-weight:500}
+.hub-body .mut,.acc-row .mut{color:var(--muted);font-size:12px}
+.card{border:1px solid var(--border);border-radius:10px;background:var(--panel);padding:16px}
+.card.empty{color:var(--muted);font-size:13px;line-height:1.55}
+.card.note{display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:13px;margin-bottom:14px}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.card-h b{font-size:13px;font-weight:600}
+.card-h h2{margin:0}
+.card .price{font-weight:600;font-variant-numeric:tabular-nums}
+.eyebrow{display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:5px}
+button.link{background:none;border:none;color:var(--accent);padding:0;height:auto;font-weight:500;font-size:12px}
+button.link:hover{background:none;text-decoration:underline}
+.who{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+.who b{font-size:15px;font-weight:600}
+.card.next b{display:block;font-size:17px;font-weight:600;letter-spacing:-.01em}
+.card.next p{color:var(--muted);font-size:13px;line-height:1.55;margin:6px 0 14px;max-width:560px}
+.card.next button{height:32px;padding:0 16px}
+.stats4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}
+.stats4 div{border:1px solid var(--border);border-radius:10px;background:var(--panel);padding:12px 14px}
+.stats4 span{display:block;color:var(--muted);font-size:11px}
+.stats4 b{display:block;font-size:16px;font-weight:600;margin-top:4px;font-variant-numeric:tabular-nums}
+.hub-grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+.rows>div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--line);font-size:12.5px}
+.rows>div:first-child{border-top:none;padding-top:2px}
+.pills{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px}
+.pills button{border-radius:20px;height:28px;padding:0 13px;background:transparent;border-color:transparent;color:var(--muted)}
+.pills button:hover{color:var(--text)}
+.pills button.act{background:var(--btn);border-color:var(--border);color:var(--text);font-weight:600}
+.shop-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.shop-it{display:flex;align-items:center;gap:12px;border:1px solid var(--border);border-radius:10px;background:var(--panel);padding:10px 12px}
+.shop-it.on{border-color:color-mix(in srgb,var(--accent) 55%,var(--border))}
+.shop-it .dot{width:22px;height:22px;border-radius:6px;flex:none;border:1px solid color-mix(in srgb,var(--text) 14%,transparent)}
+.shop-it .nm,.acc-row .nm{flex:1;min-width:0}
+.shop-it .nm b,.acc-row .nm b{display:block;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.shop-it .nm span{color:var(--muted);font-size:11.5px}
+.shop-it button{min-width:74px}
+.ac{border:1px solid var(--border);border-radius:10px;background:var(--panel);padding:14px}
+.ac.on{border-color:color-mix(in srgb,var(--accent) 50%,var(--border))}
+.ac-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.ac-h{display:flex;align-items:center;gap:8px}
+.ac-t{flex:1;min-width:0;font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.ac-n{flex:1;min-width:0;height:26px;background:transparent;border:1px solid transparent;border-radius:6px;color:var(--text);font:600 13px var(--font);padding:0 6px;margin-left:-6px}
+.ac-n:hover,.ac-n:focus{border-color:var(--border);background:var(--input);outline:none}
+.ac-r{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;color:var(--muted);margin-top:9px}
+.ac-r b{color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}.ac-r b.neg{color:var(--down)}
+.ac .hint{margin-top:9px}
+.ac-btn{width:100%;height:30px;margin-top:11px}
+.ac-link{display:block;margin:9px auto 0}
+.ac-x{width:100%;height:26px;margin-top:8px;background:none;border-color:transparent;color:var(--muted);font-size:11.5px}
+.ac-x:hover{color:var(--down)}.ac-x.arm{color:var(--down);border-color:color-mix(in srgb,var(--down) 40%,transparent)}
+.ecard .ac{border:none;border-top:1px solid var(--line);border-radius:0;background:none;padding:10px 0 0;margin-top:10px}
+.prod .erules{margin:0 0 4px}
+#acctLine{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:11.5px;color:var(--muted);padding:7px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;background:var(--bg)}
+.job-top{display:flex;justify-content:space-between;gap:16px;margin-bottom:6px}
+.job-top b{display:block;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}
+.job-top .r{text-align:right}
+.job-btn{width:100%;height:56px;font-size:15px;margin-top:16px;border-radius:10px;user-select:none}
+.job-btn:active{transform:translateY(1px)}
+.job-feed{margin-top:14px;font:12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;min-height:132px}
+.job-feed div{display:flex;justify-content:space-between;gap:12px;padding:4px 0;color:var(--muted)}
+.job-feed div.new{color:var(--text)}
+.job-feed b{font-weight:500;color:var(--up)}
+.lbt{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.lbt th{text-align:left;color:var(--muted);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;padding:0 8px 8px}
+.lbt td{padding:9px 8px;border-top:1px solid var(--line)}
+.lbt td:first-child,.lbt th:first-child{width:38px;color:var(--muted)}
+.lbt td:nth-child(n+3),.lbt th:nth-child(n+3){text-align:right}
+.lbt tr.me td{background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.lbt.sm{font-size:12px}.lbt.sm td{padding:6px 4px}.lbt.sm tr:first-child td{border-top:none}
+.acc-row{display:flex;align-items:center;gap:12px}
+.acc-av{width:36px;height:36px;border-radius:50%;background:var(--btn);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:600;flex:none}
+.au-form{display:grid;gap:10px;max-width:360px;margin-bottom:10px}
+.au-form .fld,.hub-body .card>.fld{display:grid;gap:5px;color:var(--muted);font-size:11.5px}
+.au-form input,.hub-body .card>.fld input{height:32px;font-size:13px;max-width:360px}
+.au-form button{height:32px}
+.hint.neg{color:var(--down)}
+#hub button:disabled,.ac-btn:disabled{background:var(--btn);border-color:var(--border);color:var(--muted);cursor:default;font-weight:500;opacity:1}
+#btnCareer{gap:7px;padding:0 10px;border-color:var(--border)}
+#btnCareer .wal{font-weight:600;font-variant-numeric:tabular-nums;color:var(--text);padding-left:8px;border-left:1px solid var(--border)}
+#toolbar{width:46px;gap:3px;padding:8px 0}
+#toolbar button{width:34px;height:34px;border-radius:8px}
+#toolbar button svg.ki{width:19px;height:19px}
+#toolbar svg [stroke^="var("]{stroke:currentColor;fill:currentColor}
+#toolbar button[data-group]::after{right:4px;bottom:4px;border-width:2px;opacity:.4}
+.tb-sep{width:20px;margin:6px 0}
+@media(max-width:900px){.hub-two{grid-template-columns:1fr}.hub-side{position:static;max-width:420px}.stats4{grid-template-columns:1fr 1fr}.hub-grid2{grid-template-columns:1fr}#hubNav button{padding:0 9px}.hub-wal{display:none}}
 #career{position:fixed;inset:0;z-index:95;background:rgba(3,5,10,.66);display:flex;align-items:center;justify-content:center}
 #career[hidden]{display:none}
 .cr-box{width:min(1020px,96vw);height:min(680px,94vh);background:var(--pop);border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;box-shadow:0 24px 70px rgba(0,0,0,.6);animation:pop .14s ease-out;overflow:hidden}
@@ -482,7 +584,7 @@ button.on:not(.ghost){border-color:var(--accent);color:var(--accent)}
  <div class="chip opt"><span>Trades</span><b id="kTrades">0</b></div>
  <div class="chip opt"><span>Win rate</span><b id="kWr">0.0%</b></div>
  <div class="chip"><span>Net P&amp;L</span><b id="kPnl">+0.00</b></div>
- <button id="btnCareer" class="ghost" title="Career: funded account, payouts and your character"><i data-ic="user"></i><span class="wal" id="walLb">$0</span></button>
+ <button id="btnCareer" title="Career page: your character, accounts, eval store, shop, job and leaderboard"><i data-ic="user"></i><span>Career</span><span class="wal" id="walLb">$0</span></button>
  <button id="btnOP" class="primary" title="Order panel (Shift+T)"><i data-ic="trade"></i>Trade</button>
  <button id="btnSide" class="ghost icon on" title="Show / hide the side panel"><i data-ic="panel"></i></button>
  <div id="dataPanel" hidden>
@@ -550,6 +652,7 @@ button.on:not(.ghost){border-color:var(--accent);color:var(--accent)}
    <button data-pane="pTrade" class="act">Trade</button><button data-pane="pStats">Dashboard</button><button data-pane="pJournal">Journal</button><button data-pane="pAna">Analytics</button><button data-pane="pSet">Settings</button>
   </div>
   <div class="pane" id="pTrade">
+   <div id="acctLine"></div>
    <div id="posCard" hidden></div>
    <h3>Order ticket</h3>
    <div class="fgrid">
@@ -578,8 +681,7 @@ button.on:not(.ghost){border-color:var(--accent);color:var(--accent)}
    <div id="posInfo" hidden></div>
   </div>
   <div class="pane" id="pStats" hidden>
-   <div id="evalBox"></div>
-   <div id="syncBox"></div>
+   <div id="acctBox"></div>
    <div class="kpis">
     <div class="kpi"><span>Net P&amp;L</span><b id="dPnl">+0.00</b></div>
     <div class="kpi"><span>Win rate</span><b id="dWr">0.0%</b></div>
@@ -598,6 +700,8 @@ button.on:not(.ghost){border-color:var(--accent);color:var(--accent)}
   </div>
   <div class="pane" id="pAna" hidden><div id="ana"></div></div>
   <div class="pane" id="pSet" hidden>
+   <h3>Appearance</h3>
+   <div id="uiBox"></div>
    <h3>Indicators &amp; chart</h3>
    <div id="indBox"></div>
    <h3>Sounds</h3>
@@ -713,10 +817,18 @@ function applyTimeFormat(){
  [chart,oscChart,eqChart].forEach(c=>c.applyOptions({localization:{timeFormatter:full}, timeScale:{tickMarkFormatter:()=>' '}}));   // labels are drawn by drawTimeAxis()
 }
 function fmtLocal(t){ const d=new Date((t+tzOff(t))*1000).toISOString(); return d.slice(0,16).replace('T',' '); }
+function hexMix(a,b,p){ const ok=/^#[0-9a-f]{6}$/i; if(!ok.test(a)||!ok.test(b)) return a; const x=parseInt(a.slice(1),16), y=parseInt(b.slice(1),16), ch=k=>Math.round((x>>k&255)*(1-p)+(y>>k&255)*p); return '#'+((1<<24)|(ch(16)<<16)|(ch(8)<<8)|ch(0)).toString(16).slice(1); }
+function uiTheme(t0){
+ const t=Object.assign({},t0), u=cfg.ui||{}; uiTheme.sig0=uiTheme.sig0||{up:SIG.up,down:SIG.down};
+ if(u.bg){ t.bg=u.bg; t.input=u.bg; t.light=inkFor(u.bg)==='#11130a'; }
+ if(u.text){ t.text=u.text; t.muted=hexMix(u.text,t.bg,0.42); }
+ if(u.panel){ t.panel=u.panel; t.btn=hexMix(u.panel,t.text,0.09); t.border=hexMix(u.panel,t.text,0.16); }
+ SIG.up=u.up||uiTheme.sig0.up; SIG.down=u.down||uiTheme.sig0.down; return t;
+}
 function applyTheme(){
  applyTimeFormat();
- const t = THEMES[cfg.theme] || THEMES.light;
- const r = document.documentElement.style; r.colorScheme = (THEMES[cfg.theme]||{}).light ? 'light' : 'dark';
+ const t = uiTheme(THEMES[cfg.theme] || THEMES.light);
+ const r = document.documentElement.style; r.colorScheme = t.light ? 'light' : 'dark';
  Object.entries({bg:t.bg, panel:t.panel, border:t.border, text:t.text, muted:t.muted, input:t.input, btn:t.btn, up:SIG.up, down:SIG.down, accent:cfg.accent||t.accent, 'accent-ink':cfg.accent?inkFor(cfg.accent):t.accentInk})
   .forEach(([k,v]) => r.setProperty('--'+k, v));
  const cc=cfg.colors||{}; const cb=cc.chartBg||t.chartBg||t.bg, ct=cc.text||t.chartText||t.text, ax=t.axis||t.border;
@@ -1324,7 +1436,7 @@ function openPos(side, fillPx, slOv, tpOv, why, qtyOv){
  const slP=slOv ?? (+$('slPts').value||0), tpP=tpOv ?? (+$('tpPts').value||0);
  S.pos={side, entry:price, idx:i, time:t, qty:qtyOv ?? (+$('qty').value||1), pv:+$('contract').value||1, comm:+$('comm').value||0,
   sl: slP>0 ? price-side*slP : null, tp: tpP>0 ? price+side*tpP : null, risk: slP>0 ? slP : null};
- try{ S.pos.sync=syncEnter(); }catch(e){ S.pos.sync=[]; }
+ try{ S.pos.sync=syncEnter(); }catch(e){ S.pos.sync=[]; } S.pos.nSync=S.pos.sync.length;
  S.markers.push({time:t, position:side>0?'belowBar':'aboveBar', color:side>0?SIG.up:SIG.down, shape:side>0?'arrowUp':'arrowDown', text:(why?why+' ':'')+(side>0?'BUY ':'SELL ')+price.toFixed(2)});
  if(!why) msg(''); drawLines(); refresh();
 }
@@ -2715,7 +2827,7 @@ function exportCSV(){
 
 /* ---------- indicator / color panel ---------- */
 function buildIndUI(){
- const r=[];
+ const r=[], u=[];
  r.push(`<label class="row"><input type="checkbox" id="i_vol" ${cfg.vol?'checked':''}><span>Volume</span></label>`);
  IND.forEach(d=>{ const c=cfg.ind[d.k];
   r.push(`<div class="row"><input type="checkbox" data-k="${d.k}" data-f="on" ${c.on?'checked':''}><span>${d.name}</span>`+
@@ -2735,13 +2847,22 @@ function buildIndUI(){
  r.push(`<div class="row"><span>RSI length</span><input type="number" min="2" id="i_rsi" value="${cfg.rsiLen}"></div>`);
  r.push(`<div class="row"><span>ATR length</span><input type="number" min="2" id="i_atr" value="${cfg.atrLen}"></div>`);
  r.push(`<div class="row"><span>Chart time zone</span><select id="i_tz"><option value="ny" ${cfg.tz==='ny'?'selected':''}>New York (like TradingView exchange time)</option><option value="sto" ${cfg.tz==='sto'?'selected':''}>Stockholm</option><option value="utc" ${cfg.tz==='utc'?'selected':''}>UTC</option></select></div>`);
- r.push(`<div class="row"><span>Theme</span><select id="i_theme">${Object.entries(THEMES).map(([k,t])=>`<option value="${k}">${t.label||k}</option>`).join('')}</select></div>`);
- r.push(`<div class="row"><span>Accent colour</span><input type="color" id="i_accent" value="${cfg.accent||(THEMES[cfg.theme]||THEMES.mine).accent}"></div>`);
- r.push(`<div class="row"><button id="i_chartcol">${IC.set}Chart background, grid and more colours…</button></div>`);
- r.push(`<label class="row"><input type="checkbox" id="i_coin" ${cfg.coin&&cfg.coin.on?'checked':''}><span>3D symbol coin on the chart</span></label>`);
- r.push(`<div class="row"><span>Candle body up / down</span><input type="color" id="i_up" value="${cfg.up}"><input type="color" id="i_down" value="${cfg.down}"></div>`);
- r.push(`<div class="row"><span>Candle border / wick</span><input type="color" id="i_border" value="${cfg.border||cfg.up}"><input type="color" id="i_wick" value="${cfg.wick||cfg.up}"></div>`);
+ u.push(`<div class="row"><span>Theme</span><select id="i_theme">${Object.entries(THEMES).map(([k,t])=>`<option value="${k}">${t.label||k}</option>`).join('')}</select></div>`);
+ u.push(`<div class="row"><span>Accent colour</span><input type="color" id="i_accent" value="${cfg.accent||(THEMES[cfg.theme]||THEMES.mine).accent}"></div>`);
+ u.push(`<div class="row"><button id="i_chartcol">${IC.set}Chart background, grid and more colours…</button></div>`);
+ u.push(`<label class="row"><input type="checkbox" id="i_coin" ${cfg.coin&&cfg.coin.on?'checked':''}><span>3D symbol coin on the chart</span></label>`);
+ u.push(`<div class="row"><span>Candle body up / down</span><input type="color" id="i_up" value="${cfg.up}"><input type="color" id="i_down" value="${cfg.down}"></div>`);
+ u.push(`<div class="row"><span>Candle border / wick</span><input type="color" id="i_border" value="${cfg.border||cfg.up}"><input type="color" id="i_wick" value="${cfg.wick||cfg.up}"></div>`);
  r.push(`<div class="row"><button id="i_reset">Reset colours and indicators</button></div>`);
+ { const T0=uiTheme(THEMES[cfg.theme]||THEMES.light), hx=v=>/^#[0-9a-f]{6}$/i.test(v)?v:'#000000';
+  u.splice(2,0,`<div class="row"><span>App background</span><input type="color" data-ui="bg" value="${hx(T0.bg)}"></div>`,
+   `<div class="row"><span>Panels and bars</span><input type="color" data-ui="panel" value="${hx(T0.panel)}"></div>`,
+   `<div class="row"><span>Text</span><input type="color" data-ui="text" value="${hx(T0.text)}"></div>`,
+   `<div class="row"><span>Profit / loss colours</span><input type="color" data-ui="up" value="${hx(SIG.up)}"><input type="color" data-ui="down" value="${hx(SIG.down)}"></div>`);
+  u.push(`<div class="row"><button id="i_uireset">Reset app colours to the theme</button></div>`); }
+ $('uiBox').innerHTML=u.join('');
+ $('uiBox').querySelectorAll('input,select').forEach(el=>el.addEventListener('change',onCfg));
+ $('i_uireset').addEventListener('click',()=>{ cfg.ui={}; cfg.accent=''; afterCfg(); buildIndUI(); });
  $('indBox').innerHTML=r.join('');
  $('i_osc').value=cfg.osc; $('i_theme').value=cfg.theme;
  $('indBox').querySelectorAll('input,select').forEach(el=>el.addEventListener('change',onCfg));
@@ -2765,7 +2886,8 @@ function onCfg(e){
  else if(el.dataset.tro) cfg.tros[el.dataset.tro]=el.checked;
  else if(el.id==='i_mto'){ cfg.mtoRule=el.value; QTCACHE.clear(); qtKey='#'; QB.key=''; }
  else if(el.dataset.qt) cfg.qtRows[el.dataset.qt]=el.checked;
- else if(el.id==='i_theme'){ cfg.theme=el.value; cfg.accent=''; applyPreset(); }
+ else if(el.dataset.ui){ (cfg.ui=cfg.ui||{})[el.dataset.ui]=el.value; }
+ else if(el.id==='i_theme'){ cfg.theme=el.value; cfg.accent=''; cfg.ui={}; applyPreset(); }
  else if(el.id==='i_qtpane') cfg.osc = el.checked ? 'dqt' : (cfg.osc==='dqt'?'none':cfg.osc);
  else if(el.id==='i_sess') cfg.sessHL=el.checked;
  else if(el.id==='i_accent') cfg.accent=el.value;
@@ -2985,23 +3107,45 @@ function ordGhost(w,h){
 }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape' && S.ordMode) ordMode(0); });
 
-/* ---- Lucid 25K evaluation, funded account and payouts ---- */
-const EVAL={start:25000,lock:100,minis:2,micros:20};
+/* ---- Lucid 25K accounts: bought evaluations, funded accounts, payouts, trade syncer ---- */
+const EVAL={start:25000,lock:100,minis:2,micros:20,price:50,tgt:1250,mll:1000,cons:0.5,max:5};
 const FUND={days:5,min:500,cap:1000,pct:0.5,split:0.9};
-const CAR=(()=>{ const d={stage:'eval',wallet:0,passes:0,blown:0,paid:0,payouts:0,ledger:[],owned:{},eq:{},look:{name:'You',skin:'#e8b796',hair:'#2b2118',style:'short'}};
- try{ const s=JSON.parse(localStorage.getItem('ke_career_v1')||'null'); if(s) return Object.assign(d,s,{look:Object.assign(d.look,s.look||{})}); }catch(e){} return d; })();
+const SYNCER_PRICE=1800;
+const JOBS=[[0,'Intern',0.20],[150,'Runner',0.35],[500,'Desk clerk',0.50],[1500,'Junior analyst',0.75],[4000,'Execution trader',1.00]];
+const cesc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const newId=()=>'a'+Date.now().toString(36)+Math.floor(Math.random()*46656).toString(36);
+function carMigrate(o){
+ if(!(o.v>=2)){
+  const A=[];
+  if(o.stage==='funded') A.push({id:newId()+'m',name:'Account 1',stage:'funded',ledger:Array.isArray(o.ledger)?o.ledger:[],on:true});
+  (Array.isArray(o.sync)?o.sync:[]).forEach(a=>A.push({id:a.id||newId(),name:a.name||'Account',stage:a.stage==='funded'?'funded':'eval',ledger:a.stage==='funded'&&Array.isArray(a.ledger)?a.ledger:[],on:!!a.on}));
+  o.accts=A; if(!A.length) o.wallet=Math.max(+o.wallet||0,EVAL.price);
+  delete o.stage; delete o.ledger; delete o.sync; o.v=2;
+ }
+ if(!Array.isArray(o.accts)) o.accts=[];
+ o.accts.forEach((a,i)=>{ if(!Array.isArray(a.ledger)) a.ledger=[]; if(!a.id) a.id=newId()+i; if(!a.name) a.name='Account '+(i+1); a.stage=a.stage==='funded'?'funded':'eval'; a.on=!!a.on; });
+ if(!o.job||typeof o.job!=='object') o.job={clicks:0,earned:0};
+ if(!o.owned) o.owned={}; if(!o.eq) o.eq={};
+ if(!o.owned.syncer){ let seen=false; o.accts.forEach(a=>{ if(a.on){ if(seen) a.on=false; seen=true; } }); }
+ return o;
+}
+const carDefault=()=>({v:2,wallet:EVAL.price,passes:0,blown:0,paid:0,payouts:0,accts:[],owned:{},eq:{},job:{clicks:0,earned:0},look:{name:'You',skin:'#e8b796',hair:'#2b2118',style:'short'}});
+const CAR=(()=>{ const d=carDefault(); try{ const s=JSON.parse(localStorage.getItem('ke_career_v1')||'null'); if(s){ const o=Object.assign(d,s,{look:Object.assign(d.look,s.look||{})}); o.v=s.v||0; return carMigrate(o); } }catch(e){} return d; })();
 const carSaveLocal=()=>{ try{ localStorage.setItem('ke_career_v1',JSON.stringify(CAR)); }catch(e){} };
-const carSave=()=>{ carSaveLocal(); try{ cloudPush(); }catch(e){} };
-const funded=()=>CAR.stage==='funded';
+const carSave=()=>{ CAR.ts=Date.now(); carSaveLocal(); try{ cloudPush(); }catch(e){} };
+const SYNC={prev:{},last:null};
+const syncOwned=()=>!!CAR.owned.syncer;
+const acctIn=a=>!!(S.pos&&S.pos.sync&&S.pos.sync.includes(a.id));
+const acctOpen=a=>acctIn(a) ? S.pos.side*(priceNow()-S.pos.entry)*S.pos.pv*S.pos.qty : 0;
 const evalNow=()=>S.bars.length ? ((S.partial&&S.raw.length)?replayNow():S.bars[S.cursor].time) : 0;
 function lucidCalc(L,F,open,today){
- const E=cfg.eval, tgt=+E.target||1250, mll=+E.mll||1000, cons=(!F&&E.plan==='flex')?0.5:0;
+ const tgt=EVAL.tgt, mll=EVAL.mll, cons=F?0:EVAL.cons;
  let bal=EVAL.start, floor=EVAL.start-mll, day=null, breach=false, cyc=new Map(); const lockAt=EVAL.start+EVAL.lock, days=new Map();
  const eod=()=>{ floor=Math.max(floor, Math.min(bal-mll, lockAt)); };
  for(const t of L){ if(day!==null && t.d!==day) eod(); day=t.d; bal+=t.pnl;
   if(t.pay){ cyc=new Map(); continue; }
   days.set(t.d,(days.get(t.d)||0)+t.pnl); cyc.set(t.d,(cyc.get(t.d)||0)+t.pnl); if(bal<=floor) breach=true; }
- if(day!==null && S.bars.length && (F ? today!==day : today>day)) eod();
+ if(day!==null && S.bars.length && today!==day) eod();
  const eq=bal+open, profit=bal-EVAL.start;
  const best=Math.max(0,...days.values()), consOk=!cons || best<=cons*Math.max(profit,0)+1e-9;
  const winDays=[...cyc.values()].filter(v=>v>0).length;
@@ -3009,212 +3153,141 @@ function lucidCalc(L,F,open,today){
  return {F,today,tgt,mll,bal,eq,open,floor,profit,best,cons,consOk,need:cons?best/cons:0,breach,locked:floor>=lockAt,pass:!F&&profit>=tgt&&consOk,
   winDays,maxPay,canPay:F&&winDays>=FUND.days&&maxPay>=FUND.min};
 }
-function evalCalc(){
- const F=funded(), today=cycleDay(evalNow());
- const L=F ? CAR.ledger : S.trades.slice().sort((a,b)=>a.exitTime-b.exitTime).map(t=>({d:cycleDay(t.exitTime),pnl:t.pnl}));
- const open=S.pos ? S.pos.side*(priceNow()-S.pos.entry)*S.pos.pv*S.pos.qty : 0;
- return lucidCalc(L,F,open,today);
+const acctCalc=a=>lucidCalc(a.ledger,a.stage==='funded',acctOpen(a),cycleDay(evalNow()));
+function syncEnter(){ return CAR.accts.filter(a=>a.on).map(a=>a.id); }
+function syncClose(p,pnl,t){
+ if(!p.sync||!p.sync.length) return; const d=cycleDay(t); let n=0;
+ for(const a of CAR.accts) if(p.sync.includes(a.id)){ a.ledger.push({d,pnl}); n++; }
+ if(n){ SYNC.last={n,pnl}; carSave(); }
 }
+function syncReset(){ SYNC.prev={}; SYNC.last=null; }
+function careerTrade(){}
 function evalBlock(q){
- if(!cfg.eval.on) return false;
- if(S.evalFail){ msg((S.evalFail.was==='funded'?'Funded account closed':'Evaluation failed')+': the max loss limit was hit. Press Restart on the replay bar to start a new evaluation.'); return true; }
+ if(!CAR.accts.some(a=>a.on)) return false;
  const pv=+$('contract').value, micro=[2,5,10].includes(pv), mini=[20,50,100,1000].includes(pv), max=micro?EVAL.micros:mini?EVAL.minis:Infinity;
  if(q>max){ msg(`Lucid 25K allows at most ${max} ${micro?'micros':'minis'} at once. Lower the quantity.`); return true; }
  return false;
 }
-function careerTrade(t,pnl){ if(cfg.eval&&cfg.eval.on && funded() && !S.evalFail){ CAR.ledger.push({d:cycleDay(t),pnl}); carSave(); } }
-function evalClaim(){
- if(S.pos){ msg('Close your position before you move to the funded account.'); return; }
- const c=evalCalc(); if(!c.pass || S.evalFail) return;
- CAR.stage='funded'; CAR.passes++; CAR.ledger=[]; carSave(); S.evalPrev=null;
- evalBuild(); careerSync(); sfxPlay('cash',true);
- toast('<b>Evaluation passed.</b> You now trade the funded account. Five winning days unlock your first payout.',6000);
+function acctBuy(){
+ if(CAR.accts.length>=EVAL.max || CAR.wallet<EVAL.price) return;
+ let n=CAR.accts.length+1; const names=new Set(CAR.accts.map(a=>a.name)); while(names.has('Account '+n)) n++;
+ CAR.wallet=Math.round((CAR.wallet-EVAL.price)*100)/100;
+ CAR.accts.push({id:newId(),name:'Account '+n,stage:'eval',ledger:[],on:syncOwned()||!CAR.accts.some(a=>a.on)});
+ carSave(); careerSync(); try{ sfxPlay('cash',true); }catch(e){}
+ toast(`<b>Account ${n} is open.</b> A new $25,000 evaluation. Reach +${usd(EVAL.tgt).replace(/\.00$/,'')} to pass.`,5000);
 }
-function evalPayout(){
- if(S.pos){ msg('Close your position before you request a payout.'); return; }
- const c=evalCalc(); if(!c.canPay) return;
- const amt=c.maxPay, net=Math.round(amt*FUND.split*100)/100;
- CAR.ledger.push({d:c.today,pnl:-amt,pay:1}); CAR.wallet+=net; CAR.paid+=net; CAR.payouts++; carSave(); S.evalPrev=null;
- evalBuild(); careerSync(); sfxPlay('cash',true);
- toast(`<b>Payout approved.</b> ${usd(amt)} requested, ${usd(net)} (90%) is in your wallet. Open Career to spend it.`,6500);
+function syncerBuy(){
+ if(syncOwned() || CAR.wallet<SYNCER_PRICE) return;
+ CAR.wallet=Math.round((CAR.wallet-SYNCER_PRICE)*100)/100; CAR.owned.syncer=1; carSave(); careerSync(); try{ sfxPlay('cash',true); }catch(e){}
+ toast('<b>Trade syncer unlocked.</b> Switch on several accounts and every entry is copied to all of them.',5500);
 }
-function evalBuild(){
- const E=cfg.eval, box=$('evalBox'), F=funded();
- box.innerHTML=`<div class="ecard"><div class="ehead"><b>Lucid 25K ${F?'funded account':'evaluation'}</b><span id="evBadge" class="badge">OFF</span><label class="sw" title="Turn Lucid mode on or off"><input type="checkbox" id="evOn" ${E.on?'checked':''}><i></i></label></div>`+
- (E.on?`
-  <div class="meter"><div class="l"><span>${F?'Winning days this payout cycle':'Profit target'}</span><b id="evP"></b></div><div class="m"><i id="evPb"></i></div></div>
-  <div class="meter"><div class="l"><span>Room before max loss</span><b id="evR"></b></div><div class="m"><i id="evRb"></i></div></div>
-  <div class="elist">
-   <div class="stat"><span>Balance (closed trades)</span><b id="evBal"></b></div><div class="stat"><span>Equity right now</span><b id="evEq"></b></div>
-   <div class="stat"><span>Max loss floor</span><b id="evFl"></b></div><div class="stat"><span>${F?'Payout available':'Best day'}</span><b id="evBd"></b></div>
-  </div>
-  <div class="hint" id="evNote"></div>
-  <div id="evAct"></div>
-  <div class="fgrid">
-   ${F?'':`<label class="fld wide">Plan<select id="evPlan"><option value="flex">LucidFlex (50% consistency rule)</option><option value="pro">LucidPro (no consistency rule)</option></select></label>
-   <label class="fld">Profit target $<input id="evTgt" type="number" min="1" step="50" value="${E.target}"></label>`}
-   <label class="fld">Max loss limit $<input id="evMll" type="number" min="1" step="50" value="${E.mll}"></label>
-  </div>
-  <ul class="erules">`+(F?`
-   <li>Funded account starts at $25,000 with the same end-of-day trailing max loss, locked at $25,100.</li>
-   <li>No consistency rule and no daily loss limit.</li>
-   <li>Payout: 5 winning days, minimum $500, up to 50% of profit, at most $1,000 on the 25K.</li>
-   <li>You keep 90%. It lands in your wallet for the Career shop.</li>
-   <li>Hitting the max loss closes the funded account and you start a new evaluation.</li>
-   <li>The funded account is saved in this browser. Restarting the replay does not reset it.</li>`:`
-   <li>Start balance $25,000. Reach the profit target in closed profit to pass.</li>
-   <li>Max loss limit trails your end-of-day balance (17:00 New York) and locks at $25,100.</li>
-   <li>Equity touching the floor fails the evaluation and closes your position.</li>
-   <li>Max size: 2 minis or 20 micros. No daily loss limit on the 25K.</li>
-   <li>LucidFlex: your best day can be at most 50% of total profit when you pass.</li>
-   <li>Pass, then move to the funded account to earn payouts.</li>`)+`
-  </ul>
-  <div class="hint">Check your own account dashboard: Lucid changes rules, and you can edit the numbers above.</div>`
- :`<div class="hint" style="margin-top:8px">Trade the replay under Lucid's 25K rules. Pass the evaluation, move to a funded account, and take payouts you can spend in Career.</div>`)+`</div>`;
- $('evOn').onchange=()=>{ E.on=$('evOn').checked; saveCfg(); evalBuild(); refresh(); };
- if(E.on){
-  if($('evPlan')){ $('evPlan').value=E.plan;
-   $('evPlan').onchange=()=>{ E.plan=$('evPlan').value; saveCfg(); refresh(); };
-   $('evTgt').onchange=()=>{ E.target=Math.max(1,+$('evTgt').value||1250); saveCfg(); refresh(); }; }
-  $('evMll').onchange=()=>{ E.mll=Math.max(1,+$('evMll').value||1000); saveCfg(); refresh(); }; }
- evalUpdate.key='';
- evalUpdate();
+function acctToggle(id,on){
+ const a=CAR.accts.find(x=>x.id===id); if(!a) return;
+ if(on && !syncOwned()) CAR.accts.forEach(x=>{ x.on=false; });
+ a.on=on; carSave(); acctRender();
 }
-function evalUpdate(){
- const E=cfg.eval; if(!E.on || !$('evP')) return;
- const c=evalCalc();
- // scan equity points added since the last check against the floor that applied then
- const pv=S.evalPrev;
- if(!S.evalFail && pv && S.eq.length>=pv.n){ for(let i=pv.n;i<S.eq.length;i++) if(EVAL.start+S.eq[i].value+pv.k<=pv.floor){ c.breach=true; break; } }
- S.evalPrev={n:S.eq.length,floor:c.floor,k:c.bal-EVAL.start-S.realized};
- if(!S.evalFail && (c.breach || c.eq<=c.floor)){
-  S.evalFail={eq:c.eq,was:c.F?'funded':'eval'}; stopPlay();
-  if(S.pos){ closePos(S.pos.side>0?priceNow():priceNow()+spreadPx(), S.cursor, 'MLL'); S.orders=[]; drawOrders(); setTimeout(refresh,0); }
-  if(c.F){ CAR.stage='eval'; CAR.blown++; CAR.ledger=[]; carSave(); careerSync(); sfxPlay('sl',true);
-   msg('Funded account closed: equity reached the max loss limit. Press Restart to begin a new evaluation.'); setTimeout(evalBuild,0); return; }
-  msg('Evaluation failed: equity reached the max loss limit. Press Restart to try again.');
- }
- const st=S.evalFail?[S.evalFail.was==='funded'?'CLOSED':'FAILED','bad']:c.F?['FUNDED','ok']:c.pass?['PASSED','ok']:['ACTIVE','run'];
- $('evBadge').textContent=st[0]; $('evBadge').className='badge '+st[1];
- if(c.F){ $('evP').textContent=`${Math.min(c.winDays,FUND.days)} / ${FUND.days}`; $('evPb').style.width=Math.min(100,c.winDays/FUND.days*100)+'%'; }
- else { $('evP').textContent=`${usd(c.profit)} / ${usd(c.tgt)}`; $('evPb').style.width=Math.max(0,Math.min(100,c.profit/c.tgt*100))+'%'; }
- const room=c.eq-c.floor; $('evR').textContent=usd(Math.max(0,room)); $('evRb').style.width=Math.max(0,Math.min(100,room/c.mll*100))+'%'; $('evRb').className=room<c.mll*0.25?'bad':room<c.mll*0.5?'warn':'';
- $('evBal').textContent=usd(c.bal); tween($('evEq'),c.eq,usd); $('evEq').className=cls(c.open);
- $('evFl').textContent=usd(c.floor)+(c.locked?' (locked)':'');
- $('evBd').textContent=c.F ? usd(c.maxPay) : usd(c.best)+(c.cons&&c.profit>0?` (${Math.round(c.best/c.profit*100)}%)`:'');
- $('evNote').textContent = S.evalFail ? (S.evalFail.was==='funded'?'Max loss limit hit. The funded account is closed. Press Restart to begin a new evaluation.':'Max loss limit hit. This attempt is over.') :
-  c.F ? (c.canPay ? 'Payout ready. You keep 90% of the amount.' : c.winDays<FUND.days ? `${FUND.days-c.winDays} more winning day${FUND.days-c.winDays===1?'':'s'} before you can request a payout.` : `Payout needs at least ${usd(FUND.min)} available. Half of your profit counts, so reach ${usd(FUND.min/FUND.pct)} profit.`) :
-  c.pass ? 'Target reached inside the rules. Move to the funded account to start earning payouts.' :
-  (c.profit>=c.tgt && !c.consOk) ? `Target reached, but your best day is over 50% of profit. Keep trading to ${usd(c.need)} total profit.` :
-  `${usd(Math.max(0,c.tgt-c.profit))} to go. Floor moves up only at the end of a trading day.`;
- const key=[c.F,!!S.evalFail,c.pass,c.canPay,c.maxPay].join('|');
- if(key!==evalUpdate.key){ evalUpdate.key=key; const a=$('evAct');
-  if(S.evalFail) a.innerHTML='';
-  else if(c.F){ a.innerHTML=`<button class="primary" id="evPay" ${c.canPay?'':'disabled'}>Request payout${c.canPay?' '+usd(c.maxPay):''}</button>`; $('evPay').onclick=evalPayout; }
-  else if(c.pass){ a.innerHTML='<button class="primary" id="evClaim">Move to funded account</button>'; $('evClaim').onclick=evalClaim; }
-  else a.innerHTML=''; }
-}
-
-/* ---- trade syncer: linked Lucid accounts that copy every entry ---- */
-const SYNC={max:4,prev:{},key:'',last:null};
-if(!Array.isArray(CAR.sync)) CAR.sync=[];
-CAR.sync.forEach(a=>{ if(a.stage!=='funded') a.ledger=[]; if(!Array.isArray(a.ledger)) a.ledger=[]; });   // evaluations restart with the replay, like the main one
-const syncOwned=()=>!!CAR.owned.syncer;
-const syncLive=()=>!!(cfg.eval&&cfg.eval.on&&syncOwned());
-const syncIn=a=>!!(S.pos&&S.pos.sync&&S.pos.sync.includes(a.id));
-const syncOpen=a=>syncIn(a) ? S.pos.side*(priceNow()-S.pos.entry)*S.pos.pv*S.pos.qty : 0;
-const syncCalc=a=>lucidCalc(a.ledger,a.stage==='funded',syncOpen(a),cycleDay(evalNow()));
-function syncEnter(){ return (syncLive()&&!S.evalFail) ? CAR.sync.filter(a=>a.on).map(a=>a.id) : []; }
-function syncClose(p,pnl,t){
- if(!p.sync||!p.sync.length) return; const d=cycleDay(t); let n=0;
- for(const a of CAR.sync) if(p.sync.includes(a.id)){ a.ledger.push({d,pnl}); n++; }
- if(n){ SYNC.last={n,pnl}; carSave(); }
-}
-function syncReset(){ SYNC.prev={}; SYNC.last=null; let ch=false; for(const a of CAR.sync) if(a.stage!=='funded'&&a.ledger.length){ a.ledger=[]; ch=true; } if(ch) carSave(); }
-function syncAdd(){
- if(CAR.sync.length>=SYNC.max) return;
- let n=CAR.sync.length+2; const names=new Set(CAR.sync.map(a=>a.name)); while(names.has('Account '+n)) n++;
- CAR.sync.push({id:'a'+Date.now().toString(36)+Math.floor(Math.random()*1296).toString(36),name:'Account '+n,stage:'eval',ledger:[],on:true,passes:0,blown:0});
- carSave(); syncUpdate();
- toast(`<b>Account ${n} linked.</b> It starts a new $25,000 evaluation and copies your next entry.`,4500);
-}
-function syncClaim(id){
- const a=CAR.sync.find(x=>x.id===id); if(!a) return;
- if(S.pos){ msg('Close your position before you move an account to funded.'); return; }
- if(!syncCalc(a).pass) return;
- a.stage='funded'; a.ledger=[]; a.passes=(a.passes||0)+1; CAR.passes++; delete SYNC.prev[a.id]; carSave(); careerSync(); sfxPlay('cash',true);
+function acctClaim(id){
+ const a=CAR.accts.find(x=>x.id===id); if(!a) return;
+ if(S.pos){ const m='Close your position before you move an account to funded.'; msg(m); toast(m,3500); return; }
+ if(!acctCalc(a).pass) return;
+ a.stage='funded'; a.ledger=[]; CAR.passes++; delete SYNC.prev[a.id]; carSave(); careerSync(); try{ sfxPlay('cash',true); }catch(e){}
  toast(`<b>${cesc(a.name)} passed.</b> It is now a funded account. Five winning days unlock its first payout.`,5500);
 }
-function syncPayout(id){
- const a=CAR.sync.find(x=>x.id===id); if(!a) return;
- if(S.pos){ msg('Close your position before you request a payout.'); return; }
- const c=syncCalc(a); if(!c.canPay) return;
+function acctPayout(id){
+ const a=CAR.accts.find(x=>x.id===id); if(!a) return;
+ if(S.pos){ const m='Close your position before you request a payout.'; msg(m); toast(m,3500); return; }
+ const c=acctCalc(a); if(!c.canPay) return;
  const amt=c.maxPay, net=Math.round(amt*FUND.split*100)/100;
- a.ledger.push({d:c.today,pnl:-amt,pay:1}); CAR.wallet+=net; CAR.paid+=net; CAR.payouts++; delete SYNC.prev[a.id]; carSave(); careerSync(); sfxPlay('cash',true);
+ a.ledger.push({d:c.today,pnl:-amt,pay:1}); CAR.wallet=Math.round((CAR.wallet+net)*100)/100; CAR.paid=Math.round((CAR.paid+net)*100)/100; CAR.payouts++; delete SYNC.prev[a.id]; carSave(); careerSync(); try{ sfxPlay('cash',true); }catch(e){}
  toast(`<b>Payout approved on ${cesc(a.name)}.</b> ${usd(amt)} requested, ${usd(net)} (90%) is in your wallet.`,6000);
 }
-function syncUpdate(){
- if(syncLive()){
-  let dirty=false;
-  for(const a of CAR.sync){
-   const c=syncCalc(a), ex=syncIn(a), ok=!S.pos||ex, k=c.bal-S.realized, pv=SYNC.prev[a.id];
-   let breach=c.breach||c.eq<=c.floor;
-   // scan equity points added since the last check, the same way the main account does
-   if(!breach && pv && pv.ok && ok && Math.abs(pv.k-k)<0.005 && S.eq.length>=pv.n){ for(let i=pv.n;i<S.eq.length;i++) if(S.eq[i].value+pv.k<=pv.floor){ breach=true; break; } }
-   if(breach){
-    const was=a.stage; if(ex) S.pos.sync=S.pos.sync.filter(x=>x!==a.id);
-    a.stage='eval'; a.ledger=[]; a.blown=(a.blown||0)+1; if(was==='funded') CAR.blown++; delete SYNC.prev[a.id]; dirty=true;
-    try{ sfxPlay('sl',true); }catch(e){}
-    toast(`<b>${cesc(a.name)} hit the max loss limit.</b> ${was==='funded'?'The funded account is closed and it':'It'} starts a new evaluation at $25,000.`,6500);
-   } else SYNC.prev[a.id]={n:S.eq.length,floor:c.floor,k,ok};
-  }
-  if(dirty){ carSave(); careerSync(); }
- }
- syncRender();
+function acctRemove(id){
+ if(S.pos){ const m='Close your position before you close an account.'; msg(m); toast(m,3500); return; }
+ CAR.accts=CAR.accts.filter(x=>x.id!==id); delete SYNC.prev[id]; carSave(); careerSync();
 }
-function syncRender(){
- const box=$('syncBox'); if(!box) return;
- const own=syncOwned(), live=syncLive(), A=CAR.sync, C=live?A.map(syncCalc):[];
- const key=[own,live,CAR.wallet>=1800,A.length,...A.map((a,i)=>[a.id,a.stage,a.on,C[i]?[C[i].pass,C[i].canPay,C[i].maxPay].join('.'):''].join(':'))].join('|');
- if(key!==SYNC.key){
-  const n=A.filter(a=>a.on).length;
-  box.innerHTML=`<div class="ecard"><div class="ehead"><b>Trade syncer</b><span class="badge ${own&&live&&n?'run':''}">${!own?'LOCKED':!live?'OFF':n?n+' LINKED':'NO ACCOUNTS'}</span></div>`+
-  (!own?`<div class="hint">Link up to ${SYNC.max} extra Lucid 25K accounts to this one. Every entry you take is copied to all of them, and each account passes, gets funded and pays out on its own.</div>
-    <button class="primary sy-btn" id="syUnlock">${CAR.wallet>=1800?'Unlock in the Career shop for $1,800':'Costs $1,800 in the Career shop (two payouts)'}</button>`
-  :!live?`<div class="hint">Turn on Lucid mode above to trade your linked accounts.</div>`
-  :`<div class="hint" id="syLast"></div>`+A.map((a,i)=>`<div class="sy-a"><div class="sy-h"><input class="sy-n" data-nm="${a.id}" maxlength="14" value="${cesc(a.name)}" title="Rename this account"><span class="badge" id="syB_${a.id}"></span><label class="sw" title="Copy trades to this account"><input type="checkbox" data-on="${a.id}" ${a.on?'checked':''}><i></i></label><button class="sy-x" data-rm="${a.id}" title="Remove this account">&times;</button></div>
-    <div class="meter"><div class="l"><span>${a.stage==='funded'?'Winning days this payout cycle':'Profit target'}</span><b id="syP_${a.id}"></b></div><div class="m"><i id="syPb_${a.id}"></i></div></div>
-    <div class="sy-r"><span>Balance <b id="syBal_${a.id}"></b></span><span>Room <b id="syR_${a.id}"></b></span></div>`+
-    (a.stage==='funded' ? `<button class="primary sy-btn" data-pay="${a.id}" ${C[i].canPay?'':'disabled'}>Request payout${C[i].canPay?' '+usd(C[i].maxPay):''}</button>` : C[i].pass ? `<button class="primary sy-btn" data-claim="${a.id}">Move to funded account</button>` : '')+`</div>`).join('')+
-   (A.length<SYNC.max?`<button class="sy-btn" id="syAdd">Link another account (${A.length} of ${SYNC.max})</button>`:'')+
-   `<ul class="erules"><li>Your main account leads. Each linked account takes the same entry, size, stop and target.</li>
-    <li>A new account starts its own $25,000 evaluation, so accounts can be at different stages.</li>
-    <li>Same Lucid rules on each: trailing max loss, 5 winning days, payout up to 50% of profit (max $1,000), you keep 90%.</li>
-    <li>All accounts trade the same direction, so there is no hedging between them.</li>
-    <li>Switching an account on or off applies from your next entry.</li></ul>`)+`</div>`;
-  const q=s=>box.querySelectorAll(s);
-  if($('syUnlock')) $('syUnlock').onclick=()=>careerOpen('Extras');
-  if($('syAdd')) $('syAdd').onclick=syncAdd;
-  q('[data-nm]').forEach(e=>e.onchange=()=>{ const a=A.find(x=>x.id===e.dataset.nm); if(a){ a.name=e.value.trim()||'Account'; carSave(); } });
-  q('[data-on]').forEach(e=>e.onchange=()=>{ const a=A.find(x=>x.id===e.dataset.on); if(a){ a.on=e.checked; carSave(); syncUpdate(); } });
-  q('[data-rm]').forEach(e=>e.onclick=()=>{ if(S.pos){ msg('Close your position before you remove an account.'); return; }
-   if(!e.dataset.arm){ e.dataset.arm='1'; e.textContent='Remove?'; e.classList.add('arm'); return; }
-   CAR.sync=CAR.sync.filter(x=>x.id!==e.dataset.rm); delete SYNC.prev[e.dataset.rm]; carSave(); syncUpdate(); });
-  q('[data-claim]').forEach(e=>e.onclick=()=>syncClaim(e.dataset.claim));
-  q('[data-pay]').forEach(e=>e.onclick=()=>syncPayout(e.dataset.pay));
-  SYNC.key=key;
+function acctUpdate(){
+ let dirty=false;
+ for(const a of CAR.accts.slice()){
+  const c=acctCalc(a), ex=acctIn(a), ok=!S.pos||ex, k=c.bal-S.realized, pv=SYNC.prev[a.id];
+  let breach=c.breach||c.eq<=c.floor;
+  // scan equity points added since the last check so a fast replay cannot skip a touch of the floor
+  if(!breach && pv && pv.ok && ok && Math.abs(pv.k-k)<0.005 && S.eq.length>=pv.n){ for(let i=pv.n;i<S.eq.length;i++) if(S.eq[i].value+pv.k<=pv.floor){ breach=true; break; } }
+  if(breach){
+   if(ex) S.pos.sync=S.pos.sync.filter(x=>x!==a.id);
+   CAR.accts=CAR.accts.filter(x=>x!==a); CAR.blown++; delete SYNC.prev[a.id]; dirty=true;
+   try{ sfxPlay('sl',true); }catch(e){}
+   toast(`<b>${cesc(a.name)} hit the max loss limit.</b> The ${a.stage==='funded'?'funded account':'evaluation'} is closed. Buy a new evaluation on the Career page to go again.`,7000);
+  } else SYNC.prev[a.id]={n:S.eq.length,floor:c.floor,k,ok};
  }
- if(!live) return;
- const L=$('syLast'); if(L){ const n=A.filter(a=>a.on).length;
-  L.textContent = !A.length ? 'No linked accounts yet. Link one and it copies your next entry.' : SYNC.last ? `Last trade: ${sg(SYNC.last.pnl)} on each of ${SYNC.last.n} linked account${SYNC.last.n===1?'':'s'}.` : `Your next entry is copied to ${n} linked account${n===1?'':'s'}.`; }
- A.forEach((a,i)=>{ const c=C[i], id=a.id, F=a.stage==='funded'; if(!$('syB_'+id)) return;
+ if(S.pos && S.pos.nSync>0 && !S.pos.sync.length){
+  stopPlay(); closePos(S.pos.side>0?priceNow():priceNow()+spreadPx(), S.cursor, 'MLL'); S.orders=[]; try{ drawOrders(); }catch(e){}
+  msg('Position closed: the account in this trade hit its max loss limit.'); setTimeout(refresh,0);
+ }
+ if(dirty){ carSave(); careerSync(); }
+ acctRender();
+}
+function evalBuild(){ try{ acctUpdate(); }catch(e){} }
+function evalUpdate(){ acctUpdate(); }
+function acctCard(a,c,full){
+ const F=a.stage==='funded', id=a.id;
+ return `<div class="ac ${a.on?'on':''}"><div class="ac-h">${full?`<input class="ac-n" data-nm="${id}" maxlength="16" value="${cesc(a.name)}" title="Rename this account">`:`<b class="ac-t">${cesc(a.name)}</b>`}<span class="badge" data-f="${id}:badge"></span><label class="sw" title="Trade this account"><input type="checkbox" data-on="${id}" ${a.on?'checked':''}><i></i></label></div>
+  <div class="meter"><div class="l"><span>${F?'Winning days this payout cycle':'Profit target'}</span><b data-f="${id}:p"></b></div><div class="m"><i data-f="${id}:pb"></i></div></div>
+  <div class="ac-r"><span>Balance <b data-f="${id}:bal"></b></span><span>Room to max loss <b data-f="${id}:room"></b></span></div>
+  ${full?`<div class="hint" data-f="${id}:note"></div>`:''}
+  ${F?`<button class="primary ac-btn" data-pay="${id}" ${c.canPay?'':'disabled'}>Request payout${c.canPay?' '+usd(c.maxPay):''}</button>`:c.pass?`<button class="primary ac-btn" data-claim="${id}">Move to funded account</button>`:''}
+  ${full?`<button class="ac-x" data-rm="${id}">Close account</button>`:''}</div>`;
+}
+function acctBind(box){
+ const q=s=>box.querySelectorAll(s);
+ q('[data-hub]').forEach(e=>e.onclick=()=>hubOpen(e.dataset.hub));
+ q('[data-on]').forEach(e=>e.onchange=()=>acctToggle(e.dataset.on,e.checked));
+ q('[data-nm]').forEach(e=>e.onchange=()=>{ const a=CAR.accts.find(x=>x.id===e.dataset.nm); if(a){ a.name=e.value.trim()||'Account'; carSave(); acctRender(); } });
+ q('[data-rm]').forEach(e=>e.onclick=()=>{ if(!e.dataset.arm){ e.dataset.arm='1'; e.textContent='Click again to close it for good'; e.classList.add('arm'); return; } acctRemove(e.dataset.rm); });
+ q('[data-claim]').forEach(e=>e.onclick=()=>acctClaim(e.dataset.claim));
+ q('[data-pay]').forEach(e=>e.onclick=()=>acctPayout(e.dataset.pay));
+ q('[data-buy]').forEach(e=>e.onclick=()=>{ e.dataset.buy==='eval'?acctBuy():syncerBuy(); });
+}
+function acctRender(){
+ const A=CAR.accts, C=A.map(acctCalc), own=syncOwned(), money=v=>usd(v).replace(/\.00$/,'');
+ const base=[own,A.length,...A.map((a,i)=>[a.id,a.stage,a.on,C[i].pass,C[i].canPay,C[i].maxPay,a.name].join(':'))].join('|');
+ const side=$('acctBox');
+ if(side && side.dataset.key!==base){
+  side.innerHTML=`<div class="ecard"><div class="ehead"><b>Accounts</b><button class="link" data-hub="accounts">${A.length?'Manage':'Eval store'}</button></div>`+
+   (A.length ? A.map((a,i)=>acctCard(a,C[i],false)).join('')
+    : `<div class="hint">Practice mode. Your trades are not scored against an account yet. A Lucid 25K evaluation costs ${money(EVAL.price)} on the Career page.</div><button class="primary ac-btn" data-hub="accounts">Open the eval store</button>`)+`</div>`;
+  acctBind(side); side.dataset.key=base;
+ }
+ const hub=$('hubAccts'), hk=base+'|'+CAR.wallet.toFixed(2);
+ if(hub && hub.dataset.key!==hk){
+  const full=A.length>=EVAL.max, short=EVAL.price-CAR.wallet, sshort=SYNCER_PRICE-CAR.wallet;
+  hub.innerHTML=`<div class="sec">Your accounts <span>${A.length} of ${EVAL.max}</span></div>`+
+   (A.length?`<div class="ac-grid">${A.map((a,i)=>acctCard(a,C[i],true)).join('')}</div>`:`<div class="card empty">You have no account yet. Buy an evaluation below, pass it, and it becomes a funded account that pays out.</div>`)+
+   `<div class="sec">Store</div><div class="hub-grid2">
+    <div class="card prod"><div class="card-h"><b>Lucid 25K evaluation</b><span class="price">${money(EVAL.price)}</span></div>
+     <ul class="erules"><li>Starts at $25,000. Reach +${money(EVAL.tgt)} in closed profit to pass.</li><li>Max loss ${money(EVAL.mll)}, trailing your end-of-day balance and locking at $25,100.</li><li>Your best day can be at most 50% of the profit when you pass.</li><li>Max size 2 minis or 20 micros. If it hits max loss, the account is gone.</li></ul>
+     <button class="primary ac-btn" data-buy="eval" ${full||short>0?'disabled':''}>${full?`Limit of ${EVAL.max} accounts reached`:short>0?`Need ${money(short)} more`:'Buy evaluation'}</button>${!full&&short>0?`<button class="link ac-link" data-hub="job">Earn it at the job</button>`:''}</div>
+    <div class="card prod"><div class="card-h"><b>Trade syncer</b><span class="price">${own?'Owned':money(SYNCER_PRICE)}</span></div>
+     <ul class="erules"><li>Trade several accounts at once. Every entry is copied to each account that is switched on.</li><li>Same size, stop and target on each. All accounts trade the same direction.</li><li>Each account keeps its own progress, so they can be at different stages.</li><li>Without it, one account trades at a time.</li></ul>
+     ${own?`<div class="hint">Unlocked. Use the switches on your accounts to choose which ones trade.</div>`:`<button class="primary ac-btn" data-buy="syncer" ${sshort>0?'disabled':''}>${sshort>0?`Need ${money(sshort)} more`:'Unlock trade syncer'}</button>`}</div></div>
+   <div class="sec">Funded account rules</div><div class="card"><ul class="erules" style="margin:0"><li>A funded account starts at $25,000 with the same trailing max loss, locked at $25,100.</li><li>Payout: 5 winning days, minimum $500, up to 50% of profit, at most $1,000 each time.</li><li>You keep 90%. It lands in your wallet.</li><li>Accounts are saved, so restarting the replay does not reset them.</li></ul></div>`;
+  acctBind(hub); hub.dataset.key=hk;
+ }
+ const ln=$('acctLine'); if(ln){ const on=A.filter(a=>a.on), t=on.length?`Trading on ${on.map(a=>a.name).join(', ')}`:(A.length?'Practice mode: no account is switched on':'Practice mode: no account yet'); if(ln.dataset.t!==t){ ln.dataset.t=t; ln.innerHTML=`<span>${cesc(t)}</span><button class="link" id="acctLineB">${A.length?'Change':'Get one'}</button>`; $('acctLineB').onclick=()=>{ A.length?sideTab('pStats'):hubOpen('accounts'); }; } }
+ const set=(k,fn)=>document.querySelectorAll(`[data-f="${k}"]`).forEach(fn);
+ A.forEach((a,i)=>{ const c=C[i], id=a.id, F=a.stage==='funded';
   const st=!a.on?['PAUSED','']:F?['FUNDED','ok']:c.pass?['PASSED','ok']:['EVALUATION','run'];
-  $('syB_'+id).textContent=st[0]; $('syB_'+id).className='badge '+st[1];
-  if(F){ $('syP_'+id).textContent=`${Math.min(c.winDays,FUND.days)} / ${FUND.days}`; $('syPb_'+id).style.width=Math.min(100,c.winDays/FUND.days*100)+'%'; }
-  else { $('syP_'+id).textContent=`${usd(c.profit)} / ${usd(c.tgt)}`; $('syPb_'+id).style.width=Math.max(0,Math.min(100,c.profit/c.tgt*100))+'%'; }
-  $('syBal_'+id).textContent=usd(c.eq); const room=c.eq-c.floor; $('syR_'+id).textContent=usd(Math.max(0,room)); $('syR_'+id).className=room<c.mll*0.25?'neg':''; });
+  set(id+':badge',e=>{ e.textContent=st[0]; e.className='badge '+st[1]; });
+  const pt=F?`${Math.min(c.winDays,FUND.days)} / ${FUND.days}`:`${usd(c.profit)} / ${usd(c.tgt)}`, pw=(F?Math.min(100,c.winDays/FUND.days*100):Math.max(0,Math.min(100,c.profit/c.tgt*100)))+'%';
+  set(id+':p',e=>{ e.textContent=pt; }); set(id+':pb',e=>{ e.style.width=pw; });
+  const room=c.eq-c.floor;
+  set(id+':bal',e=>{ e.textContent=usd(c.eq); }); set(id+':room',e=>{ e.textContent=usd(Math.max(0,room)); e.className=room<c.mll*0.25?'neg':''; });
+  const note = F ? (c.canPay ? 'Payout ready. You keep 90% of the amount.' : c.winDays<FUND.days ? `${FUND.days-c.winDays} more winning day${FUND.days-c.winDays===1?'':'s'} before a payout.` : `A payout needs at least ${usd(FUND.min)} available. Half of the profit counts, so reach ${usd(FUND.min/FUND.pct)} profit.`) :
+   c.pass ? 'Target reached inside the rules. Move it to funded to start earning payouts.' :
+   (c.profit>=c.tgt && !c.consOk) ? `Target reached, but the best day is over 50% of profit. Keep trading to ${usd(c.need)} total profit.` :
+   `${usd(Math.max(0,c.tgt-c.profit))} to go. The floor is at ${usd(c.floor)}${c.locked?' (locked)':''}.`;
+  set(id+':note',e=>{ e.textContent=note; }); });
 }
-try{ Object.assign(window.__bt,{SYNC,syncUpdate,syncAdd,syncClaim,syncPayout,evalCalc,lucidCalc}); }catch(e){}
+try{ Object.assign(window.__bt,{SYNC,acctUpdate,acctBuy,syncerBuy,acctClaim,acctPayout,acctToggle,acctCalc,lucidCalc}); }catch(e){}
 
 /* ---- split screen: second chart for the pair symbol ---- */
 const chart2El=$('chart2');
@@ -3290,7 +3363,6 @@ function liveUI(){
  const q=+$('qty').value||0, pv=+$('contract').value||1, sl=+$('slPts').value||0, tp=+$('tpPts').value||0;
  $('riskLine').innerHTML = (sl||tp) ? `Risk <b>${sl?usd(sl*pv*q):'-'}</b> · Reward <b>${tp?usd(tp*pv*q):'-'}</b>${sl&&tp?` · R:R <b>${(tp/sl).toFixed(2)}</b>`:''}` : 'Set stop loss and take profit points to see your risk in dollars.';
  try{ evalUpdate(); }catch(e){}
- try{ syncUpdate(); }catch(e){}
  try{ splitUpdate(); }catch(e){}
 }
 ['qty','slPts','tpPts','contract'].forEach(id=>$(id).addEventListener('input',liveUI));
@@ -3324,7 +3396,7 @@ function helpDialog(){
   {name:'Trading',html:'<div class="help">'+P('<b>Market order:</b> Buy or Sell in the Trade tab, the buttons on the chart, or keys B and S.')+P('<b>Pending order:</b> press Buy on chart or Sell on chart, then click the price. Below the market a buy becomes a limit; above it becomes a stop. The reverse applies to sells.')+P('<b>Move things:</b> drag any order, stop loss or take profit line. Press TP or SL on a line to add an exit.')+P('<b>Your open P&amp;L</b> is shown live on the chart and in the Trade tab.')+'</div>'},
   {name:'Indicators',html:'<div class="help">'+P('<b>Quarter boxes</b> draw each quarter on the chart. <b>Quarter timeline</b> is the strip under the chart. They are two separate switches in Settings.')+P('<b>Session highs and lows</b> mark the high and low of Asia, London, NY AM and NY PM in New York time.')+P('<b>True opens</b> and <b>SMT</b> are also in Settings, with themes, accent and chart colours.')+'</div>'},
   {name:'Lucid 25K',html:'<div class="help">'+P('Turn it on in the <b>Dashboard</b> tab. You start at $25,000 and must reach the profit target in closed profit.')+P('The <b>max loss floor</b> starts $1,000 below your balance, moves up only at the end of a trading day, and locks at $25,100. If equity touches it, the attempt fails.')+P('Size is limited to 2 minis or 20 micros. LucidFlex adds the 50% consistency rule.')+'</div>'},
-  {name:'Career',html:'<div class="help">'+P('<b>1. Pass.</b> Reach the profit target in the Lucid 25K evaluation (Dashboard tab).')+P('<b>2. Get funded.</b> Press Move to funded account. The funded account is saved in this browser.')+P('<b>3. Payouts.</b> After five winning days you can request up to half of your profit, at most $1,000. 90% goes to your wallet.')+P('<b>4. Spend.</b> Open Career in the top bar to buy clothes, a home, a car and more for your character.')+P('<b>Sounds.</b> A take profit plays an order-filled sound and a stop loss plays a laugh. Change or mute them in Settings.')+'</div>'}
+  {name:'Career',html:'<div class="help">'+P('<b>The Career page.</b> Press Career in the top bar. It holds your character, accounts, the eval store, the shop, the job and the leaderboard.')+P('<b>1. Get an evaluation.</b> You start with $50, the price of one Lucid 25K evaluation. If your wallet is empty, earn money at the job.')+P('<b>2. Pass.</b> Reach +$1,250 in closed profit without touching the max loss limit, then move the account to funded.')+P('<b>3. Payouts.</b> After five winning days you can request up to half of the profit, at most $1,000. 90% goes to your wallet.')+P('<b>4. Trade syncer.</b> For $1,800 you can trade several accounts at once. Every entry is copied to each account that is switched on.')+P('<b>Practice mode.</b> With no account switched on, trades are not scored.')+P('<b>Sounds.</b> A take profit plays an order-filled sound and a stop loss plays a laugh. Change or mute them in Settings.')+'</div>'}
  ],null,null);
 }
 on('btnSplit',()=>setSplit(!cfg.split));
@@ -3561,7 +3633,7 @@ const ITEMS=[
  {id:'plant',slot:'plant',cat:'Extras',name:'House plant',price:50,c:'#2f9e5b'},
  {id:'dog',slot:'pet',cat:'Extras',name:'Dog',price:900,c:'#c98f5a'},
  {id:'desk',slot:'desk',cat:'Extras',name:'Trading desk',price:1500,c:'#3a4257'},
- {id:'syncer',slot:'tool',cat:'Extras',name:'Trade syncer',price:1800,c:'#2f80ff',tool:1}
+ {id:'syncer',slot:'tool',cat:'Store',name:'Trade syncer',price:1800,c:'#2f80ff',tool:1}
 ];
 const ITEM=Object.fromEntries(ITEMS.map(i=>[i.id,i]));
 const SLOT_DEF={top:'tee',shoes:'sneak',home:'room'};
@@ -3663,131 +3735,230 @@ function avScene(eq,L){
  return s;
 }
 
-const CR={tab:'Clothes',try:null};
-function careerSync(){ const w=$('walLb'); if(w) w.textContent=usd(CAR.wallet).replace(/\.00$/,''); if($('career') && !$('career').hidden) careerRender(); try{ syncUpdate(); }catch(e){} }
-function careerScene(){ const eq=eqNow(); if(CR.try){ const it=ITEM[CR.try]; eq[it.slot]=it.id; } $('crTilt').innerHTML=avScene(eq,CAR.look); }
-function careerWave(){ const t=$('crTilt'); t.classList.remove('wave'); void t.offsetWidth; t.classList.add('wave'); }
-function careerRender(){
- $('crWal').textContent=usd(CAR.wallet);
- $('crRank').textContent=funded()?'FUNDED':'IN EVALUATION'; $('crRank').className='badge '+(funded()?'ok':'run');
- $('crStats').innerHTML=[['Evaluations passed',CAR.passes],['Payouts taken',CAR.payouts],['Total paid out',usd(CAR.paid)],['Funded accounts lost',CAR.blown]].map(([l,v])=>`<div>${l}<b>${v}</b></div>`).join('');
- const tabs=['Clothes','Accessories','Home','Cars','Extras','Look','Account'];
- $('crTabs').innerHTML=tabs.map(t=>`<button data-t="${t}" class="${t===CR.tab?'act':''}">${t}</button>`).join('');
- $('crTabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{ CR.tab=b.dataset.t; CR.try=null; careerRender(); });
- const B=$('crBody');
- if(CR.tab==='Account'){
-  const st=[[CAR.passes>0||funded(),!funded()&&!CAR.passes,'Pass the evaluation','Turn on Lucid mode in the Dashboard tab and reach the profit target inside the rules.'],
-   [funded()||CAR.payouts>0,CAR.passes>0&&!funded(),'Move to the funded account','When the evaluation shows PASSED, press "Move to funded account".'],
-   [CAR.payouts>0,funded()&&!CAR.payouts,'Request a payout','Five winning days and at least $500 available. You keep 90% in your wallet.'],
-   [Object.keys(CAR.owned).length>0,CAR.payouts>0&&!Object.keys(CAR.owned).length,'Build your life','Spend payouts on clothes, a home, a car and more for your character.']];
-  B.innerHTML=`<div class="cr-steps">${st.map(([d,n,t,x],i)=>`<div class="cr-step ${d?'done':n?'now':''}"><i>${d?'&#10003;':i+1}</i><div><b>${t}</b><span>${x}</span></div></div>`).join('')}</div>
-   <div class="dl-row" style="margin-top:14px"><button id="crDash" class="primary" style="height:30px;padding:0 14px">Open the Lucid dashboard</button><button id="crReset" style="height:30px;padding:0 12px">Reset career</button></div>
-   <div class="hint">Wallet money is game money. It comes only from payouts on the simulated funded account.</div><div class="dl-sub">Online account</div><div id="cloudBox">${cloudAccountHTML()}</div><div class="dl-sub">Leaderboard</div><div id="lbBox" class="hint">Loading...</div>`;
-  $('crDash').onclick=()=>{ $('career').hidden=true; if(!cfg.eval.on){ cfg.eval.on=true; saveCfg(); evalBuild(); } sideTab('pStats'); };
-  cloudWire();
-  $('crReset').onclick=()=>{ const b=$('crReset'); if(b.dataset.arm){ Object.assign(CAR,{stage:'eval',wallet:0,passes:0,blown:0,paid:0,payouts:0,ledger:[],owned:{},eq:{},sync:[]}); carSave(); evalBuild(); careerSync(); careerScene(); } else { b.dataset.arm='1'; b.textContent='Click again to erase everything'; } };
- } else if(CR.tab==='Look'){
-  const L=CAR.look, sw=(k,vals)=>vals.map(v=>`<button data-lk="${k}" data-v="${v}" class="${L[k]===v?'act':''}" style="background:${v}"></button>`).join('');
-  B.innerHTML=`<div class="cr-look"><div><div class="dl-sub" style="margin-top:0">Skin</div><div class="sws">${sw('skin',['#f6d3bd','#e8b796','#d09a72','#a8734f','#7b4f33','#523222'])}</div></div>
-   <div><div class="dl-sub" style="margin-top:0">Hair colour</div><div class="sws">${sw('hair',['#16110d','#2b2118','#5a3a22','#9a6a3a','#d8b46a','#b23b2e','#8d95a6','#2f80ff'])}</div></div>
-   <div><div class="dl-sub" style="margin-top:0">Hair style</div><div class="sws">${['short','buzz','curly','long','bald'].map(v=>`<button class="tx ${L.style===v?'act':''}" data-lk="style" data-v="${v}">${v[0].toUpperCase()+v.slice(1)}</button>`).join('')}</div></div>
-   <div class="hint">Changing your look is free.</div></div>`;
-  B.querySelectorAll('[data-lk]').forEach(b=>b.onclick=()=>{ CAR.look[b.dataset.lk]=b.dataset.v; carSave(); careerScene(); careerRender(); });
- } else {
-  B.innerHTML=`<div class="cr-grid">${ITEMS.filter(i=>i.cat===CR.tab).map(i=>{ const own=owns(i.id), on=eqNow()[i.slot]===i.id, can=CAR.wallet>=i.price;
-   return `<div class="it ${own?'own':''} ${on?'on':''}" data-it="${i.id}"><div class="sw2" style="background:linear-gradient(135deg,${shade(i.c,22)},${shade(i.c,-28)})">${i.slot}</div><b>${i.name}</b><span class="pr">${i.price?usd(i.price).replace(/\.00$/,''):'Free'}${own&&i.price?' · owned':''}</span>
-    <button data-act="${i.id}" class="${own?'':'primary'}" ${!own&&!can?'disabled':''}>${i.tool&&own?'Open':on?(SLOT_DEF[i.slot]?'Wearing':'Take off'):own?'Use':can?'Buy':'Need '+usd(i.price-CAR.wallet).replace(/\.00$/,'')+' more'}</button></div>`; }).join('')}</div>
-   <div class="hint" style="margin-top:12px">Hover an item to try it on your character before you buy.</div>`;
-  B.querySelectorAll('.it').forEach(el=>{ el.onmouseenter=()=>{ if(ITEM[el.dataset.it].tool) return; CR.try=el.dataset.it; careerScene(); }; el.onmouseleave=()=>{ CR.try=null; careerScene(); }; });
+/* ---- Career page: character, accounts, shop, job, leaderboard, profile ---- */
+const HUB={page:'home',shop:'Clothes',try:null,feed:[],lb:null,lbAt:0,lbErr:'',auth:'in',jt:0};
+const CR=HUB;
+const HUB_PAGES=[['home','Home'],['accounts','Accounts'],['shop','Shop'],['job','Job'],['leaderboard','Leaderboard'],['profile','Profile']];
+const money=v=>usd(v).replace(/\.00$/,'');
+const hubShown=()=>!!($('hub') && !$('hub').hidden);
+function careerSync(){
+ const w=$('walLb'); if(w) w.textContent=money(CAR.wallet);
+ if(hubShown()) hubRender();
+ try{ acctRender(); }catch(e){}
+}
+function careerScene(){ const t=$('crTilt'); if(!t) return; const eq=eqNow(); if(HUB.try){ const it=ITEM[HUB.try]; eq[it.slot]=it.id; } t.innerHTML=avScene(eq,CAR.look); }
+function careerWave(){ const t=$('crTilt'); if(!t) return; t.classList.remove('wave'); void t.offsetWidth; t.classList.add('wave'); }
+function careerOpen(tab){ if(tab && ['Clothes','Accessories','Home','Cars','Extras','Look'].includes(tab)){ HUB.shop=tab; hubOpen('shop'); } else hubOpen(); }
+const jobRole=()=>{ let r=JOBS[0], i=0; JOBS.forEach((j,k)=>{ if(CAR.job.clicks>=j[0]){ r=j; i=k; } }); return {i,name:r[1],pay:r[2],next:JOBS[i+1]||null,from:r[0]}; };
+function hubRank(){ const A=CAR.accts; return A.some(a=>a.stage==='funded')?['FUNDED TRADER','ok']:A.length?['IN EVALUATION','run']:['PRACTICE','']; }
+function hubNext(){
+ const A=CAR.accts, C=A.map(acctCalc);
+ if(!A.length) return CAR.wallet>=EVAL.price ? ['Buy your first evaluation',`A Lucid 25K evaluation costs ${money(EVAL.price)}. Pass it and it becomes a funded account that pays out.`,'Open the eval store','accounts']
+  : ['Earn your first evaluation',`You need ${money(EVAL.price-CAR.wallet)} more. Work the order desk to earn it.`,'Go to the job','job'];
+ if(C.some(c=>c.pass)) return ['Move your account to funded','An evaluation has reached its target inside the rules.','Open accounts','accounts'];
+ if(C.some(c=>c.canPay)) return ['Request your payout','A funded account has a payout ready. You keep 90% of it.','Open accounts','accounts'];
+ if(!A.some(a=>a.on)) return ['Switch an account on','None of your accounts is trading right now, so trades are practice only.','Open accounts','accounts'];
+ if(A.some(a=>a.stage==='funded')) return ['Bank five winning days','A funded account pays out after five winning days and at least $1,000 in profit.','Back to the chart','chart'];
+ return ['Pass your evaluation',`Reach +${money(EVAL.tgt)} in closed profit without touching the max loss limit.`,'Back to the chart','chart'];
+}
+const stageHTML=()=>`<div class="cr-stage" id="crStage"><div class="cr-tilt" id="crTilt"></div></div>`;
+function stageBind(){
+ const st=$('crStage'), tl=$('crTilt'); if(!st) return;
+ st.addEventListener('mousemove',e=>{ const r=st.getBoundingClientRect(), x=(e.clientX-r.left)/r.width-0.5, y=(e.clientY-r.top)/r.height-0.5;
+  tl.style.transform=`rotateY(${(x*10).toFixed(2)}deg) rotateX(${(-y*6).toFixed(2)}deg)`; tl.style.setProperty('--px',(x*2).toFixed(3)); tl.style.setProperty('--py',(y*2).toFixed(3)); });
+ st.addEventListener('mouseleave',()=>{ tl.style.transform=''; tl.style.setProperty('--px',0); tl.style.setProperty('--py',0); });
+ st.addEventListener('click',careerWave);
+ careerScene();
+}
+function hubRender(){
+ if(!$('hub')) return;
+ $('hubNav').innerHTML=HUB_PAGES.map(([k,l])=>`<button data-p="${k}" class="${k===HUB.page?'act':''}">${l}</button>`).join('');
+ $('hubNav').querySelectorAll('button').forEach(b=>b.onclick=()=>hubOpen(b.dataset.p));
+ $('hubWal').textContent=usd(CAR.wallet);
+ const ub=$('hubUser'); ub.textContent=CLOUD.user?(CLOUD.user.email||'Signed in'):'Sign in'; ub.title=CLOUD.user?'Your online account':'Sign in to save your career online';
+ const B=$('hubBody'), P=HUB.page, name=cesc(CAR.look.name||'You');
+ if(P==='home'){
+  const rk=hubRank(), nx=hubNext(), A=CAR.accts, C=A.map(acctCalc);
+  B.innerHTML=`<div class="hub-two"><div class="hub-side">${stageHTML()}<div class="who"><b>${name}</b><span class="badge ${rk[1]}">${rk[0]}</span></div></div>
+   <div class="hub-main">
+    <div class="card next"><span class="eyebrow">Next step</span><b>${nx[0]}</b><p>${nx[1]}</p><button class="primary" data-hub="${nx[3]}">${nx[2]}</button></div>
+    <div class="stats4">${[['Wallet',usd(CAR.wallet)],['Evaluations passed',CAR.passes],['Payouts taken',CAR.payouts],['Total paid out',usd(CAR.paid)]].map(([l,v])=>`<div><span>${l}</span><b>${v}</b></div>`).join('')}</div>
+    <div class="hub-grid2">
+     <div class="card"><div class="card-h"><b>Accounts</b><button class="link" data-hub="accounts">${A.length?'Manage':'Eval store'}</button></div>
+      ${A.length?`<div class="rows">${A.map((a,i)=>`<div><span>${cesc(a.name)}</span><span class="mut">${a.stage==='funded'?`Funded · ${Math.min(C[i].winDays,FUND.days)}/${FUND.days} winning days`:`Evaluation · ${money(Math.round(C[i].profit))} of ${money(EVAL.tgt)}`}</span></div>`).join('')}</div>`:`<div class="hint">No account yet. Accounts lost so far: ${CAR.blown}.</div>`}</div>
+     <div class="card"><div class="card-h"><b>Leaderboard</b><button class="link" data-hub="leaderboard">See all</button></div><div id="lbMini" class="hint">Loading...</div></div>
+    </div></div></div>`;
+  stageBind(); lbRender();
+ } else if(P==='accounts'){
+  B.innerHTML=`<div class="hub-wide"><h2>Accounts</h2><p class="sub">Buy an evaluation, pass it, and trade the funded account for payouts. The switch on each account decides whether your trades count on it.</p><div id="hubAccts"></div></div>`;
+ } else if(P==='shop'){
+  const tabs=['Clothes','Accessories','Home','Cars','Extras','Look'];
+  let body;
+  if(HUB.shop==='Look'){ const L=CAR.look, sw=(k,vals)=>vals.map(v=>`<button data-lk="${k}" data-v="${v}" class="${L[k]===v?'act':''}" style="background:${v}"></button>`).join('');
+   body=`<div class="cr-look"><div><div class="sec" style="margin-top:0">Skin</div><div class="sws">${sw('skin',['#f6d3bd','#e8b796','#d09a72','#a8734f','#7b4f33','#523222'])}</div></div>
+    <div><div class="sec">Hair colour</div><div class="sws">${sw('hair',['#16110d','#2b2118','#5a3a22','#9a6a3a','#d8b46a','#b23b2e','#8d95a6','#2f80ff'])}</div></div>
+    <div><div class="sec">Hair style</div><div class="sws">${['short','buzz','curly','long','bald'].map(v=>`<button class="tx ${L.style===v?'act':''}" data-lk="style" data-v="${v}">${v[0].toUpperCase()+v.slice(1)}</button>`).join('')}</div></div>
+    <div class="hint">Changing your look is free.</div></div>`; }
+  else body=`<div class="shop-list">${ITEMS.filter(i=>i.cat===HUB.shop).map(i=>{ const own=owns(i.id), on=eqNow()[i.slot]===i.id, can=CAR.wallet>=i.price;
+    return `<div class="shop-it ${on?'on':''}" data-it="${i.id}"><i class="dot" style="background:${i.c}"></i><div class="nm"><b>${i.name}</b><span>${i.price?money(i.price):'Free'}${own&&i.price?' · owned':''}</span></div>
+     <button data-act="${i.id}" class="${own?'':'primary'}" ${!own&&!can?'disabled':''}>${on?(SLOT_DEF[i.slot]?'In use':'Remove'):own?'Use':can?'Buy':'Need '+money(i.price-CAR.wallet)}</button></div>`; }).join('')}</div>
+    <div class="hint" style="margin-top:12px">Hover an item to preview it on your character.</div>`;
+  B.innerHTML=`<div class="hub-two"><div class="hub-side">${stageHTML()}<div class="who"><b>${name}</b><span class="mut">Wallet ${usd(CAR.wallet)}</span></div></div>
+   <div class="hub-main"><h2>Shop</h2><p class="sub">Spend wallet money on your character. Wallet money comes from payouts and the job.</p>
+    <div class="pills">${tabs.map(t=>`<button data-st="${t}" class="${t===HUB.shop?'act':''}">${t}</button>`).join('')}</div>${body}</div></div>`;
+  stageBind();
+  B.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{ HUB.shop=b.dataset.st; HUB.try=null; hubRender(); });
+  B.querySelectorAll('[data-lk]').forEach(b=>b.onclick=()=>{ CAR.look[b.dataset.lk]=b.dataset.v; carSave(); hubRender(); });
+  B.querySelectorAll('.shop-it').forEach(el=>{ el.onmouseenter=()=>{ HUB.try=el.dataset.it; careerScene(); }; el.onmouseleave=()=>{ HUB.try=null; careerScene(); }; });
   B.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{ const i=ITEM[b.dataset.act];
-   if(!owns(i.id)){ if(CAR.wallet<i.price) return; CAR.wallet=Math.round((CAR.wallet-i.price)*100)/100; CAR.owned[i.id]=1; if(!i.tool) CAR.eq[i.slot]=i.id; sfxPlay('cash',true); toast(i.tool?'<b>Trade syncer unlocked.</b> Open the Dashboard tab to link accounts.':`<b>${i.name}</b> is yours.`,i.tool?5000:2600); }
-   else if(i.tool){ $('career').hidden=true; if(!cfg.eval.on){ cfg.eval.on=true; saveCfg(); evalBuild(); } sideTab('pStats'); refresh(); return; }
+   if(!owns(i.id)){ if(CAR.wallet<i.price) return; CAR.wallet=Math.round((CAR.wallet-i.price)*100)/100; CAR.owned[i.id]=1; CAR.eq[i.slot]=i.id; try{ sfxPlay('cash',true); }catch(e){} toast(`<b>${i.name}</b> is yours.`,2600); }
    else if(eqNow()[i.slot]===i.id){ if(SLOT_DEF[i.slot]) return; delete CAR.eq[i.slot]; }
    else CAR.eq[i.slot]=i.id;
-   CR.try=null; carSave(); careerSync(); careerScene(); careerWave(); });
- }
-}
-function careerOpen(tab){
- if(!$('career')){
-  document.body.insertAdjacentHTML('beforeend',`<div id="career" hidden><div class="cr-box"><div class="cr-h"><b>Career</b><span class="cr-w">Wallet<b id="crWal"></b></span><button class="dlg-x" id="crX">&times;</button></div>
-   <div class="cr-main"><div class="cr-left"><div class="cr-stage" id="crStage"><div class="cr-tilt" id="crTilt"></div></div>
-    <div class="cr-name"><input id="crName" maxlength="16" title="Your character's name"><span id="crRank" class="badge"></span></div><div class="cr-stats" id="crStats"></div></div>
-   <div class="cr-right"><div class="cr-tabs" id="crTabs"></div><div id="crBody"></div></div></div></div></div>`);
-  $('crX').onclick=()=>{ $('career').hidden=true; };
-  $('career').addEventListener('mousedown',e=>{ if(e.target===$('career')) $('career').hidden=true; });
+   HUB.try=null; carSave(); careerSync(); careerWave(); });
+ } else if(P==='job'){
+  B.innerHTML=`<div class="hub-narrow"><h2>Order desk</h2><p class="sub">Process order tickets to earn wallet money. It is the way to pay for an evaluation when your wallet is empty.</p>
+   <div class="card job"><div class="job-top"><div><span class="eyebrow">Your role</span><b id="jbRole"></b><span class="mut" id="jbPay"></span></div><div class="r"><span class="eyebrow">Earned at the desk</span><b id="jbEarn"></b><span class="mut" id="jbCnt"></span></div></div>
+    <div class="meter"><div class="l"><span id="jbNextL"></span><b id="jbNextV"></b></div><div class="m"><i id="jbBar"></i></div></div>
+    <button id="jbBtn" class="primary job-btn">Process ticket</button>
+    <div class="job-feed" id="jbFeed"></div></div>
+   <div class="sec">Roles</div><div class="card"><div class="rows">${JOBS.map(j=>`<div><span>${j[1]}</span><span class="mut">${j[0]?j[0].toLocaleString('en-US')+' tickets':'Start'} · ${usd(j[2])} per ticket</span></div>`).join('')}</div></div></div>`;
+  $('jbBtn').onclick=jobClick; $('jbBtn').addEventListener('keydown',e=>{ if(e.repeat) e.preventDefault(); });
+  jobPaint();
+ } else if(P==='leaderboard'){
+  B.innerHTML=`<div class="hub-narrow"><div class="card-h"><h2>Leaderboard</h2><button id="lbRef">Refresh</button></div><p class="sub">Ranked by total paid out from funded accounts. Job money does not count.</p>
+   ${cloudOn()&&!CLOUD.user?`<div class="card note"><span>Sign in to put your name on the board.</span><button class="primary" data-hub="profile">Sign in</button></div>`:''}
+   <div class="card" id="lbBox"><div class="hint">Loading...</div></div></div>`;
+  $('lbRef').onclick=()=>lbRender(true); lbRender();
+ } else {
+  B.innerHTML=`<div class="hub-narrow"><h2>Profile</h2><p class="sub">Your online account, your name on the leaderboard, and your saved career.</p>
+   <div class="sec" style="margin-top:0">Online account</div><div class="card" id="cloudBox"></div>
+   <div class="sec">Name</div><div class="card"><label class="fld">Shown on your character and on the leaderboard<input id="crName" maxlength="16" value="${name}"></label></div>
+   <div class="sec">Career</div><div class="card note"><span>Start over with ${money(EVAL.price)}, no accounts and nothing owned. Your look is kept.</span><button id="crReset">Reset career</button></div></div>`;
   $('crName').oninput=()=>{ CAR.look.name=$('crName').value; carSave(); };
-  const st=$('crStage'), tl=$('crTilt');
-  st.addEventListener('mousemove',e=>{ const r=st.getBoundingClientRect(), x=(e.clientX-r.left)/r.width-0.5, y=(e.clientY-r.top)/r.height-0.5;
-   tl.style.transform=`rotateY(${(x*14).toFixed(2)}deg) rotateX(${(-y*9).toFixed(2)}deg)`; tl.style.setProperty('--px',(x*2).toFixed(3)); tl.style.setProperty('--py',(y*2).toFixed(3)); });
-  st.addEventListener('mouseleave',()=>{ tl.style.transform=''; tl.style.setProperty('--px',0); tl.style.setProperty('--py',0); });
-  st.addEventListener('click',careerWave);
+  $('crReset').onclick=()=>{ const b=$('crReset'); if(b.dataset.arm){ const look=CAR.look; Object.keys(CAR).forEach(k=>{ if(k!=='uid') delete CAR[k]; }); Object.assign(CAR,carDefault(),{look}); SYNC.prev={}; carSave(); careerSync(); toast('Career reset.',2500); } else { b.dataset.arm='1'; b.textContent='Click again to erase everything'; } };
+  cloudAccountUI();
  }
- if(tab) CR.tab=tab; CR.try=null;
- $('crName').value=CAR.look.name||'You'; $('career').hidden=false; careerScene(); careerRender(); careerWave();
+ B.querySelectorAll('[data-hub]').forEach(e=>{ if(!e.onclick) e.onclick=()=>hubOpen(e.dataset.hub); });
+ try{ acctRender(); }catch(e){}
 }
-document.addEventListener('keydown',e=>{ if(e.key==='Escape' && $('career') && !$('career').hidden) $('career').hidden=true; });
+function jobPaint(){
+ if(!$('jbRole')) return; const r=jobRole(), j=CAR.job;
+ $('jbRole').textContent=r.name; $('jbPay').textContent=usd(r.pay)+' per ticket';
+ $('jbEarn').textContent=usd(j.earned||0); $('jbCnt').textContent=(j.clicks||0).toLocaleString('en-US')+' tickets processed';
+ if(r.next){ $('jbNextL').textContent='Next role: '+r.next[1]+' ('+usd(r.next[2])+' per ticket)'; $('jbNextV').textContent=`${j.clicks-r.from} / ${r.next[0]-r.from}`; $('jbBar').style.width=Math.min(100,(j.clicks-r.from)/(r.next[0]-r.from)*100)+'%'; }
+ else { $('jbNextL').textContent='Top role reached'; $('jbNextV').textContent=''; $('jbBar').style.width='100%'; }
+ $('jbFeed').innerHTML=HUB.feed.map((f,i)=>`<div class="${i?'':'new'}"><span>${f[0]}</span><b>+${usd(f[1])}</b></div>`).join('')||'<div class="mut">Each ticket you process is paid straight into your wallet.</div>';
+}
+function jobClick(){
+ const now=performance.now(); if(now-HUB.jt<50) return; HUB.jt=now;
+ const before=jobRole(), j=CAR.job;
+ j.clicks=(j.clicks||0)+1; j.earned=Math.round(((j.earned||0)+before.pay)*100)/100; CAR.wallet=Math.round((CAR.wallet+before.pay)*100)/100;
+ const sym=['NQ','ES','MNQ','MES','CL','GC'][Math.floor(Math.random()*6)], px={NQ:21400,ES:6050,MNQ:21400,MES:6050,CL:71,GC:2650}[sym]*(1+(Math.random()-0.5)*0.01);
+ HUB.feed.unshift([`${Math.random()<0.5?'BUY':'SELL'} ${1+Math.floor(Math.random()*5)} ${sym} @ ${px.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})} · filled`,before.pay]); HUB.feed.length=Math.min(HUB.feed.length,6);
+ const after=jobRole(); if(after.i>before.i) toast(`<b>Promoted to ${after.name}.</b> You now earn ${usd(after.pay)} per ticket.`,4500);
+ carSave(); const w=$('walLb'); if(w) w.textContent=money(CAR.wallet); $('hubWal').textContent=usd(CAR.wallet); jobPaint();
+}
+function hubOpen(page){
+ if(page==='chart'){ if($('hub')) $('hub').hidden=true; return; }
+ if(!$('hub')){
+  document.body.insertAdjacentHTML('beforeend',`<div id="hub" hidden><div class="hub-top"><div class="brand">${document.querySelector('#top .brand').innerHTML}</div><nav id="hubNav"></nav><div class="grow"></div>
+   <div class="hub-wal">Wallet<b id="hubWal"></b></div><button id="hubUser" class="ghost"></button><button id="hubBack">Back to chart</button></div><div class="hub-body" id="hubBody"></div></div>`);
+  $('hubBack').onclick=()=>hubOpen('chart'); $('hubUser').onclick=()=>hubOpen('profile');
+ }
+ if(page) HUB.page=page; HUB.try=null;
+ $('hub').hidden=false; hubRender(); $('hubBody').scrollTop=0; if(HUB.page==='home') careerWave();
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && hubShown() && !/^(INPUT|TEXTAREA|SELECT)$/.test((e.target||{}).tagName||'')) hubOpen('chart'); });
 
-try{ Object.assign(window.__bt,{openPos,closePos,CAR,careerSync}); }catch(e){}
+try{ Object.assign(window.__bt,{openPos,closePos,CAR,careerSync,hubOpen,HUB,jobClick}); }catch(e){}
 
-/* ---- online accounts and leaderboard (Supabase, optional) ---- */
-const SB_CONFIG={url:'https://ggleblgcptooqnukfyvi.supabase.co',anon:'sb_publishable_6hEAmJik4xwT60KvtkqNMg_zE29wW59'};   // paste your Supabase Project URL and anon public key between the quotes
-const CLOUD={sb:null,user:null,timer:0,err:''};
-const cesc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---- online accounts and leaderboard (Supabase) ---- */
+const SB_CONFIG={url:'https://ggleblgcptooqnukfyvi.supabase.co',anon:'sb_publishable_6hEAmJik4xwT60KvtkqNMg_zE29wW59'};
+const CLOUD={sb:null,user:null,timer:0,err:'',state:''};
 const cloudOn=()=>!!(SB_CONFIG.url&&SB_CONFIG.anon&&window.supabase);
 function cloudInit(){
  if(!cloudOn()||CLOUD.sb) return;
  try{
   CLOUD.sb=window.supabase.createClient(SB_CONFIG.url,SB_CONFIG.anon,{auth:{persistSession:true,detectSessionInUrl:true}});
-  CLOUD.sb.auth.onAuthStateChange((ev,s)=>{ const was=CLOUD.user; CLOUD.user=s?s.user:null; cloudAccountUI();
-   if(CLOUD.user && (!was || ev==='SIGNED_IN')) cloudPull(); });
+  CLOUD.sb.auth.onAuthStateChange((ev,s)=>{ const was=CLOUD.user&&CLOUD.user.id; CLOUD.user=s?s.user:null; const now=CLOUD.user&&CLOUD.user.id;
+   if(now!==was) setTimeout(()=>{ HUB.lbAt=0; if(now) cloudPull(); careerSync(); },0); });
  }catch(e){ CLOUD.err=e.message; CLOUD.sb=null; }
 }
 function cloudPush(){
  if(!CLOUD.user||!CLOUD.sb) return;
- clearTimeout(CLOUD.timer);
+ clearTimeout(CLOUD.timer); CLOUD.state='saving'; cloudStat();
  CLOUD.timer=setTimeout(async()=>{
-  const p={name:CAR.look.name||'You',stage:CAR.stage,wallet:CAR.wallet,passes:CAR.passes,payouts:CAR.payouts,paid:CAR.paid,blown:CAR.blown,owned:CAR.owned,eq:CAR.eq,look:CAR.look,ledger:CAR.ledger,sync:CAR.sync,updated_at:new Date().toISOString()};
-  const a=await CLOUD.sb.from('profiles').upsert({id:CLOUD.user.id,...p});
-  const b=await CLOUD.sb.from('leaderboard').upsert({id:CLOUD.user.id,name:p.name,paid:p.paid,passes:p.passes});
-  CLOUD.err=(a.error||b.error)?(a.error||b.error).message:'';
-  cloudAccountUI();
+  const uid=CLOUD.user&&CLOUD.user.id; if(!uid) return; CAR.uid=uid; carSaveLocal();
+  const name=CAR.look.name||'You';
+  const p={id:uid,name,stage:CAR.accts.some(a=>a.stage==='funded')?'funded':'eval',wallet:CAR.wallet,passes:CAR.passes,payouts:CAR.payouts,paid:CAR.paid,blown:CAR.blown,owned:CAR.owned,eq:CAR.eq,look:CAR.look,ledger:[],sync:{v:2,accts:CAR.accts,job:CAR.job},updated_at:new Date(CAR.ts||Date.now()).toISOString()};
+  const a=await CLOUD.sb.from('profiles').upsert(p);
+  const b=await CLOUD.sb.from('leaderboard').upsert({id:uid,name,paid:CAR.paid,passes:CAR.passes});
+  CLOUD.err=(a.error||b.error)?(a.error||b.error).message:''; CLOUD.state=CLOUD.err?'':'saved'; HUB.lbAt=0; cloudStat();
  },1200);
 }
 async function cloudPull(){
- const r=await CLOUD.sb.from('profiles').select('*').eq('id',CLOUD.user.id).maybeSingle();
- if(r.error){ CLOUD.err=r.error.message; cloudAccountUI(); return; }
- if(r.data){ const d=r.data;
-  Object.assign(CAR,{stage:d.stage||'eval',wallet:+d.wallet||0,passes:d.passes||0,payouts:d.payouts||0,paid:+d.paid||0,blown:d.blown||0,owned:d.owned||{},eq:d.eq||{},look:Object.assign({},CAR.look,d.look||{}),ledger:d.ledger||[]});
-  if(Array.isArray(d.sync)){ const loc=Object.fromEntries(CAR.sync.map(a=>[a.id,a])); CAR.sync=d.sync.map(a=>a.stage==='funded'?a:Object.assign({},a,{ledger:loc[a.id]&&loc[a.id].stage!=='funded'?loc[a.id].ledger:[]})); SYNC.prev={}; }
-  carSaveLocal(); evalBuild(); careerSync(); }
- else cloudPush();
- cloudAccountUI();
+ const uid=CLOUD.user&&CLOUD.user.id; if(!uid||!CLOUD.sb) return;
+ const r=await CLOUD.sb.from('profiles').select('*').eq('id',uid).maybeSingle();
+ if(r.error){ CLOUD.err=r.error.message; cloudStat(); return; }
+ const wipe=()=>Object.keys(CAR).forEach(k=>delete CAR[k]);
+ if(r.data){ const d=r.data, ct=Date.parse(d.updated_at)||0;
+  if(CAR.uid===uid && (CAR.ts||0)>ct+1500){ cloudPush(); return; }      // this browser has newer changes for the same person
+  const o={wallet:+d.wallet||0,passes:d.passes||0,payouts:d.payouts||0,paid:+d.paid||0,blown:d.blown||0,owned:d.owned||{},eq:d.eq||{},look:Object.assign(carDefault().look,d.look||{})};
+  const v2=d.sync&&!Array.isArray(d.sync)&&d.sync.v>=2;
+  if(v2){ o.v=2; o.accts=d.sync.accts||[]; o.job=d.sync.job; } else { o.v=0; o.stage=d.stage; o.ledger=d.ledger; o.sync=d.sync; }
+  wipe(); Object.assign(CAR,carMigrate(o),{uid,ts:ct}); SYNC.prev={}; carSaveLocal(); careerSync(); if(!v2) carSave();
+ } else {
+  if(CAR.uid && CAR.uid!==uid){ wipe(); Object.assign(CAR,carDefault()); SYNC.prev={}; }   // another person's career is in this browser: start fresh
+  CAR.uid=uid; carSave(); careerSync();
+ }
+ CLOUD.state='saved'; cloudStat();
 }
-function cloudAccountHTML(){
- if(!cloudOn()) return '<div class="hint">Online accounts are off. Paste your Supabase URL and key into SB_CONFIG at the top of the script to turn them on. Your career still saves in this browser.</div>';
- if(CLOUD.user) return `<div class="dl-row"><span>Signed in as ${cesc(CLOUD.user.email||'')}</span><button id="cloudOut" style="height:26px;width:auto">Sign out</button></div><div class="hint">${CLOUD.err?'Sync problem: '+cesc(CLOUD.err):'Your career syncs after each change.'}</div>`;
- return `<div class="dl-row"><input id="cloudMail" type="email" placeholder="you@example.com" style="flex:1;height:26px"><button id="cloudSend" class="primary" style="height:26px;width:auto">Send sign-in link</button></div><div class="hint" id="cloudMsg">Sign in to save your career online and join the leaderboard.</div>`;
+function cloudStat(){ const e=$('cloudStat'); if(e) e.textContent=CLOUD.err?'Sync problem: '+CLOUD.err:CLOUD.state==='saving'?'Saving...':'Your career is saved online.'; }
+function cloudAccountUI(){
+ const b=$('cloudBox'); if(!b) return;
+ if(!cloudOn()||!CLOUD.sb){ b.innerHTML='<div class="hint">Online accounts could not load (no connection to the sign-in service). Your career still saves in this browser.</div>'; return; }
+ if(CLOUD.user){ const m=CLOUD.user.email||'';
+  b.innerHTML=`<div class="acc-row"><i class="acc-av">${cesc((m[0]||'?').toUpperCase())}</i><div class="nm"><b>${cesc(m)}</b><span class="mut" id="cloudStat"></span></div><button id="cloudOut">Sign out</button></div>`;
+  cloudStat(); $('cloudOut').onclick=async()=>{ await CLOUD.sb.auth.signOut(); }; return; }
+ const up=HUB.auth==='up';
+ b.innerHTML=`<div class="pills"><button data-am="in" class="${up?'':'act'}">Sign in</button><button data-am="up" class="${up?'act':''}">Create account</button></div>
+  <form id="auForm" class="au-form"><label class="fld">Email<input id="auMail" type="email" autocomplete="email" placeholder="you@example.com" required></label>
+   <label class="fld">Password<input id="auPw" type="password" autocomplete="${up?'new-password':'current-password'}" minlength="6" placeholder="${up?'At least 6 characters':''}" required></label>
+   <button class="primary" type="submit" id="auGo">${up?'Create account':'Sign in'}</button></form>
+  <div class="hint" id="auMsg">${up?'One account per person. Your career and leaderboard name are saved to it.':'Sign in to load your career on any device and appear on the leaderboard.'}</div>
+  <button class="link" id="auLink" type="button">No password? Email me a sign-in link</button>`;
+ b.querySelectorAll('[data-am]').forEach(e=>e.onclick=()=>{ const m=$('auMail').value; HUB.auth=e.dataset.am; cloudAccountUI(); $('auMail').value=m; });
+ const say=(t,bad)=>{ const m=$('auMsg'); if(m){ m.textContent=t; m.className='hint'+(bad?' neg':''); } };
+ const back=location.href.split('#')[0].split('?')[0];
+ $('auForm').onsubmit=async e=>{ e.preventDefault(); const email=$('auMail').value.trim(), password=$('auPw').value; if(!email||password.length<6){ say('Enter your email and a password of at least 6 characters.',1); return; }
+  $('auGo').disabled=true; say(up?'Creating your account...':'Signing in...');
+  try{ const r=up ? await CLOUD.sb.auth.signUp({email,password,options:{emailRedirectTo:back}}) : await CLOUD.sb.auth.signInWithPassword({email,password});
+   if(r.error) say(/invalid login/i.test(r.error.message)?'Wrong email or password. New here? Choose Create account.':r.error.message,1);
+   else if(up && !r.data.session) say('Account created. Open the confirmation email we sent, then sign in here.');
+  }catch(err){ say('Could not reach the sign-in service. Check your connection.',1); }
+  if($('auGo')) $('auGo').disabled=false; };
+ $('auLink').onclick=async()=>{ const email=$('auMail').value.trim(); if(!email){ say('Type your email first, then press this again.',1); return; }
+  say('Sending...'); const r=await CLOUD.sb.auth.signInWithOtp({email,options:{emailRedirectTo:back}});
+  say(r.error?'Could not send: '+r.error.message:'Check your inbox and open the link on this device.',!!r.error); };
 }
-function cloudBind(){
- const s=$('cloudSend'); if(s) s.onclick=async()=>{ const mail=($('cloudMail').value||'').trim(), m=$('cloudMsg');
-  if(!mail){ m.textContent='Type your email first.'; return; }
-  m.textContent='Sending...'; const r=await CLOUD.sb.auth.signInWithOtp({email:mail,options:{emailRedirectTo:location.href.split('#')[0]}});
-  m.textContent=r.error?'Could not send: '+r.error.message:'Check your inbox and open the link on this device.'; };
- const o=$('cloudOut'); if(o) o.onclick=async()=>{ await CLOUD.sb.auth.signOut(); CLOUD.user=null; cloudAccountUI(); };
+async function lbLoad(force){
+ if(!cloudOn()||!CLOUD.sb) return null;
+ if(!force && HUB.lb && Date.now()-HUB.lbAt<20000) return HUB.lb;
+ const r=await CLOUD.sb.from('leaderboard').select('id,name,paid,passes').order('paid',{ascending:false}).order('passes',{ascending:false}).limit(50);
+ if(r.error){ HUB.lbErr=r.error.message; return null; }
+ HUB.lbErr=''; HUB.lb=r.data; HUB.lbAt=Date.now(); return r.data;
 }
-function cloudAccountUI(){ const b=$('cloudBox'); if(b){ b.innerHTML=cloudAccountHTML(); cloudBind(); } }
-async function cloudLeaderboard(){
- const box=$('lbBox'); if(!box) return;
- if(!cloudOn()||!CLOUD.sb){ box.textContent='The leaderboard appears once online accounts are on.'; return; }
- const r=await CLOUD.sb.from('leaderboard').select('name,paid,passes').order('paid',{ascending:false}).limit(20);
- if(r.error){ box.textContent='Could not load the leaderboard: '+r.error.message; return; }
- box.innerHTML = r.data.length
-  ? `<table class="lb"><tr><th>#</th><th>Name</th><th>Paid out</th><th>Passes</th></tr>${r.data.map((x,i)=>`<tr><td>${i+1}</td><td>${cesc(x.name||'You')}</td><td>${usd(+x.paid||0)}</td><td>${x.passes||0}</td></tr>`).join('')}</table>`
-  : 'No one has been paid out yet.';
+async function lbRender(force){
+ if(!$('lbBox')&&!$('lbMini')) return;
+ const d=await lbLoad(force), me=CLOUD.user&&CLOUD.user.id, full=$('lbBox'), mini=$('lbMini');
+ const off=!cloudOn()||!CLOUD.sb ? 'The leaderboard needs a connection to the online service.' : HUB.lbErr ? 'Could not load the leaderboard: '+HUB.lbErr : (d&&!d.length) ? 'No one is on the board yet.' : '';
+ const rows=n=>d.slice(0,n).map((x,i)=>`<tr class="${x.id===me?'me':''}"><td>${i+1}</td><td>${cesc(x.name||'You')}${x.id===me?' <span class="badge run">YOU</span>':''}</td><td>${usd(+x.paid||0)}</td><td>${x.passes||0}</td></tr>`).join('');
+ if(full) full.innerHTML=off?`<div class="hint">${cesc(off)}</div>`:`<table class="lbt"><tr><th>#</th><th>Trader</th><th>Paid out</th><th>Evaluations passed</th></tr>${rows(50)}</table>`;
+ if(mini) mini.innerHTML=off?cesc(off):`<table class="lbt sm">${rows(5)}</table>`;
 }
-function cloudWire(){ cloudBind(); cloudLeaderboard(); }
 
-on('btnCareer',()=>careerOpen());
+on('btnCareer',()=>hubOpen());
 on('btnMind',mindDialog);
 cloudInit();
 evalBuild(); coinBuild(); sndBuild(); careerSync();
