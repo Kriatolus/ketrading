@@ -1420,7 +1420,7 @@ function closePos(price, i, reason){
  const day=Math.floor(t/86400); S.dayPnl[day]=(S.dayPnl[day]||0)+pnl;
  S.trades.push({n:S.trades.length+1, side:p.side>0?'LONG':'SHORT', entryTime:p.time, exitTime:t, entry:p.entry, exit:price,
   points:pts, pnl, reason, bars:i-p.idx, r:p.risk?pts/p.risk:null});
- S.markers.push({time:t, position:p.side>0?'aboveBar':'belowBar', color:'#f5a623', shape:'circle', text:`${reason} ${sg(pnl)}`});
+ S.markers.push({time:t, position:p.side>0?'aboveBar':'belowBar', color:pnl>=0?SIG.up:SIG.down, shape:'circle', size:0.6, text:''});
  try{ syncClose(p,pnl,t); }catch(e){}
  S.pos=null; clearLines();
  try{ tradeFx(reason,pnl,t); }catch(e){}
@@ -1438,6 +1438,7 @@ function openPos(side, fillPx, slOv, tpOv, why, qtyOv){
   sl: slP>0 ? price-side*slP : null, tp: tpP>0 ? price+side*tpP : null, risk: slP>0 ? slP : null};
  try{ S.pos.sync=syncEnter(); }catch(e){ S.pos.sync=[]; } S.pos.nSync=S.pos.sync.length;
  S.markers.push({time:t, position:side>0?'belowBar':'aboveBar', color:side>0?SIG.up:SIG.down, shape:side>0?'arrowUp':'arrowDown', text:(why?why+' ':'')+(side>0?'BUY ':'SELL ')+price.toFixed(2)});
+ sfxPlay('bell');
  if(!why) msg(''); drawLines(); refresh();
 }
 /* ---------- limit orders ---------- */
@@ -3469,6 +3470,7 @@ function sfxPlay(kind,force){
  if(kind==='tp'){ sfxTone(c,'sine',880,880,t,0.16,0.35); sfxTone(c,'sine',1318.500,1318.500,t+0.11,0.32,0.35); sfxTone(c,'triangle',2637,2637,t+0.11,0.2,0.08);
   if(s.voice && window.speechSynthesis){ try{ const u=new SpeechSynthesisUtterance('Order filled'); u.lang='en-US'; u.rate=1.05; u.volume=Math.min(1,s.vol??0.7); speechSynthesis.cancel(); setTimeout(()=>speechSynthesis.speak(u),260); }catch(e){} } }
  else if(kind==='sl') sfxLaugh(c);
+ else if(kind==='bell'){ [[1, 1, 0.5, 2.6], [2.76, 0.55, 0.3, 1.6], [5.4, 0.25, 0.14, 0.9]].forEach(([m,v,_,d])=>{ sfxTone(c,'sine',2093*m,2093*m,t,d,0.32*v); }); sfxTone(c,'triangle',1046.5,1046.5,t,0.08,0.12); }
  else if(kind==='cash'){ [1046.500,1318.500,1568,2093].forEach((f,i)=>sfxTone(c,'triangle',f,f,t+i*0.085,0.22,0.3)); sfxTone(c,'sine',2093,2093,t+0.36,0.5,0.2); }
 }
 function tradeFx(reason,pnl,t){
