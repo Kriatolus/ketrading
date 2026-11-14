@@ -652,6 +652,109 @@ body.cfs main{grid-template-columns:1fr!important}
 body.intro-out main{animation:inMain 1.2s cubic-bezier(.2,.8,.2,1)}
 @keyframes inMain{from{transform:perspective(1200px) translateZ(-160px) rotateX(6deg);opacity:.2}to{transform:none;opacity:1}}
 
+
+/* ===== v11 design pass ===== */
+:root{--r1:6px;--r2:10px;--r3:14px;--shadow1:0 1px 0 rgba(255,255,255,.04) inset,0 1px 2px rgba(0,0,0,.35);--shadow2:0 1px 0 rgba(255,255,255,.05) inset,0 10px 30px -12px rgba(0,0,0,.65),0 2px 6px -2px rgba(0,0,0,.4);--ease:cubic-bezier(.2,.7,.2,1)}
+button,select,input{transition:background-color .15s var(--ease),border-color .15s var(--ease),color .15s var(--ease),box-shadow .2s var(--ease),transform .15s var(--ease)}
+button.primary{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 88%,#fff),var(--accent));box-shadow:0 1px 0 rgba(255,255,255,.22) inset,0 6px 16px -8px color-mix(in srgb,var(--accent) 80%,transparent)}
+button.primary:hover{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 80%,#fff),color-mix(in srgb,var(--accent) 92%,#fff))}
+button.primary:disabled,#hub button:disabled{background:var(--btn);box-shadow:none}
+button:disabled{cursor:not-allowed}
+/* header */
+#top{background:linear-gradient(180deg,color-mix(in srgb,var(--panel) 96%,#fff),var(--panel));box-shadow:0 1px 0 rgba(255,255,255,.03) inset}
+.kstats{display:flex;align-items:center;height:30px;border:1px solid var(--border);border-radius:var(--r2);background:var(--bg);padding:0 2px;flex:none}
+.kstats>div{display:flex;flex-direction:column;justify-content:center;line-height:1.1;padding:0 10px;white-space:nowrap}
+.kstats>div+div{border-left:1px solid var(--line)}
+.kstats span{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.kstats b{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+@media(max-width:1500px){.kstats .k-n{display:none}}
+@media(max-width:1280px){.kstats .k-p{display:none}}
+@media(max-width:1800px){#top .wl .lb{display:none}#top .wl{width:var(--h);padding:0}}
+@media(max-width:1700px){#top .brand .wordmark{display:none}#top .brand{padding:0 12px}}
+@media(max-width:1500px){.secnav button{padding:0 7px;font-size:12px}}
+#btnMore{display:none}
+@media(max-width:1460px){#top #btnView,#top #btnShot{display:none}#btnMore{display:inline-flex}}
+@media(max-width:1400px){#top #btnSplit{display:none}}
+@media(max-width:1300px){#btnOP{font-size:0;gap:0;width:34px;padding:0}#symSel{width:132px;flex-basis:132px}#pairSel{width:100px}}
+@media(max-width:1260px){#top #btnMind{display:none}.secnav button{padding:0 6px}}
+.secnav{border-radius:var(--r2)}.secnav button{border-radius:7px}
+#btnCareer{border-radius:var(--r2)}
+/* side panel and tabs */
+aside{background:linear-gradient(180deg,color-mix(in srgb,var(--panel) 97%,#fff),var(--panel) 30%)}
+.row.lockrow{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px dashed var(--border);border-radius:var(--r2);margin:6px 0;background:color-mix(in srgb,var(--bg) 60%,transparent)}
+.row.lockrow span{flex:1;min-width:0;white-space:normal;color:var(--muted);font-size:11.5px;line-height:1.4}
+.row.lockrow span::before{content:'';display:inline-block;width:9px;height:10px;margin-right:7px;vertical-align:-1px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 10'%3E%3Cpath d='M2 4V3a2.5 2.5 0 015 0v1h.5A1 1 0 019 5v4a1 1 0 01-1 1H1a1 1 0 01-1-1V5a1 1 0 011-1zm1 0h3V3a1.5 1.5 0 00-3 0z'/%3E%3C/svg%3E") center/contain no-repeat}
+.row.lockrow button{flex:none;width:auto}
+/* toasts */
+#toast{background:color-mix(in srgb,var(--pop) 86%,transparent);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);border-radius:var(--r3);box-shadow:var(--shadow2);padding:11px 16px;bottom:96px;font-size:12.5px;line-height:1.45}
+/* cards */
+.card,.ac,.stats4 div{border-radius:var(--r3);box-shadow:var(--shadow1);background:linear-gradient(180deg,color-mix(in srgb,var(--panel) 94%,#fff),var(--panel) 46%)}
+.card.next{position:relative;overflow:hidden;background:radial-gradient(120% 140% at 100% 0%,color-mix(in srgb,var(--accent) 16%,transparent),transparent 55%),linear-gradient(180deg,color-mix(in srgb,var(--panel) 94%,#fff),var(--panel))}
+.stats4 b{font-size:18px;letter-spacing:-.01em}
+#hub .hub-top{background:color-mix(in srgb,var(--panel) 82%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+#hub .hub-body{background:radial-gradient(90% 60% at 50% -10%,color-mix(in srgb,var(--accent) 7%,transparent),transparent 60%)}
+/* 3D tilt + specular sheen (driven by JS vars) */
+.t3d{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateZ(0);transform-style:preserve-3d;transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .2s;will-change:transform;position:relative}
+.t3d.tilting{transition:transform .08s linear,box-shadow .2s,border-color .2s;box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 24px 50px -22px rgba(0,0,0,.85),0 0 0 1px color-mix(in srgb,var(--accent) 22%,transparent)}
+.t3d::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(420px circle at var(--mx,50%) var(--my,0%),rgba(255,255,255,.07),transparent 45%);opacity:0;transition:opacity .25s}
+.t3d.tilting::after{opacity:1}
+/* prop firms: premium pricing */
+.plan-tabs{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--border);border-radius:var(--r3);background:var(--bg);margin:4px 0 14px}
+.plan-tabs button{border:1px solid transparent;background:transparent;min-width:150px;padding:9px 16px;border-radius:var(--r2);text-align:left}
+.plan-tabs button b{font-size:13px;font-weight:600}
+.plan-tabs button:hover{background:var(--hover)}
+.plan-tabs button.act{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 20%,var(--panel)),color-mix(in srgb,var(--accent) 9%,var(--panel)));border-color:color-mix(in srgb,var(--accent) 45%,var(--border));box-shadow:0 8px 20px -12px color-mix(in srgb,var(--accent) 70%,transparent)}
+.plan-blurb{font-size:13.5px;margin:0 0 16px}
+.ev-grid{gap:16px}
+.card.prod.ev{padding:20px;display:flex;flex-direction:column}
+.ev .card-h{flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.ev .card-h b{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.ev .card-h .price{font-size:30px;font-weight:600;letter-spacing:-.02em;color:var(--text)}
+.ev .card-h .price::after{content:' one-time';font-size:12px;font-weight:500;color:var(--muted);letter-spacing:0}
+.ev .rt{gap:0;margin:0 0 16px;font-size:12.5px}
+.ev .rt span,.ev .rt b{padding:7px 0;border-bottom:1px solid var(--line)}
+.ev .rt b{font-weight:500;color:var(--text);padding-left:12px}
+.ev .ac-btn{margin-top:auto;height:36px;border-radius:var(--r2);font-size:13px}
+.ev-grid>.ev:nth-child(2){border-color:color-mix(in srgb,var(--accent) 40%,var(--border))}
+
+.plan-lock{border-radius:var(--r3);background:color-mix(in srgb,var(--bg) 70%,transparent)}
+.ac{transition:border-color .2s}
+.ac.on{border-color:color-mix(in srgb,var(--accent) 50%,var(--border))}
+/* skills */
+.sk-lvl{border-radius:var(--r3);box-shadow:var(--shadow2)}
+.sk-ring{width:72px;height:72px;box-shadow:0 0 0 1px rgba(255,255,255,.04) inset,0 10px 24px -10px color-mix(in srgb,var(--accent) 70%,transparent);transform:perspective(300px) rotateX(10deg)}
+.sk-ring::before{inset:6px;background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--panel) 80%,#fff),var(--panel) 60%)}
+.sk-ring b{font-size:24px;font-weight:700}
+.sk-col{gap:22px}
+.sk-bh{display:flex;align-items:center;gap:8px}.sk-bh::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
+.sk-node{border-radius:var(--r3);padding:14px 15px;box-shadow:var(--shadow1)}
+.sk-node .sk-top b{font-size:13px}
+.sk-link{top:-23px;height:22px;width:2px;transform:translateX(-50%);background:linear-gradient(var(--border),var(--border))}
+.sk-link::after{content:'';position:absolute;left:50%;bottom:-3px;width:6px;height:6px;border-radius:50%;transform:translateX(-50%);background:var(--border)}
+.sk-node.own .sk-link,.sk-node.own .sk-link::after{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.sk-node.open{border-color:color-mix(in srgb,var(--accent) 30%,var(--border))}
+.sk-node.own{box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 0 0 1px color-mix(in srgb,var(--accent) 35%,transparent),0 14px 30px -18px color-mix(in srgb,var(--accent) 80%,transparent)}
+.sk-node.own .sk-cost::before{content:'';display:inline-block;width:8px;height:5px;border-left:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg) translateY(-2px);margin-right:6px}
+.sk-node.lock{opacity:.5;filter:saturate(.6)}
+.sk-node button{height:30px;border-radius:var(--r2)}
+/* life stage */
+.cr-stage{box-shadow:0 30px 60px -30px rgba(0,0,0,.9),0 0 0 1px var(--border);border-radius:var(--r3);overflow:hidden}
+.cr-stage::after{content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:linear-gradient(115deg,rgba(255,255,255,.07),transparent 35%,transparent 70%,rgba(255,255,255,.03));z-index:2}
+.cr-stage{position:relative}
+/* live chart backgrounds: drawn over the chart with screen blending so the chart keeps a solid, readable base */
+#bgfx{z-index:2;mix-blend-mode:screen}
+body.has-bgfx #equity,body.has-bgfx #osc{border-top-color:#16213a}
+/* intro spacing */
+#intro .in-chart{transform:rotateX(60deg) rotateZ(-8deg) translateY(30vh) translateZ(-80px)}
+@keyframes inTilt{to{transform:rotateX(54deg) rotateZ(-3deg) translateY(28vh) translateZ(-40px)}}
+#intro .in-copy{transform:translateY(-12vh)}
+#intro .in-skip{margin-top:4px;letter-spacing:.06em}
+#intro::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(70% 60% at 50% 40%,transparent 40%,rgba(0,0,0,.55))}
+#intro .in-copy{z-index:2}
+#intro.fly .in-copy{animation:inCopyOut .6s cubic-bezier(.6,0,.4,1) forwards}
+@keyframes inCopyOut{to{opacity:0;transform:translateY(-20vh) scale(.94);filter:blur(6px)}}
+@keyframes inFly{0%{opacity:.85}60%{opacity:1}to{transform:rotateX(0) rotateZ(0) translateY(0) translateZ(820px);opacity:0;filter:blur(2px)}}
+
 </style>
 </head>
 <body>
@@ -676,13 +779,12 @@ body.intro-out main{animation:inMain 1.2s cubic-bezier(.2,.8,.2,1)}
  <button id="btnMind" class="ghost icon" title="Trading psychology"><i data-ic="mind"></i></button>
  <button id="btnFull" class="ghost icon" title="Fullscreen chart (Shift+F)"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
  <button id="btnHelp" class="ghost icon" title="How KETRADING works"><i data-ic="help"></i></button>
+ <button id="btnMore" class="ghost icon" title="More tools"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg></button>
  <button id="btnHline" hidden>H-Line</button>
  <button id="btnClearH" hidden>Clear lines</button>
  <div class="grow"></div>
  <div class="chip" id="pxChip"><span id="pxSym">Last</span><b id="pxLast">-</b></div>
- <div class="chip opt"><span>Trades</span><b id="kTrades">0</b></div>
- <div class="chip opt"><span>Win rate</span><b id="kWr">0.0%</b></div>
- <div class="chip"><span>Net P&amp;L</span><b id="kPnl">+0.00</b></div>
+ <div class="kstats" id="kStats" title="This replay session"><div class="k-n"><span>Trades</span><b id="kTrades">0</b></div><div><span>Win rate</span><b id="kWr">0.0%</b></div><div class="k-p"><span>Net P&amp;L</span><b id="kPnl">+0.00</b></div></div>
  <nav class="secnav" id="secNav"><button data-sec="chart" class="act">Trading</button><button data-sec="life">Life</button><button data-sec="props">Prop firms</button><button data-sec="job">Job</button></nav><button id="btnCareer" title="Your level and wallet. Open Skills"><span class="lvl" id="lvLb">Lv 1</span><span class="wal" id="walLb">$0</span></button>
  <button id="btnOP" class="primary" title="Order panel (Shift+T)"><i data-ic="trade"></i>Trade</button>
  <button id="btnSide" class="ghost icon on" title="Show / hide the side panel"><i data-ic="panel"></i></button>
@@ -2173,7 +2275,7 @@ function drawTimeAxis(w,h,H){
  const ts=chart.timeScale(), rng=ts.getVisibleLogicalRange(); if(!rng) return;
  const i0=Math.max(0,Math.floor(rng.from)), i1=Math.min(S.cursor,Math.ceil(rng.to)); if(i1<i0) return;
  const sp=Math.abs((ts.logicalToCoordinate(i0+1)||0)-(ts.logicalToCoordinate(i0)||0))||1;
- const minGap=48, y=h+(H-h)/2, col=(cfg.colors&&cfg.colors.text)||(THEMES[cfg.theme]||{}).chartText||(THEMES[cfg.theme]||{}).text||'#131722';
+ const minGap=48, y=h+(H-h)/2, col=(typeof bgfxOn==='function'&&bgfxOn())?'#93a3bf':(cfg.colors&&cfg.colors.text)||(THEMES[cfg.theme]||{}).chartText||(THEMES[cfg.theme]||{}).text||'#131722';
  const L=t=>new Date((t+tzOff(t))*1000);
  const intraday=!CAL[S.tf] && S.tfSec<86400, tfMin=S.tfSec/60;
  let stepMin=null;
@@ -3586,8 +3688,8 @@ function helpDialog(){
   {name:'Replay',html:'<div class="help">'+P('<b>1. Pick a start.</b> Use Select bar, a date, or the session jump (NY AM open, London, Asia) on the bar under the chart.')+P('<b>2. Press Play.</b> Live mode moves price one tick per second on every timeframe. Candles mode reveals one whole candle per step.')+P('<b>3. Switch timeframe any time.</b> Every timeframe stays at the same moment and keeps playing.')+P('<b>Split screen</b> shows your second symbol (for example ES) next to the main chart. Drag the divider to resize it.')+'</div>'},
   {name:'Trading',html:'<div class="help">'+P('<b>Market order:</b> Buy or Sell in the Trade tab, the buttons on the chart, or keys B and S.')+P('<b>Pending order:</b> press Buy on chart or Sell on chart, then click the price. Below the market a buy becomes a limit; above it becomes a stop. The reverse applies to sells.')+P('<b>Move things:</b> drag any order, stop loss or take profit line. Press TP or SL on a line to add an exit.')+P('<b>Your open P&amp;L</b> is shown live on the chart and in the Trade tab.')+'</div>'},
   {name:'Indicators',html:'<div class="help">'+P('<b>Quarter boxes</b> draw each quarter on the chart. <b>Quarter timeline</b> is the strip under the chart. They are two separate switches in Settings.')+P('<b>Session highs and lows</b> mark the high and low of Asia, London, NY AM and NY PM in New York time.')+P('<b>True opens</b> and <b>SMT</b> are also in Settings, with themes, accent and chart colours.')+'</div>'},
-  {name:'Prop firms',html:'<div class="help">'+P('<b>Buy an evaluation</b> under <b>Prop firms</b>: Lucid 25K ($100), 50K ($130) or 150K ($345). Each has Lucid\'s own profit target, end-of-day trailing max loss and size limit.')+P('<b>Pass it</b> by reaching the profit target in closed profit without touching the max loss, with no single day over 50% of your total profit (the consistency rule).')+P('<b>Funded:</b> no consistency rule. After five winning days ($100 / $150 / $250 or more each, by size) you can take up to half your profit, between $500 and the cap for the size. You keep 90%.')+'</div>'},
-  {name:'Sections',html:'<div class="help">'+P('<b>Trading</b> is the chart. <b>Life</b> is your home, character and shop. <b>Prop firms</b> holds your accounts and the eval store. <b>Job</b> pays wallet money per ticket.')+P('<b>Saving.</b> Your replay spot, closed trades and settings save in this browser, and online too when you sign in under your profile.')+P('<b>Trade syncer.</b> For $1,800 you can trade several accounts at once. Every entry is copied to each account that is switched on.')+P('<b>Sounds.</b> Pick a sound for every event (entry, take profit, stop loss, passing, payouts, your dog) in Settings.')+'</div>'}
+  {name:'Prop firms',html:'<div class="help">'+P('<b>Four Lucid account types</b> in 25K, 50K and 150K, each with Lucid\'s own rules: <b>LucidFlex</b> and <b>LucidDaily</b> evaluations (50% consistency rule), <b>LucidPro</b> (no consistency rule while evaluating, soft daily loss limit on 50K and 150K) and <b>LucidDirect</b> (no evaluation, you start funded; unlock it in Skills).')+P('<b>Max loss</b> trails your end-of-day balance and locks at the starting balance + $100. A soft daily loss limit only benches the account until the next day.')+P('<b>Payouts:</b> Flex after five winning days; Pro after three trading days and the cycle goal with a 40% consistency rule; Daily on any day with net profit above a buffer; Direct after the cycle profit goal, five trading days and a 20% consistency rule. You keep 90%.')+'</div>'},
+  {name:'Sections',html:'<div class="help">'+P('<b>Trading</b> is the chart. <b>Life</b> is your home, character, family and shop. <b>Prop firms</b> holds your accounts and the eval store. <b>Job</b> pays wallet money per ticket. <b>Skills</b> is where you spend skill points.')+P('<b>Levels and skills.</b> Trades, passes, payouts and job tickets earn XP. Every level gives a skill point that unlocks chart colours, live backgrounds, the 3D coin, LucidDirect, the trade syncer, family, luxury items and job boosts.')+P('<b>Fullscreen.</b> Press Shift+F or the fullscreen button for a chart-only view. Esc leaves it.')+P('<b>Saving.</b> Your replay spot, closed trades and settings save in this browser, and online too when you sign in under your profile.')+P('<b>Sounds.</b> Pick a sound for every event (entry, take profit, stop loss, passing, payouts, your dog) in Settings.')+'</div>'}
  ],null,null);
 }
 on('btnSplit',()=>setSplit(!cfg.split));
@@ -3903,7 +4005,7 @@ function avHome(h){
   <rect x="8" y="232" width="118" height="24" rx="6" fill="#515b73"/><rect x="8" y="222" width="38" height="16" rx="6" fill="#e6e8ee"/>`;
 }
 function avCar(k,col){
- if(!k) return `<text x="200" y="372" text-anchor="middle" fill="#55607a" font-size="12" font-family="Geist,Segoe UI,sans-serif">Empty garage. Your first car goes here.</text>`;
+ if(!k) return `<g fill="none" stroke="#33405c" stroke-width="1.4" stroke-dasharray="4 4" opacity=".9"><path d="M128 386h-6q-4 0-4-5v-9q0-6 6-8l24-6 22-16q7-5 16-5h52q10 0 17 6l20 15 26 6q6 2 6 8v9q0 5-4 5h-6"/><path d="M182 386h48"/><circle cx="155" cy="386" r="13"/><circle cx="257" cy="386" r="13"/><path d="M178 346l-14 12h52v-12M228 346v12h44l-18-12z" opacity=".6"/></g><text x="200" y="412" text-anchor="middle" fill="#55607a" font-size="10.5" letter-spacing="1.5" font-family="Geist,Segoe UI,sans-serif">YOUR FIRST CAR PARKS HERE</text>`;
  const wheel=(x,r)=>`<circle cx="${x}" cy="70" r="${r}" fill="#0c0e13"/><circle cx="${x}" cy="70" r="${r-5}" fill="#c9ced8"/><circle cx="${x}" cy="70" r="${r-9}" fill="#3a4050"/>${[0,60,120].map(a=>`<path d="M${x-r+6} 70h${2*r-12}" stroke="#8c93a3" stroke-width="1.6" transform="rotate(${a} ${x} 70)"/>`).join('')}`;
  const d2=shade(col,-30), l2=shade(col,35); let b='';
  if(k==='hatch') b=`<path d="M8 58q0-15 16-17l24-4q20-24 52-24h52q28 0 46 24l50 6q24 3 24 17v8q0 6-6 6H14q-6 0-6-6z" fill="url(#gCar)"/><path d="M60 36q15-17 36-17h20v19z" fill="#bfe3ff" opacity=".85"/><path d="M124 19h28q22 0 36 19h-64z" fill="#bfe3ff" opacity=".85"/><path d="M120 38v30" stroke="${d2}" stroke-width="1.5"/><rect x="258" y="46" width="14" height="6" rx="3" fill="#fff3c4" class="av-glow"/><rect x="8" y="48" width="8" height="7" rx="2" fill="#f23645"/>`+wheel(66,15)+wheel(214,15);
@@ -3968,7 +4070,7 @@ function avScene(eq,L){
  if(eq.plant) s+=`<g transform="translate(${out?12:6},0)"><path d="M22 262h28l-4 30H26z" fill="#b5653a"/>${[-38,-16,6,28].map(a=>`<path d="M36 262q-10-34 0-58q10 24 0 58z" fill="${a%4?'#2f9e5b':'#3fb56c'}" transform="rotate(${a} 36 262)"/>`).join('')}</g>`;
  s+=`<g class="av-me"><g transform="translate(74,-20) scale(.8)">${avMe(eq,L)}</g></g>`;
  s+=famScene(eq,L);
- if(eq.pet) s+=`<g class="av-pet" transform="translate(238,214)"><ellipse cx="34" cy="80" rx="30" ry="5" fill="rgba(0,0,0,.28)"/><path d="M52 60q16-8 12-24" stroke="#b07a48" stroke-width="6" fill="none" stroke-linecap="round" class="av-tail"/><ellipse cx="34" cy="60" rx="22" ry="19" fill="#c98f5a"/><rect x="16" y="62" width="9" height="18" rx="4" fill="#b07a48"/><rect x="40" y="62" width="9" height="18" rx="4" fill="#b07a48"/><circle cx="22" cy="36" r="16" fill="#d6a06c"/><ellipse cx="9" cy="30" rx="6" ry="11" fill="#9a683b" transform="rotate(18 9 30)"/><ellipse cx="35" cy="28" rx="6" ry="11" fill="#9a683b" transform="rotate(-18 35 28)"/><ellipse cx="20" cy="42" rx="8" ry="6" fill="#f0d2b0"/><circle cx="20" cy="39.500" r="2.400" fill="#22252e"/><circle cx="15" cy="33" r="2" fill="#22252e"/><circle cx="27" cy="33" r="2" fill="#22252e"/><path d="M17 44q3 3 6 0" stroke="#22252e" stroke-width="1.300" fill="none"/><rect x="10" y="48" width="24" height="4" rx="2" fill="#2f80ff"/></g>`;
+ if(eq.pet) s+=`<g class="av-pet" transform="translate(${CAR.fam&&CAR.fam.partner?318:238},214)"><ellipse cx="34" cy="80" rx="30" ry="5" fill="rgba(0,0,0,.28)"/><path d="M52 60q16-8 12-24" stroke="#b07a48" stroke-width="6" fill="none" stroke-linecap="round" class="av-tail"/><ellipse cx="34" cy="60" rx="22" ry="19" fill="#c98f5a"/><rect x="16" y="62" width="9" height="18" rx="4" fill="#b07a48"/><rect x="40" y="62" width="9" height="18" rx="4" fill="#b07a48"/><circle cx="22" cy="36" r="16" fill="#d6a06c"/><ellipse cx="9" cy="30" rx="6" ry="11" fill="#9a683b" transform="rotate(18 9 30)"/><ellipse cx="35" cy="28" rx="6" ry="11" fill="#9a683b" transform="rotate(-18 35 28)"/><ellipse cx="20" cy="42" rx="8" ry="6" fill="#f0d2b0"/><circle cx="20" cy="39.500" r="2.400" fill="#22252e"/><circle cx="15" cy="33" r="2" fill="#22252e"/><circle cx="27" cy="33" r="2" fill="#22252e"/><path d="M17 44q3 3 6 0" stroke="#22252e" stroke-width="1.300" fill="none"/><rect x="10" y="48" width="24" height="4" rx="2" fill="#2f80ff"/></g>`;
  s+=`</g><rect y="310" width="400" height="110" fill="url(#gGar)"/><rect y="310" width="400" height="3" fill="#2a344d"/><path d="M0 398h400" stroke="#2a344d" stroke-width="1"/>${[40,120,200,280,360].map(x=>`<rect x="${x-14}" y="316" width="28" height="3" rx="1.500" fill="#dfe9ff" opacity=".5" class="av-glow"/>`).join('')}
   <text x="12" y="330" fill="#55607a" font-size="9" font-weight="700" letter-spacing="1.500" font-family="Geist,Segoe UI,sans-serif">GARAGE</text>${avCar(eq.car,carC)}</svg>`;
  return s;
@@ -3977,13 +4079,13 @@ function avScene(eq,L){
 /* ---- XP, levels and the skill tree ---- */
 const SKILLS=[
  {b:'Chart',id:'colors',n:'Chart colours',d:'Change candle, wick, border, grid and chart background colours.',c:1,r:[]},
- {b:'Chart',id:'bgfx',n:'Live backgrounds',d:'Animated backgrounds behind the chart: falling stars, snow and rain.',c:1,r:[]},
- {b:'Chart',id:'bgfx2',n:'Premium backgrounds',d:'Aurora, constellation network and deep-space nebula.',c:2,r:['bgfx']},
  {b:'Chart',id:'themes',n:'App themes',d:'Switch app theme, accent colour and panel colours.',c:1,r:['colors']},
  {b:'Chart',id:'coin',n:'3D symbol coin',d:'A spinning 3D coin of the symbol you trade, on the chart.',c:2,r:['themes']},
+ {b:'Chart',id:'bgfx',n:'Live backgrounds',d:'Animated backgrounds behind the chart: falling stars, snow and rain.',c:1,r:[]},
+ {b:'Chart',id:'bgfx2',n:'Premium backgrounds',d:'Aurora, constellation network and deep-space nebula.',c:2,r:['bgfx']},
  {b:'Funding',id:'copy',n:'Copy trading licence',d:'Lets you buy the trade syncer and trade several accounts at once.',c:1,r:[]},
- {b:'Funding',id:'direct',n:'Instant funding',d:'Unlocks LucidDirect: start funded, no evaluation.',c:2,r:[]},
  {b:'Funding',id:'scale',n:'Scaling',d:'+50% XP from closed trades.',c:2,r:['copy']},
+ {b:'Funding',id:'direct',n:'Instant funding',d:'Unlocks LucidDirect: start funded, no evaluation.',c:2,r:[]},
  {b:'Life',id:'family',n:'Family',d:'Get married and have up to three kids. They live in your home.',c:1,r:[]},
  {b:'Life',id:'luxury',n:'Luxury living',d:'Unlocks the villa, penthouse, sports coupe and supercar.',c:2,r:[]},
  {b:'Life',id:'legacy',n:'Legacy',d:'Your family adds +10% to every payout you take.',c:3,r:['family','luxury']},
@@ -4043,8 +4145,8 @@ function famBind(B){
 function famScene(eq,L){
  const f=CAR.fam; if(!f||!f.partner) return '';
  const pl={skin:f.partner.skin,hair:f.partner.hair,style:'long'};
- let s=`<g class="av-fam"><g transform="translate(150,-6) scale(.74)">${avMe({top:'hoodie',shoes:'kicks'},pl)}</g>`;
- (f.kids||[]).forEach((k,i)=>{ s+=`<g transform="translate(${118+i*44},150) scale(.44)">${avMe({top:['tee','hoodie','track'][i%3],shoes:'kicks'},{skin:i%2?L.skin:pl.skin,hair:i%2?L.hair:pl.hair,style:i%2?'short':'curly'})}</g>`; });
+ let s=`<g class="av-fam"><g transform="translate(166,-6) scale(.74)">${avMe({top:'hoodie',shoes:'kicks'},pl)}</g>`;
+ (f.kids||[]).forEach((k,i)=>{ s+=`<g transform="translate(${[38,96,174][i]},139) scale(.42)">${avMe({top:['tee','hoodie','track'][i%3],shoes:'kicks'},{skin:i%2?L.skin:pl.skin,hair:i%2?L.hair:pl.hair,style:i%2?'short':'curly'})}</g>`; });
  return s+'</g>';
 }
 /* ---- live chart backgrounds ---- */
@@ -4056,11 +4158,17 @@ function bgfxSync(){
  if(!BGFX.cv){ const c=document.createElement('canvas'); c.id='bgfx'; host.insertBefore(c,host.firstChild); BGFX.cv=c; BGFX.cx=c.getContext('2d');
   try{ new ResizeObserver(()=>bgfxSize()).observe(host); }catch(e){} }
  BGFX.cv.hidden=!k; document.body.classList.toggle('has-bgfx',!!k);
- if(k){ const lt=c=>/^#[0-9a-f]{6}$/i.test(c)&&inkFor(c)==='#11130a'; try{ candles.applyOptions({borderUpColor:lt(cfg.border||cfg.up)?cfg.border||cfg.up:'#c9d3e6',borderDownColor:lt(cfg.border||cfg.down)?cfg.border||cfg.down:'#c9d3e6',wickUpColor:lt(cfg.wick||cfg.up)?cfg.wick||cfg.up:'#c9d3e6',wickDownColor:lt(cfg.wick||cfg.down)?cfg.wick||cfg.down:'#c9d3e6'}); }catch(e){} }
- if(k){ const bg=getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()||'#05070d'; BGFX.dark=/^#[0-9a-f]{6}$/i.test(bg)&&inkFor(bg)!=='#11130a'?bg:'#05070d'; }
- try{ chart.applyOptions({layout:{background:{color:k?'rgba(0,0,0,0)':BGFX.base},textColor:k?'#9fb0cc':(BGFX.text||undefined)}}); }catch(e){}
+ if(k){ const bg=getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()||'#05070d'; BGFX.dark=/^#[0-9a-f]{6}$/i.test(bg)&&inkFor(bg)!=='#11130a'?bg:'#05070d';
+  const G=cfg.grid||{}, gl='rgba(160,180,220,0.07)', L={layout:{background:{color:BGFX.dark},textColor:'#93a3bf'},grid:{vertLines:{visible:!!G.v,color:gl},horzLines:{visible:!!G.h,color:gl}},timeScale:{borderColor:'#1a2540'},rightPriceScale:{borderColor:'#1a2540'}};
+  [chart,oscChart].forEach(c=>{ try{ c.applyOptions(L); }catch(e){} });
+  try{ eqChart.applyOptions({layout:L.layout,rightPriceScale:{borderColor:'#1a2540'},grid:{vertLines:{visible:false},horzLines:{color:gl}}}); }catch(e){}
+  const lt=c=>/^#[0-9a-f]{6}$/i.test(c)&&inkFor(c)==='#11130a', pick=(c,f)=>lt(c)?c:f;
+  try{ candles.applyOptions({borderUpColor:pick(cfg.border||cfg.up,'#c9d3e6'),borderDownColor:pick(cfg.border||cfg.down,'#c9d3e6'),wickUpColor:pick(cfg.wick||cfg.up,'#c9d3e6'),wickDownColor:pick(cfg.wick||cfg.down,'#c9d3e6')}); }catch(e){}
+  BGFX.was=true; }
+ else if(BGFX.was){ BGFX.was=false; try{ applyTheme(); }catch(e){} }
  if(k!==BGFX.kind){ BGFX.kind=k; BGFX.p=[]; bgfxSize(); }
  cancelAnimationFrame(BGFX.raf); if(k) BGFX.raf=requestAnimationFrame(bgfxLoop);
+ try{ drawAll(); }catch(e){}
 }
 function bgfxSize(){ const c=BGFX.cv; if(!c) return; const r=c.parentElement.getBoundingClientRect(), d=Math.min(2,window.devicePixelRatio||1);
  BGFX.w=r.width; BGFX.h=r.height; c.width=Math.max(1,r.width*d); c.height=Math.max(1,r.height*d); c.style.width=r.width+'px'; c.style.height=r.height+'px'; BGFX.cx.setTransform(d,0,0,d,0,0); BGFX.p=[]; }
@@ -4077,7 +4185,7 @@ function bgfxLoop(ts){
  if(document.hidden || (typeof hubShown==='function'&&hubShown()) || ts-BGFX.t<30) return; BGFX.t=ts;
  const c=BGFX.cx, W=BGFX.w, H=BGFX.h, P=BGFX.p, k=BGFX.kind, A=(cfg.bgfxAmt??0.6); if(!W) return; if(!P.length) bgfxInit();
  const ac=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#2f80ff';
- c.globalAlpha=1; c.fillStyle=BGFX.dark||'#05070d'; c.fillRect(0,0,W,H);
+ c.globalAlpha=1; c.clearRect(0,0,W,H);
  if(k==='aurora'||k==='nebula'){ const t=ts/9000;
   [[.25,.3,ac],[.7,.45,'#7b5cff'],[.5,.75,'#00c2a8']].forEach(([x,y,col],i)=>{ const gx=W*(x+.12*Math.sin(t+i*2)), gy=H*(y+.1*Math.cos(t*1.3+i)), R=Math.max(W,H)*(k==='aurora'?.45:.35);
    const g=c.createRadialGradient(gx,gy,0,gx,gy,R); g.addColorStop(0,col); g.addColorStop(1,'rgba(0,0,0,0)'); c.globalAlpha=(k==='aurora'?.16:.12)*A*1.6; c.fillStyle=g; c.fillRect(0,0,W,H); }); }
@@ -4269,7 +4377,7 @@ function hubOpen(page){
 }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape' && hubShown() && !/^(INPUT|TEXTAREA|SELECT)$/.test((e.target||{}).tagName||'')) hubOpen('chart'); });
 
-try{ Object.assign(window.__bt,{openPos,closePos,CAR,careerSync,hubOpen,HUB,jobClick,skBuy,xpAdd,skill,planSpec,chartFull,bgfxSync,cfg:()=>cfg,famScene,sfxPlay,sessSave,sessApply}); }catch(e){}
+try{ Object.assign(window.__bt,{chart,eqChart,oscChart,openPos,closePos,CAR,careerSync,hubOpen,HUB,jobClick,skBuy,xpAdd,skill,planSpec,chartFull,bgfxSync,cfg:()=>cfg,famScene,sfxPlay,sessSave,sessApply}); }catch(e){}
 
 
 /* ---- save the chart session (symbol, replay spot, trades) in this browser and online ---- */
@@ -4410,6 +4518,30 @@ cloudInit();
 evalBuild(); coinBuild(); sndBuild(); careerSync();
 
 try{ introRun(); }catch(e){}
+/* ---- 3D tilt with a specular sheen on premium cards ---- */
+(()=>{ const SEL='.ev,.sk-node,.ac-grid .ac,.stats4>div,.card.next,.sk-lvl,.fam .card';
+ let cur=null, raf=0, ev=null;
+ const reset=el=>{ if(!el) return; el.classList.remove('tilting'); el.style.removeProperty('--rx'); el.style.removeProperty('--ry'); };
+ document.addEventListener('mousemove',e=>{ ev=e; if(raf) return; raf=requestAnimationFrame(()=>{ raf=0; const t=ev.target&&ev.target.closest?ev.target.closest(SEL):null;
+  if(t!==cur){ reset(cur); cur=t; } if(!t) return; if(!t.classList.contains('t3d')) t.classList.add('t3d');
+  const r=t.getBoundingClientRect(), x=(ev.clientX-r.left)/r.width, y=(ev.clientY-r.top)/r.height, m=r.width>420?2:4;
+  t.classList.add('tilting'); t.style.setProperty('--ry',((x-.5)*m).toFixed(2)+'deg'); t.style.setProperty('--rx',((.5-y)*m).toFixed(2)+'deg');
+  t.style.setProperty('--mx',(x*100).toFixed(1)+'%'); t.style.setProperty('--my',(y*100).toFixed(1)+'%'); }); },{passive:true});
+ document.addEventListener('mouseleave',()=>{ reset(cur); cur=null; });
+})();
+/* ---- "More" menu in the header: holds the tools the bar has no room for ---- */
+(()=>{ const b=document.getElementById('btnMore'); if(!b) return;
+ const ITEMS=[['btnView','Reset chart view','R'],['btnShot','Save a picture of the chart',''],['btnSplit','Split screen',''],['btnMind','Trading psychology',''],['btnFull','Fullscreen chart','Shift+F']];
+ b.onclick=e=>{ e.stopPropagation(); const f=document.getElementById('flyout');
+  if(!f.hidden && f.dataset.group==='more'){ f.hidden=true; return; }
+  const hid=ITEMS.filter(([id])=>{ const x=document.getElementById(id); return x && getComputedStyle(x).display==='none'; });
+  const list=hid.length?hid:ITEMS;
+  f.dataset.group='more'; f.innerHTML='<div class="fl-h">More tools</div>'+list.map(([id,n,k])=>`<div class="fl-i" data-more="${id}"><span>${n}</span><span class="k">${k}</span></div>`).join('');
+  const r=b.getBoundingClientRect(); f.style.left=Math.min(r.left, innerWidth-250)+'px'; f.style.top=(r.bottom+6)+'px'; f.hidden=false;
+  f.querySelectorAll('[data-more]').forEach(el=>el.onclick=()=>{ f.hidden=true; const t=document.getElementById(el.dataset.more); if(t) t.click(); }); };
+ document.addEventListener('click',e=>{ const f=document.getElementById('flyout'); if(f && f.dataset.group==='more' && !f.hidden && !f.contains(e.target) && e.target!==b) f.hidden=true; });
+})();
+
 buildToolbar();
 buildIndUI();
 applyTheme();
