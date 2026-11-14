@@ -902,6 +902,13 @@ body.challenge #symSel,body.challenge #tf{cursor:not-allowed}
 
 @media(max-width:1440px){#top #btnFull,#top #btnMind{display:none}}
 @media(max-width:1300px){#top #btnHelp,#top #btnReplayToggle{display:none}}
+
+body:not(.challenge) .ch-only{display:none!important}
+body.challenge #playBtn,body.challenge #btnStep,body.challenge #speed,body.challenge #mode,body.challenge #tickMs,body.challenge #pace,body.challenge #btn10,body.challenge #btn100,body.challenge #btnSessNext,body.challenge #sessSel,body.challenge #btnSessPrev{display:none!important}
+#chSpdBox{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted)}
+#chSpdBox label{display:flex;align-items:center;gap:6px}#chSpdBox select{min-width:150px}
+.ch-clock{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;letter-spacing:1.4px;color:#ff6b7a;padding:3px 9px;border-radius:999px;border:1px solid rgba(255,77,94,.4);background:rgba(255,77,94,.08)}
+.ch-clock i{width:6px;height:6px;border-radius:50%;background:#ff4d5e;animation:livePulse 1.6s infinite}
 </style>
 </head>
 <body>
@@ -1115,7 +1122,7 @@ function loadCfg(){
    if(!c.blueMig2){ c.blueMig2=true; if(c.up==='#3d8bff'&&c.down==='#0f2550'){ c.up='#ffffff'; c.down='#222222'; c.border='#000000'; c.wick='#000000'; } }
    if(!c.qtMig1){ c.qtRows=Object.assign({},c.qtRows||{},{Q:false}); c.qtMig1=true; }
    c.ind = Object.assign(JSON.parse(JSON.stringify(DEF.ind)), s.ind || {});
-   if(!c.cleanMig){ c.cleanMig=true; Object.values(c.ind).forEach(v=>v.on=false); c.osc='none'; c.qbox=false; c.tro=false; c.smt=false; c.sessHL=false; c.vol=false; if(c.coin) c.coin.on=false; }
+   if(!s.cleanMig){ c.cleanMig=true; Object.values(c.ind).forEach(v=>v.on=false); c.osc='none'; c.qbox=false; c.tro=false; c.smt=false; c.sessHL=false; c.vol=false; if(c.coin) c.coin.on=false; }
    return c;
   }
  }catch(e){}
@@ -1618,7 +1625,7 @@ function stepOnce(){
  if(!advance(1)){ stopPlay(); if(CHA()) chEndQ(); else msg('End of data.'); return; }
  drawLast();
 }
-function jump(n){ if(CHA()&&n===Infinity){ msg('Locked during an evaluation session.'); return; }
+function jump(n){ if(CHA()){ msg('The market runs live during an evaluation session. Change the speed instead.'); return; } if(CHA()&&n===Infinity){ msg('Locked during an evaluation session.'); return; }
  stopPlay(); finishBar();
  advance(n); renderAll();
 }
@@ -1734,6 +1741,7 @@ function liveTick(){
  applyTick(S.ticks[S.tk]);
 }
 function togglePlay(){
+ if(CHA()){ msg('The market does not pause during an evaluation session. Change the speed instead.'); return; }
  if(S.timer){ stopPlay(); return; }
  if(!S.bars.length) return;
  if(S.cursor>=S.bars.length-1 && !S.partial) return;
@@ -1750,6 +1758,7 @@ function stopPlay(){
  $('playBtn').innerHTML=IC.play+'Play';
 }
 function manualStep(){
+ if(CHA()) return;
  stopPlay();
  if($('mode').value==='live') liveTick(); else stepOnce();
 }
@@ -1966,7 +1975,7 @@ function syncModeUI(){
 /* ---------- jump to session open (New York time) ---------- */
 const SESS={nyam:[0,9,30],ny6:[0,6,0],nypm:[0,13,30],lon:[0,3,0],mid:[0,0,0],asia:[-1,18,0]};
 function sessUTC(D,key){ const [dd,h,m]=SESS[key]; const Ls=(D+dd)*86400+h*3600+m*60; const u=Ls+5*3600; return Ls-nyOffset(u); }
-function jumpSession(dir){ if(CHA()&&dir<0){ msg('Locked during an evaluation session.'); return; }
+function jumpSession(dir){ if(CHA()){ msg('Locked during an evaluation session.'); return; } if(CHA()&&dir<0){ msg('Locked during an evaluation session.'); return; }
  if(!S.bars.length) return;
  stopPlay(); finishBar();
  const key=$('sessSel').value, cur=S.bars[S.cursor].time;
@@ -3498,7 +3507,7 @@ function carMigrate(o){
   delete o.stage; delete o.ledger; delete o.sync; o.v=2;
  }
  if(!Array.isArray(o.accts)) o.accts=[];
- o.accts.forEach((a,i)=>{ if(!Array.isArray(a.ledger)) a.ledger=[]; if(!a.id) a.id=newId()+i; if(!a.name) a.name='Account '+(i+1); a.stage=a.stage==='funded'?'funded':'eval'; a.on=!!a.on; });
+ o.accts.forEach((a,i)=>{ if(!a.plan) a.plan='flex'; if(!a.size) a.size=25; if(!Array.isArray(a.ledger)) a.ledger=[]; if(!a.id) a.id=newId()+i; if(!a.name) a.name='Account '+(i+1); a.stage=a.stage==='funded'?'funded':'eval'; a.on=!!a.on; });
  if(!o.job||typeof o.job!=='object') o.job={clicks:0,earned:0};
  if(!o.owned) o.owned={}; if(!o.eq) o.eq={};
  if(!o.priceMig){ o.priceMig=1; if(!o.accts.length && !o.passes) o.wallet=Math.max(+o.wallet||0,LSIZES[25].price); }
@@ -3848,7 +3857,7 @@ function helpDialog(){
   {name:'Replay',html:'<div class="help">'+P('<b>1. Pick a start.</b> Use Select bar, a date, or the session jump (NY AM open, London, Asia) on the bar under the chart.')+P('<b>2. Press Play.</b> Live mode moves price one tick per second on every timeframe. Candles mode reveals one whole candle per step.')+P('<b>3. Switch timeframe any time.</b> Every timeframe stays at the same moment and keeps playing.')+P('<b>Split screen</b> shows your second symbol (for example ES) next to the main chart. Drag the divider to resize it.')+'</div>'},
   {name:'Trading',html:'<div class="help">'+P('<b>Market order:</b> Buy or Sell in the Trade tab, the buttons on the chart, or keys B and S.')+P('<b>Pending order:</b> press Buy on chart or Sell on chart, then click the price. Below the market a buy becomes a limit; above it becomes a stop. The reverse applies to sells.')+P('<b>Move things:</b> drag any order, stop loss or take profit line. Press TP or SL on a line to add an exit.')+P('<b>Your open P&amp;L</b> is shown live on the chart and in the Trade tab.')+'</div>'},
   {name:'Indicators',html:'<div class="help">'+P('<b>Quarter boxes</b> draw each quarter on the chart. <b>Quarter timeline</b> is the strip under the chart. They are two separate switches in Settings.')+P('<b>Session highs and lows</b> mark the high and low of Asia, London, NY AM and NY PM in New York time.')+P('<b>True opens</b> and <b>SMT</b> are also in Settings, with themes, accent and chart colours.')+'</div>'},
-  {name:'Prop firms',html:'<div class="help">'+P('<b>Four Lucid account types</b> in 25K, 50K and 150K, each with Lucid\'s own rules: <b>LucidFlex</b> and <b>LucidDaily</b> evaluations (50% consistency rule), <b>LucidPro</b> (no consistency rule while evaluating, soft daily loss limit on 50K and 150K) and <b>LucidDirect</b> (no evaluation, you start funded; unlock it in Skills).')+P('<b>Max loss</b> trails your end-of-day balance and locks at the starting balance + $100. A soft daily loss limit only benches the account until the next day.')+P('<b>Payouts:</b> Flex after five winning days; Pro after three trading days and the cycle goal with a 40% consistency rule; Daily on any day with net profit above a buffer; Direct after the cycle profit goal, five trading days and a 20% consistency rule. You keep 90%.')+'</div>'},
+  {name:'Prop firms',html:'<div class="help">'+P('<b>Evaluation sessions.</b> Your accounts only trade in sessions the Lucid desk sends to your phone: one random, hidden trading day from 09:30 to 16:00 New York time. The market runs live and cannot be paused, rewound or skipped. Pick a speed from 1 second to 15 minutes of market time per real second. At 16:00 open positions close and the date is revealed. Trades outside sessions are practice.')+P('<b>Four Lucid account types</b> in 25K, 50K and 150K, each with Lucid\'s own rules: <b>LucidFlex</b> and <b>LucidDaily</b> evaluations (50% consistency rule), <b>LucidPro</b> (no consistency rule while evaluating, soft daily loss limit on 50K and 150K) and <b>LucidDirect</b> (no evaluation, you start funded; unlock it in Skills).')+P('<b>Max loss</b> trails your end-of-day balance and locks at the starting balance + $100. A soft daily loss limit only benches the account until the next day.')+P('<b>Payouts:</b> Flex after five winning days; Pro after three trading days and the cycle goal with a 40% consistency rule; Daily on any day with net profit above a buffer; Direct after the cycle profit goal, five trading days and a 20% consistency rule. You keep 90%.')+'</div>'},
   {name:'Sections',html:'<div class="help">'+P('<b>Trading</b> is the chart. <b>Life</b> is your home, character, family and shop. <b>Prop firms</b> holds your accounts and the eval store. <b>Job</b> pays wallet money per ticket. <b>Skills</b> is where you spend skill points.')+P('<b>Levels and skills.</b> Trades, passes, payouts and job tickets earn XP. Every level gives a skill point that unlocks chart colours, live backgrounds, the 3D coin, LucidDirect, the trade syncer, family, luxury items and job boosts.')+P('<b>Fullscreen.</b> Press Shift+F or the fullscreen button for a chart-only view. Esc leaves it.')+P('<b>Saving.</b> Your replay spot, closed trades and settings save in this browser, and online too when you sign in under your profile.')+P('<b>Sounds.</b> Pick a sound for every event (entry, take profit, stop loss, passing, payouts, your dog) in Settings.')+'</div>'}
  ],null,null);
 }
@@ -3867,8 +3876,12 @@ Object.assign(IC,{
  mind:SV(Pa('M3.500 5.500c2.200-.900 4.300-.700 6.500.700 2.200-1.400 4.300-1.600 6.500-.700v9.500c-2.200-.900-4.300-.700-6.500.700-2.200-1.400-4.300-1.600-6.500-.700z')+Pa('M10 6.200v9.500'))
 });
 function shade(hex,p){ const n=parseInt(hex.slice(1),16), f=v=>Math.max(0,Math.min(255,Math.round(v+(p>0?(255-v):v)*p/100))); return '#'+[n>>16&255,n>>8&255,n&255].map(v=>f(v).toString(16).padStart(2,'0')).join(''); }
-function toast(html,ms){ let t=$('toast'); if(!t){ t=document.createElement('div'); t.id='toast'; document.body.appendChild(t); }
- t.innerHTML=html; t.classList.add('on'); clearTimeout(toast.h); toast.h=setTimeout(()=>t.classList.remove('on'),ms||4500); }
+function toast(html,ms){ toast.q=toast.q||[];
+ if(toast.busy){ if(toast.cur===html) return; if(!toast.q.some(x=>x[0]===html)){ if(toast.q.length>=4) toast.q.shift(); toast.q.push([html,ms]); } clearTimeout(toast.h); toast.h=setTimeout(toastNext,Math.max(0,toast.at+1800-Date.now())); return; }
+ toastShow(html,ms); }
+function toastShow(html,ms){ let t=$('toast'); if(!t){ t=document.createElement('div'); t.id='toast'; document.body.appendChild(t); }
+ t.innerHTML=html; t.classList.add('on'); toast.busy=true; toast.cur=html; toast.at=Date.now(); clearTimeout(toast.h); toast.h=setTimeout(toastNext,ms||4500); }
+function toastNext(){ const n=(toast.q||[]).shift(); if(n){ toastShow(n[0],n[1]); return; } const t=$('toast'); if(t) t.classList.remove('on'); toast.busy=false; toast.cur=null; }
 
 /* ---- more indicator math ---- */
 function nn(f,src,n){ const st=src.findIndex(v=>v!=null); if(st<0) return src.map(()=>null); return new Array(st).fill(null).concat(f(src.slice(st),n)); }
@@ -4495,11 +4508,12 @@ function chTick(){
  if(!CAR.accts.some(a=>a.on)) return;
  if(Date.now()<(CAR.ch.next||0)) return;
  const r=chMakeReq(); if(!r) return; CAR.ch.req=r;
- msgAdd({k:'req',id:r.id,from:'Lucid Trading desk',title:`Evaluation session ${r.n} is ready`,body:'One random trading day on NQ, 09:30 to 16:00 New York time. The date stays hidden until the session ends. Accept to trade it on your active accounts, or ignore it and enjoy life.'});
+ msgAdd({k:'req',id:r.id,from:'Lucid Trading desk',title:`Evaluation session ${r.n} is ready`,body:'One random trading day on NQ, 09:30 to 16:00 New York time. The date stays hidden until the session ends. The market runs live and cannot be paused; you can speed it up from 1 second to 15 minutes per second. Accept to trade it on your active accounts, or ignore it and enjoy life.'});
  carSave(); try{ sfxPlay('alert',true); }catch(e){}
  toast(`<b>New evaluation session.</b> Open your phone to accept it.`,5000);
 }
 setInterval(()=>{ try{ chTick(); }catch(e){} },15000);
+const chTfNorm=v=>({'1':'60','5':'300','15':'900'})[String(v)]||String(v||'300');
 async function chAccept(tf){
  const r=CAR.ch&&CAR.ch.req; if(!r||CHA()||CH.busy) return;
  if(S.pos){ toast('Close your practice position first.',3500); return; }
@@ -4515,7 +4529,7 @@ async function chAccept2(r,tf){
  const raw=await loadSymbol(r.sym,y0,r.y); CH.loading=false; const k0=raw.findIndex(b=>b.time>=t0);
  if(k0<0 || raw[k0].time>t0+10*60 || k0<2){ CAR.ch.req=null; CAR.ch.next=0; msgDrop(r.id); carSave(); chTick(); toast('That day had no trading. A new session request is on its way.',4000); return; }
  const p0=raw[k0].open, off=Math.round(p0*(0.08+Math.random()*0.17)*(Math.random()<0.5?-1:1)*4)/4;
- CAR.ch.act={id:r.id,sym:r.sym,y0,y1:r.y,D:r.D,t0,tEnd,off,tf:tf||'5',day:((CAR.ch.day)||0)+1,cur:t0,fresh:true,trades:[],markers:[],realized:0,dayPnl:{},pos:null,started:Date.now()};
+ CAR.ch.act={id:r.id,sym:r.sym,y0,y1:r.y,D:r.D,t0,tEnd,off,tf:chTfNorm(tf),day:((CAR.ch.day)||0)+1,cur:t0,fresh:true,trades:[],markers:[],realized:0,dayPnl:{},pos:null,started:Date.now()};
  CAR.ch.req=null; msgDrop(r.id); carSave();
  await chLoad(raw); toast(`<b>Evaluation session ${CHS().day} started.</b> Trades now count on your active accounts. The session runs 09:30 to 16:00 New York time.`,6000);
 }
@@ -4524,9 +4538,10 @@ async function chLoad(raw){
  if(!raw){ CH.loading=true; try{ raw=await loadSymbol(a.sym,a.y0,a.y1); } finally{ CH.loading=false; } }
  if(!CHS()||CHS().id!==a.id) return;
  const o=a.off, sh=raw.map(b=>({time:b.time,open:b.open+o,high:b.high+o,low:b.low+o,close:b.close+o,volume:b.volume}));
- document.body.classList.add('challenge'); stopPlay();
+ document.body.classList.add('challenge'); stopPlay(); chClockStop(); chLiveMode();
  const seen=chSeenGet(a.id);
  CH.allow=true;
+ a.tf=chTfNorm(a.tf);
  try{ if([...$('tf').options].some(x=>x.value===String(a.tf))) $('tf').value=a.tf; S.symKey=a.sym; S.pairRaw=[]; if(cfg.split) setSplit(false);
   loadRaw(sh,'Evaluation session'); msg('Evaluation session ready. Trades count on your active accounts.');
   if(a.fresh){ const k=lowerBound(S.bars,a.t0); reset(Math.max(1,k-1)); a.cur=S.bars[S.cursor].time; a.fresh=false; }
@@ -4542,10 +4557,51 @@ async function chLoad(raw){
  if(!CHS()) return;
  if(S.bars[S.cursor+1] && S.bars[S.cursor+1].time<CHS().tEnd && S.bars[S.cursor+1].time>=CHS().t0-1 && S.cursor+1===lowerBound(S.bars,CHS().t0)) startLiveBar();
  renderAll(); try{ updateTrades(true); }catch(e){} chSnap(); carSaveLocal(); chBar(); acctRender();
+ chSpdUI(); chClockRun();
 }
 const chSeenSet=t=>{ try{ const a=CHS(); if(a) localStorage.setItem('ke_chseen',a.id+'|'+t); }catch(e){} };
 const chSeenGet=id=>{ try{ const [i,t]=(localStorage.getItem('ke_chseen')||'').split('|'); return i===id?+t:null; }catch(e){ return null; } };
-function chEndQ(){ if(CH.endQ||!CHA()) return; CH.endQ=true; stopPlay(); setTimeout(()=>{ CH.endQ=false; chEnd(false); },0); }
+/* the session clock: market time runs continuously, 1 tick = 1 market second (real-time pace), speed = market seconds per real second */
+CH.pillT=0;
+const CH_SPD=[[1,'1s'],[5,'5s'],[10,'10s'],[15,'15s'],[30,'30s'],[60,'1m'],[120,'2m'],[180,'3m'],[300,'5m'],[600,'10m'],[900,'15m']];
+const chSpd=()=>{ const a=CHS(), v=a&&+a.spd; return CH_SPD.some(x=>x[0]===v)?v:1; };
+const chSpdLabel=v=>(CH_SPD.find(x=>x[0]===v)||CH_SPD[0])[1]+'/s';
+function chLiveMode(){ const m=$('mode'), pc=$('pace'); if(!CH.prevMode) CH.prevMode={mode:m.value,pace:pc.value}; m.value='live'; pc.value='real'; }
+function chClockRun(){
+ if(!CHA()||CH.clock||CH.loading||CH.allow||CH.loadedId!==CHS().id) return;
+ chLiveMode(); CH.last=performance.now(); CH.acc=0;
+ CH.clock=setInterval(chClockStep,100); chSpdUI();
+}
+function chClockStop(){ if(CH.clock){ clearInterval(CH.clock); CH.clock=null; } }
+function chClockStep(){
+ if(!CHA()||CH.endQ){ chClockStop(); return; }
+ if(++CH.pillT%10===0) try{ chBar(); }catch(e){}
+ const now=performance.now(), dt=Math.max(0,(now-CH.last)/1000); CH.last=now;
+ CH.acc+=dt*chSpd(); const n=Math.floor(CH.acc); if(n<=0) return; CH.acc-=n;
+ chTicks(n);
+}
+function chTicks(n){
+ let moved=false;
+ while(n>0 && CHA() && !CH.endQ){
+  if(!S.partial){ if(!startLiveBar()) return; n--; moved=false; continue; }
+  const left=S.ticks.length-1-S.tk;
+  if(left<=0){ finishBar(); if(!startLiveBar()) return; n--; continue; }
+  const k=Math.min(n,left), q=S.partial;
+  for(let j=0;j<k;j++){ S.tk++; const px=S.ticks[S.tk]; q.high=Math.max(q.high,px); q.low=Math.min(q.low,px); q.close=px; tickExits(px); if(!CHA()||CH.endQ||!S.partial) break; }
+  if(S.partial) S.partial.volume=S.bars[S.cursor].volume*(S.tk+1)/S.ticks.length;
+  n-=k; moved=true;
+ }
+ if(moved && S.partial) drawLast();
+}
+function chSpdUI(){
+ let w=$('chSpdBox');
+ if(!w){ const rb=$('replayBar'); if(!rb) return; w=document.createElement('div'); w.id='chSpdBox'; w.className='grp ch-only';
+  w.innerHTML=`<span class="ch-clock" title="The market keeps moving during an evaluation session, like live trading"><i></i>LIVE</span><label>Speed <select id="chSpd" title="Market time per real second">${CH_SPD.map(([v,l])=>`<option value="${v}">${l} per second</option>`).join('')}</select></label>`;
+  rb.insertBefore(w,rb.firstChild);
+  $('chSpd').onchange=()=>{ const a=CHS(); if(!a) return; a.spd=+$('chSpd').value; CH.acc=0; carSaveLocal(); chBar(); msg(`Session speed: ${chSpdLabel(a.spd)}.`); }; }
+ const sel=$('chSpd'); if(sel && CHA()) sel.value=String(chSpd());
+}
+function chEndQ(){ if(CH.endQ||!CHA()) return; CH.endQ=true; stopPlay(); chClockStop(); setTimeout(()=>{ CH.endQ=false; chEnd(false); },0); }
 function chAfterPull(){
  if(CHA()){ if(CH.loadedId!==CHS().id && !CH.loading){ stopPlay(); S.pos=null; chLoad(); } }
  else if(document.body.classList.contains('challenge')){ document.body.classList.remove('challenge'); CH.loadedId=null; stopPlay(); S.pos=null; S.symKey='__session_done';
@@ -4555,7 +4611,7 @@ function chAfterPull(){
 function chSnap(){ const a=CHS(); if(!a||!S.bars.length||CH.allow||CH.loading||CH.loadedId!==a.id) return; a.cur=S.bars[S.partial?Math.max(0,S.cursor-1):S.cursor].time; CAR.ts=Date.now(); a.trades=S.trades.slice(-300); a.markers=S.markers.slice(-600); a.realized=S.realized; a.dayPnl=S.dayPnl; a.pos=S.pos?JSON.parse(JSON.stringify(S.pos)):null; }
 function chEnd(early){
  const a=CHS(); if(!a) return;
- stopPlay(); S.orders=[]; try{ drawOrders(); }catch(e){} if(S.pos){ CH.ending=true; closePos(S.pos.side>0?priceNow():priceNow()+spreadPx(), S.cursor, 'EOD'); CH.ending=false; }
+ stopPlay(); chClockStop(); if(CH.prevMode){ $('mode').value=CH.prevMode.mode; $('pace').value=CH.prevMode.pace; CH.prevMode=null; try{ $('mode').dispatchEvent(new Event('change')); }catch(e){} } S.orders=[]; try{ drawOrders(); }catch(e){} if(S.pos){ CH.ending=true; closePos(S.pos.side>0?priceNow():priceNow()+spreadPx(), S.cursor, 'EOD'); CH.ending=false; }
  chSnap();
  const T=S.trades, n=T.length, wins=T.filter(t=>t.pnl>0).length, pnl=S.realized, rs=T.filter(t=>t.r!=null).map(t=>t.r), bestR=rs.length?Math.max(...rs):null;
  const real=new Date(a.D*864e5), dateTxt=`${DOW[real.getUTCDay()]} ${real.getUTCDate()} ${MON[real.getUTCMonth()]} ${real.getUTCFullYear()}`;
@@ -4578,10 +4634,12 @@ function chResult(r){
 function chBar(){
  let b=$('chBar'); if(!b){ b=document.createElement('div'); b.id='chBar'; const c=$('chart'); if(!c) return; c.appendChild(b); }
  const a=CHS();
- if(!a){ const on=CAR.accts.filter(x=>x.on); b.className='mode-pill prac'; b.innerHTML=`<i></i><b>Practice</b><span>${on.length?'Accounts only trade in evaluation sessions':'Trades here do not count'}</span>${CAR.ch&&CAR.ch.req?'<button id="chOpen">Session waiting</button>':''}`; const o=$('chOpen'); if(o) o.onclick=()=>phoneOpen('messages'); return; }
+ if(!a){ b.dataset.k=''; const on=CAR.accts.filter(x=>x.on); b.className='mode-pill prac'; b.innerHTML=`<i></i><b>Practice</b><span>${on.length?'Accounts only trade in evaluation sessions':'Trades here do not count'}</span>${CAR.ch&&CAR.ch.req?'<button id="chOpen">Session waiting</button>':''}`; const o=$('chOpen'); if(o) o.onclick=()=>phoneOpen('messages'); return; }
  const now=S.bars.length?S.bars[S.cursor].time:a.t0, left=Math.max(0,a.tEnd-now), h=Math.floor(left/3600), m=Math.floor(left%3600/60);
  const on=CAR.accts.filter(x=>x.on);
- b.className='mode-pill live'; b.innerHTML=`<i></i><b>Evaluation session ${a.day}</b><span>${on.map(x=>planShort(SPEC(x))).join(' · ')||'no account on'} · ${h}h ${pad2(m)}m to the 16:00 close</span><button id="chEndB">End session</button>`;
+ const txt=`${on.map(x=>planShort(SPEC(x))).join(' · ')||'no account on'} · live ${chSpdLabel(chSpd())} · ${h}h ${pad2(m)}m to the 16:00 close`;
+ if(b.dataset.k==='live'+a.id && $('chEndB')){ const sp=b.querySelector('span'); if(sp&&sp.textContent!==txt) sp.textContent=txt; return; }
+ b.dataset.k='live'+a.id; b.className='mode-pill live'; b.innerHTML=`<i></i><b>Evaluation session ${a.day}</b><span>${txt}</span><button id="chEndB">End session</button>`;
  $('chEndB').onclick=()=>{ const x=$('chEndB'); if(!x.dataset.arm){ x.dataset.arm=1; x.textContent='Click again to end'; setTimeout(()=>{ if(x.isConnected){ x.dataset.arm=''; x.textContent='End session'; } },3000); return; } chEnd(true); };
 }
 /* ---- hall of fame: best R trades from evaluation sessions only ---- */
@@ -4648,7 +4706,7 @@ function phoneRender(){
    <div class="ph-note">25% of every income (job, payouts, rewards) goes to your loans automatically. Paying loans off raises your credit score, which lowers your rate.</div>`; }
  else if(A==='messages'){ (CAR.inbox||[]).forEach(m=>m.read=true); const r=CAR.ch&&CAR.ch.req;
   h=head('Messages','')+`<div class="ph-list">${(CAR.inbox||[]).map(m=>`<div class="ph-msg ${m.k}"><div class="mh"><b>${cesc(m.from||'KE')}</b><span>${new Date(m.t).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</span></div><div class="mt">${cesc(m.title)}</div><p>${cesc(m.body)}</p>
-   ${m.k==='req'&&r&&r.id===m.id?`<div class="mr"><label>Timeframe <select id="chTf"><option value="1">1m</option><option value="5" selected>5m</option><option value="15">15m</option></select></label><button class="primary" data-acc>Accept</button><button data-dec>Not now</button></div>`:''}</div>`).join('')||'<div class="ph-empty">No messages. When you have an active account, the desk sends you evaluation sessions here.</div>'}</div>`; phoneBadge(); }
+   ${m.k==='req'&&r&&r.id===m.id?`<div class="mr"><label>Timeframe <select id="chTf"><option value="60">1m</option><option value="300" selected>5m</option><option value="900">15m</option></select></label><button class="primary" data-acc>Accept</button><button data-dec>Not now</button></div>`:''}</div>`).join('')||'<div class="ph-empty">No messages. When you have an active account, the desk sends you evaluation sessions here.</div>'}</div>`; phoneBadge(); }
  else if(A==='hof'){ const me=CAR.hof||[];
   h=head('Hall of Fame','Best R trades from evaluation sessions')+(CAR.tamper?'<div class="ph-note">This save was edited outside the app, so it can\'t enter the global Hall of Fame.</div>':'')+`<div class="ph-seg"><button data-hof="me" class="${PH.hof==='me'?'act':''}">You</button><button data-hof="all" class="${PH.hof==='all'?'act':''}">Everyone</button></div><div id="hofBox" class="ph-list">${PH.hof==='me'?(me.map((e,i)=>`<div class="ph-tx"><div><b>#${i+1} · ${e.r.toFixed(2)}R</b><span>${e.side} · session ${e.day}</span></div><em class="pos">+${fmt$(e.pnl)}</em></div>`).join('')||'<div class="ph-empty">No entries yet. Win a trade with a stop loss in an evaluation session.</div>'):'<div class="ph-empty">Loading...</div>'}</div>`; }
  else if(A==='missions'){ const M=misGet(), mult=1+Math.min(0.5,((CAR.streak||1)-1)*0.1);
@@ -4706,8 +4764,11 @@ function hubNext(){
  if(C.some(c=>c.pass)) return ['Move your account to funded','An evaluation has reached its target inside the rules.','Open accounts','accounts'];
  if(C.some(c=>c.canPay)) return ['Request your payout','A funded account has a payout ready. You keep 90% of it.','Open accounts','accounts'];
  if(!A.some(a=>a.on)) return ['Switch an account on','None of your accounts is trading right now, so trades are practice only.','Open accounts','accounts'];
- if(A.some(a=>a.stage==='funded')) return ['Bank five winning days','A funded account pays out after five winning days and at least $1,000 in profit.','Go trade','chart'];
- return ['Pass your evaluation',`Reach your profit target without touching the max loss limit, with no single day over 50% of the profit.`,'Go trade','chart'];
+ if(typeof CHA==='function'&&CHA()) return ['Trade your evaluation session','A session is live. Every trade counts on your active accounts until 16:00 New York time.','Back to the session','chart'];
+ if(CAR.ch&&CAR.ch.req) return ['Your evaluation session is ready','The Lucid desk sent you a session. Open your phone and accept it, or keep enjoying life.','Open messages','phone'];
+ const f=A.findIndex(a=>a.stage==='funded'&&a.on);
+ if(f>=0) return ['Work toward your next payout',`${cesc(A[f].name)} (${planShort(SPEC(A[f]))}) needs ${C[f].why.length?C[f].why.join(', '):'a bit more profit'}. Only trades in evaluation sessions count.`,'Practice while you wait','chart'];
+ return ['Pass your evaluation','Trades count in evaluation sessions, which the Lucid desk sends to your phone. Reach the target without touching the max loss limit and inside the consistency rule.','Practice while you wait','chart'];
 }
 const stageHTML=()=>`<div class="cr-stage" id="crStage"><div class="cr-tilt" id="crTilt"></div></div>`;
 function petDog(e){ CAR.pets=(CAR.pets||0)+1; try{ misBump('pet',1); }catch(x){} try{ sfxPlay('pet',true); }catch(x){} const st=$('crStage'); if(!st) return; const r=st.getBoundingClientRect(), h=document.createElement('i');
@@ -4816,6 +4877,7 @@ function jobClick(){
 }
 function secMark(p){ document.querySelectorAll('#secNav [data-sec]').forEach(b=>b.classList.toggle('act',b.dataset.sec===p)); }
 function hubOpen(page){
+ if(page==='phone'){ hubOpen('chart'); phoneOpen('messages'); return; }
  if(page==='chart'){ if($('hub')) $('hub').hidden=true; secMark('chart'); return; }
  const toStore=page==='store'; if(HUB_ALIAS[page]) page=HUB_ALIAS[page];
  if(!$('hub')){
@@ -4829,7 +4891,7 @@ function hubOpen(page){
 }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape' && hubShown() && !/^(INPUT|TEXTAREA|SELECT)$/.test((e.target||{}).tagName||'')) hubOpen('chart'); });
 
-try{ Object.assign(window.__bt,{chart,eqChart,oscChart,chAfterPull,chSnap,txAdd,financeItem,loanPay,chAccept,chEnd,chTick,CHS,phoneOpen,misBump,misClaim,achCheck,credit,hofAdd,openPos,closePos,CAR,careerSync,hubOpen,HUB,jobClick,skBuy,xpAdd,skill,planSpec,chartFull,bgfxSync,cfg:()=>cfg,famScene,sfxPlay,sessSave,sessApply}); }catch(e){}
+try{ Object.assign(window.__bt,{chTicks,chSpd,chClockStop,chClockRun,CH,chart,eqChart,oscChart,chAfterPull,chSnap,txAdd,financeItem,loanPay,chAccept,chEnd,chTick,CHS,phoneOpen,misBump,misClaim,achCheck,credit,hofAdd,openPos,closePos,CAR,careerSync,hubOpen,HUB,jobClick,skBuy,xpAdd,skill,planSpec,chartFull,bgfxSync,cfg:()=>cfg,famScene,sfxPlay,sessSave,sessApply}); }catch(e){}
 
 
 /* ---- save the chart session (symbol, replay spot, trades) in this browser and online ---- */
