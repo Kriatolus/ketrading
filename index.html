@@ -1064,6 +1064,7 @@ body.pnlw-on #hud{display:none!important}
 .mut.sm{font-size:11px;line-height:1.45}
 
 </style>
+<style id="v17">.lf-needs{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:0 0 14px}.lf-m{border:1px solid var(--border);border-radius:12px;padding:10px 12px;background:var(--panel);display:flex;flex-direction:column;gap:6px}.lf-m .l{display:flex;justify-content:space-between;font-size:12px}.lf-m .l span{color:var(--muted)}.lf-m .m{height:6px;border-radius:3px;background:color-mix(in srgb,var(--border) 80%,transparent);overflow:hidden}.lf-m .m i{display:block;height:100%;border-radius:3px;transition:width .3s}.lf-m em{font-style:normal;font-size:11px;color:var(--muted)}.card.gym{display:flex;flex-direction:column;gap:12px;max-width:560px}</style>
 </head>
 <body>
 <div id="splash"><svg viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="6" fill="#2f80ff"/><path d="M8 4v16" stroke="#05070d" stroke-width="1.6" stroke-linecap="round"/><rect x="6" y="7" width="4" height="10" rx="1" fill="#05070d"/><path d="M18 5.5l-6 6.5 6 6.5" stroke="#05070d" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="wordmark"><b>KE</b>TRADING</div><i></i></div>
@@ -3786,7 +3787,7 @@ function carMigrate(o){
 }
 const carDefault=()=>({v:2,priceMig:1,wallet:EVAL.price,passes:0,blown:0,paid:0,payouts:0,accts:[],owned:{},eq:{},job:{clicks:0,earned:0},look:{name:'You',skin:'#e8b796',hair:'#2b2118',style:'short'}});
 const CAR=(()=>{ const d=carDefault(); try{ const s=JSON.parse(localStorage.getItem('ke_career_v1')||'null'); if(s){ const o=Object.assign(d,s,{look:Object.assign(d.look,s.look||{})}); o.v=s.v||0; return carMigrate(o); } }catch(e){} return d; })();
-const EXT_KEYS=['login','bills','sav','prestige','xp','skills','fam','ch','loans','loansPaid','tx','hof','hofBest','mis','ach','inbox','streak','lastDay','pets','priceMig','tamper','cleanMig'];
+const EXT_KEYS=['life','login','bills','sav','prestige','xp','skills','fam','ch','loans','loansPaid','tx','hof','hofBest','mis','ach','inbox','streak','lastDay','pets','priceMig','tamper','cleanMig'];
 const carExt=()=>{ const o={}; EXT_KEYS.forEach(k=>{ if(CAR[k]!==undefined) o[k]=CAR[k]; }); if(o.tx) o.tx=o.tx.slice(0,80); if(o.inbox) o.inbox=o.inbox.slice(0,30); if(o.ch) o.ch=Object.assign({},o.ch,{prev:null}); return o; };
 const carHash=t=>{ let h=2166136261; t='ke1|'+t; for(let i=0;i<t.length;i++){ h^=t.charCodeAt(i); h=Math.imul(h,16777619); } return (h>>>0).toString(36); };
 const carSaveLocal=()=>{ try{ CAR.sigv=1; const j=JSON.stringify(CAR); localStorage.setItem('ke_career_v1',j); localStorage.setItem('ke_career_sig',carHash(j)); }catch(e){} };
@@ -3921,7 +3922,7 @@ function acctPayout(id){
  if(S.pos){ const m='Close your position before you request a payout.'; msg(m); toast(m,3500); return; }
  const c=acctCalc(a); if(!c.canPay) return;
  const amt=c.maxPay, net=Math.round(amt*FUND.split*(skill('legacy')?1.1:1)*100)/100; try{ xpAdd(200); }catch(e){}
- a.ledger.push({d:c.today,pnl:-amt,pay:1}); CAR.wallet=Math.round((CAR.wallet+net)*100)/100; txAdd(`Payout · ${a.name}`,net,'payout'); if(CAR.prestige){ const pb=Math.round(net*0.05*CAR.prestige*100)/100; CAR.wallet=Math.round((CAR.wallet+pb)*100)/100; txAdd(`Prestige bonus · ${a.name}`,pb,'refund'); } CAR.paid=Math.round((CAR.paid+net)*100)/100; CAR.payouts++; delete SYNC.prev[a.id]; carSave(); careerSync(); try{ sfxPlay('payout',true); }catch(e){}
+ a.ledger.push({d:c.today,pnl:-amt,pay:1}); CAR.wallet=Math.round((CAR.wallet+net)*100)/100; txAdd(`Payout · ${a.name}`,net,'payout'); setTimeout(()=>{ try{ partyCheck(); }catch(e){} },1500); if(CAR.prestige){ const pb=Math.round(net*0.05*CAR.prestige*100)/100; CAR.wallet=Math.round((CAR.wallet+pb)*100)/100; txAdd(`Prestige bonus · ${a.name}`,pb,'refund'); } CAR.paid=Math.round((CAR.paid+net)*100)/100; CAR.payouts++; delete SYNC.prev[a.id]; carSave(); careerSync(); try{ sfxPlay('payout',true); }catch(e){}
  toast(`<b>Payout approved on ${cesc(a.name)}.</b> ${usd(amt)} requested, ${usd(net)} (90%${skill('legacy')?' + 10% legacy':''}) is in your wallet.`,6000);
 }
 function acctRemove(id){
@@ -4589,10 +4590,10 @@ const skill=id=>!!(CAR.skills&&CAR.skills[id]);
 const lvlOf=xp=>1+Math.floor(Math.sqrt(Math.max(0,xp)/80));
 const lvlXp=l=>80*(l-1)*(l-1);
 const skSpent=()=>Object.keys(CAR.skills||{}).reduce((a,k)=>a+(SK[k]?SK[k].c:0),0);
-const skPoints=()=>{ const l=lvlOf(CAR.xp||0); return l+Math.floor(l/5)-skSpent(); };
+const skPoints=()=>{ const l=lvlOf(CAR.xp||0); return l+Math.floor(l/5)+fitPts()-skSpent(); };
 function xpAdd(n,why){
  if(typeof CHA==='function'&&CHA()&&skill('focus')) n*=1.25;
- n*=1+0.1*(CAR.prestige||0);
+ n*=1+0.1*(CAR.prestige||0); try{ n*=lifeXp(); }catch(e){}
  const b=lvlOf(CAR.xp||0); CAR.xp=Math.round(((CAR.xp||0)+n)*100)/100; const a=lvlOf(CAR.xp);
  if(a>b){ const bonus=25*a; CAR.wallet=Math.round((CAR.wallet+bonus)*100)/100; try{ txAdd(`Level ${a} reward`,bonus,'level'); }catch(e){} }
  if(a>b){ try{ sfxPlay('pass',true); }catch(e){} toast(`<b>Level ${a} · ${levelTitle(a)}.</b> +${fmt$(25*a)} reward. You have ${skPoints()} skill point${skPoints()===1?'':'s'} to spend in Skills.`,5000); }
@@ -4951,7 +4952,7 @@ function chEnd(early){
  const T=S.trades, n=T.length, wins=T.filter(t=>t.pnl>0).length, pnl=S.realized, rs=T.filter(t=>t.r!=null).map(t=>t.r), bestR=rs.length?Math.max(...rs):null;
  const real=new Date(a.D*864e5), dateTxt=`${DOW[real.getUTCDay()]} ${real.getUTCDate()} ${MON[real.getUTCMonth()]} ${real.getUTCFullYear()}`;
  CAR.ch.day=a.day; (CAR.ch.hist=CAR.ch.hist||[]).unshift({day:a.day,pnl,n,wins,bestR,date:dateTxt,early:!!early,at:Date.now()}); CAR.ch.hist.length=Math.min(CAR.ch.hist.length,60);
- CAR.ch.act=null; CAR.ch.next=Date.now()+90000; document.body.classList.remove('challenge');
+ try{ foodUse(22); }catch(e){} CAR.ch.act=null; CAR.ch.next=Date.now()+90000; document.body.classList.remove('challenge');
  xpAdd(30+(pnl>0?40:0)); misBump('session',1); if(pnl>0) misBump('green',1);
  msgAdd({k:'res',from:'Lucid Trading desk',title:`Session ${a.day} results: ${pnl>=0?'+':''}${fmt$(Math.round(pnl))}`,body:`${n} trade${n===1?'':'s'}, ${wins} winner${wins===1?'':'s'}${bestR!=null?`, best ${bestR.toFixed(1)}R`:''}. The day you traded was ${dateTxt}.${early?' You ended the session early.':''}`});
  carSave(); acctUpdate(); achCheck();
@@ -5045,7 +5046,7 @@ function phoneRender(){
    <div class="ph-note">25% of every income (job, payouts, rewards) goes to your loans automatically. Paying loans off raises your credit score, which lowers your rate.</div>`; }
  else if(A==='messages'){ (CAR.inbox||[]).forEach(m=>m.read=true); const r=CAR.ch&&CAR.ch.req;
   h=head('Messages','')+`<div class="ph-list">${(CAR.inbox||[]).map(m=>`<div class="ph-msg ${m.k}"><div class="mh"><b>${cesc(m.from||'KE')}</b><span>${new Date(m.t).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</span></div><div class="mt">${cesc(m.title)}</div><p>${cesc(m.body)}</p>
-   ${m.k==='req'&&r&&r.id===m.id?`<div class="mr"><label>Timeframe <select id="chTf"><option value="60">1m</option><option value="300" selected>5m</option><option value="900">15m</option></select></label><button class="primary" data-acc>Accept</button><button data-dec>Not now</button></div>`:''}</div>`).join('')||'<div class="ph-empty">No messages. When you have an active account, the desk sends you evaluation sessions here.</div>'}</div>`; phoneBadge(); }
+   ${m.k==='req'&&r&&r.id===m.id?`<div class="mr"><label>Timeframe <select id="chTf"><option value="60">1m</option><option value="300" selected>5m</option><option value="900">15m</option></select></label><button class="primary" data-acc>Accept</button><button data-dec>Not now</button></div>`:''}${m.k==='party'?(m.went?'<div class="mr"><em style="color:#2ecf8f;font-style:normal">You went</em></div>':`<div class="mr"><button class="primary" data-party="${m.pid}">Go · ${fmt$(PARTIES[m.pid][3])}</button></div>`):''}</div>`).join('')||'<div class="ph-empty">No messages. When you have an active account, the desk sends you evaluation sessions here.</div>'}</div>`; phoneBadge(); }
  else if(A==='hof'){ const me=CAR.hof||[];
   h=head('Hall of Fame','Best R trades from evaluation sessions')+(CAR.tamper?'<div class="ph-note">This save was edited outside the app, so it can\'t enter the global Hall of Fame.</div>':'')+`<div class="ph-seg"><button data-hof="me" class="${PH.hof==='me'?'act':''}">You</button><button data-hof="all" class="${PH.hof==='all'?'act':''}">Everyone</button></div><div id="hofBox" class="ph-list">${PH.hof==='me'?(me.map((e,i)=>`<div class="ph-tx"><div><b>#${i+1} · ${e.r.toFixed(2)}R</b><span>${e.side} · session ${e.day}</span></div><em class="pos">+${fmt$(e.pnl)}</em></div>`).join('')||'<div class="ph-empty">No entries yet. Win a trade with a stop loss in an evaluation session.</div>'):'<div class="ph-empty">Loading...</div>'}</div>`; }
  else if(A==='missions'){ const M=misGet(), mult=1+Math.min(0.5,((CAR.streak||1)-1)*0.1);
@@ -5064,6 +5065,7 @@ function phoneRender(){
  sc.querySelectorAll('[data-rw]').forEach(b=>b.onclick=loginClaim);
  sc.querySelectorAll('[data-sav]').forEach(b=>b.onclick=()=>{ const v=+($('savAmt')||{}).value; if(!(v>0)){ toast('Type an amount first.',2500); return; } savMove(+b.dataset.sav,v); });
  sc.querySelectorAll('[data-hof]').forEach(b=>b.onclick=()=>{ PH.hof=b.dataset.hof; phoneRender(); });
+ sc.querySelectorAll('[data-party]').forEach(b=>b.onclick=()=>partyGo(+b.dataset.party));
  const acc=sc.querySelector('[data-acc]'); if(acc) acc.onclick=()=>chAccept($('chTf').value);
  const dec=sc.querySelector('[data-dec]'); if(dec) dec.onclick=()=>{ const r=CAR.ch.req; if(r){ msgDrop(r.id); CAR.ch.req=null; CAR.ch.next=Date.now()+5*60000; carSave(); toast('No problem. Enjoy life. The desk will send another session later.',3500); phoneRender(); chBar(); } };
  if(A==='hof'&&PH.hof==='all') hofLoad().then(res=>{ const box=$('hofBox'); if(!box) return; box.innerHTML=res.err?`<div class="ph-empty">${res.err==='offline'?'Sign in to see everyone.':/best_rr/.test(res.err)?'The global Hall of Fame needs one database update (see the setup note).':'Could not load: '+cesc(res.err)}</div>`:(res.rows.map((x,i)=>`<div class="ph-tx ${CLOUD.user&&x.id===CLOUD.user.id?'me':''}"><div><b>#${i+1} · ${cesc(x.name||'Trader')}</b><span>Best trade</span></div><em class="pos">${(+x.best_rr).toFixed(2)}R</em></div>`).join('')||'<div class="ph-empty">No entries yet.</div>'); });
@@ -5209,6 +5211,58 @@ function worldTick(){ try{ loginTick(); billsTick(); savTick(); }catch(e){ conso
 setTimeout(()=>{ worldTick(); try{ const L=loginTick(); if(!L.claimed) toast('<b>Your daily reward is ready.</b> Open the Rewards app on your phone (P).',5000); phoneBadge(); }catch(e){} },2500);
 setInterval(worldTick,60000);
 
+/* ================= v17: food, gym, parties, family life ================= */
+const LF=()=>{ const d=CAR.life=CAR.life||{}; if(d.food==null) d.food=80; if(d.fit==null) d.fit=0; if(d.happy==null) d.happy=70; if(!d.t) d.t=Date.now(); d.party=d.party||{sent:0,done:0,net:0}; return d; };
+const hungry=()=>LF().food<=0, wellFed=()=>(LF().fedTill||0)>Date.now();
+const famSize=()=>1+(CAR.fam&&CAR.fam.partner?1:0)+((CAR.fam&&CAR.fam.kids)||[]).length;
+const famOn=()=>!!(CAR.fam&&CAR.fam.partner);
+const lifeXp=()=>(hungry()?0.75:1)*(wellFed()?1.1:1)*(famOn()?(LF().happy>=70?1.1:LF().happy<=20?0.9:1):1);
+const fitPts=()=>Math.floor(LF().fit/5);
+const gymOn=()=>(LF().gymTill||0)>Date.now();
+function foodUse(n){ const d=LF(), was=d.food; d.food=Math.max(0,Math.round((d.food-n)*10)/10); if(was>0&&d.food<=0) toast('<b>You are hungry.</b> Job pay is halved and XP is down 25% until you eat. Buy food in Life → Store.',6000); }
+function lifeTick(){ const d=LF(), now=Date.now(), h=Math.min(72,(now-d.t)/36e5); if(h<0.05) return; d.t=now;
+ foodUse(h*1.2); if(famOn()){ const was=d.happy; d.happy=Math.max(0,Math.round((d.happy-h*0.35)*10)/10); if(was>20&&d.happy<=20) msgAdd({k:'fam',from:CAR.fam.partner.name,title:'We never see you anymore',body:'The family misses you. Plan a dinner, a date night or a trip in Life → Family.'}); }
+ carSaveLocal(); }
+setInterval(()=>{ try{ lifeTick(); }catch(e){} },60000); setTimeout(()=>{ try{ lifeTick(); partyCheck(); }catch(e){} },4000);
+const FOODS=[['snack','Snack','A quick bite.',6,15,0],['groc','Groceries','A few days of home cooking.',28,55,0],['prep','Meal prep week','Clean eating. Well fed: +10% XP for 24 hours.',65,100,24],['rest','Restaurant dinner','Great food. Well fed for 12 hours, and the family loves it.',90,70,12]];
+function foodBuy(id){ const f=FOODS.find(x=>x[0]===id), d=LF(); if(!f) return; const price=Math.round(f[3]*(1+0.5*(famSize()-1)));
+ if(CAR.wallet<price){ toast(`You need ${fmt$(price)}.`,3000); return; } if(d.food>=100&&!f[5]){ toast('You are already full.',2500); return; }
+ CAR.wallet=Math.round((CAR.wallet-price)*100)/100; txAdd(f[1],-price,'food'); d.food=Math.min(100,d.food+f[4]); if(f[5]) d.fedTill=Math.max(d.fedTill||0,Date.now())+f[5]*36e5; if(id==='rest'&&famOn()) d.happy=Math.min(100,d.happy+15);
+ carSave(); careerSync(); try{ sfxPlay('buy',true); }catch(e){} }
+const GYM={week:35,reps:12,food:18};
+function gymJoin(){ const d=LF(); if(CAR.wallet<GYM.week){ toast(`A week at the gym costs ${fmt$(GYM.week)}.`,3000); return; } CAR.wallet=Math.round((CAR.wallet-GYM.week)*100)/100; txAdd('Gym membership · 7 days',-GYM.week,'gym'); d.gymTill=Math.max(d.gymTill||0,Date.now())+7*864e5; carSave(); careerSync(); }
+function gymRep(){ const d=LF(); if(!gymOn()||d.gymDay===today()) return; if(d.food<GYM.food){ toast('Too hungry to train. Eat first.',3000); return; }
+ d.reps=(d.reps||0)+1; try{ sfxPlay('job'); }catch(e){}
+ if(d.reps>=GYM.reps){ const before=fitPts(); d.reps=0; d.gymDay=today(); d.fit++; foodUse(GYM.food); xpAdd(20); if(fitPts()>before){ try{ sfxPlay('pass',true); }catch(e){} toast(`<b>Fitness milestone.</b> ${d.fit} workouts done: +1 skill point.`,5000); } else toast(`<b>Workout done.</b> ${5-d.fit%5} more for a skill point. Come back tomorrow.`,4000); carSave(); careerSync(); }
+ else { carSaveLocal(); const b=$('gymBar'); if(b){ b.style.width=d.reps/GYM.reps*100+'%'; $('gymN').textContent=`${d.reps} / ${GYM.reps} reps`; } } }
+const PARTIES=[[1,'First payout drinks','The funded traders in town are buying a round.',40,80,null],[3,'Rooftop party','A rooftop full of prop traders. Smart casual.',150,200,null],[5,'Yacht party','A day on the water with the desk heads.',400,400,null],
+ [10,'Monaco gala','Black tie. You need a suit or tuxedo.',1200,900,'suit'],[20,'Private island weekend','Invitation only. Black tie.',4000,2000,'suit'],[35,'KE Legends dinner','The top table.',9000,4000,'suit']];
+function partyCheck(){ const d=LF().party; while(d.sent<PARTIES.length && CAR.payouts>=PARTIES[d.sent][0]){ const p=PARTIES[d.sent]; d.sent++; msgAdd({k:'party',pid:d.sent-1,from:'Invitation',title:p[1],body:`${p[2]} Going costs ${fmt$(p[3])} and earns ${p[4]} XP and a new contact.`}); toast(`<b>You are invited: ${p[1]}.</b> Check Messages on your phone.`,5500); try{ sfxPlay('alert',true); }catch(e){} carSave(); } }
+function partyGo(pid){ const p=PARTIES[pid], d=LF(); if(!p) return; const m=(CAR.inbox||[]).find(x=>x.k==='party'&&x.pid===pid&&!x.went); if(!m) return;
+ if(p[5]==='suit'&&BASE(eqNow().top)!=='suit'){ toast('Dress code: wear a suit or tuxedo (Life → Clothes).',4000); return; } if(CAR.wallet<p[3]){ toast(`You need ${fmt$(p[3])}.`,3000); return; }
+ CAR.wallet=Math.round((CAR.wallet-p[3])*100)/100; txAdd(p[1],-p[3],'party'); m.went=true; d.party.done++; d.party.net++; xpAdd(p[4]); if(famOn()) d.happy=Math.max(0,d.happy-5);
+ carSave(); careerSync(); phoneRender(); try{ sfxPlay('payout',true); }catch(e){} toast(`<b>${p[1]}.</b> Great night. Your network grew: +3% job pay (now +${d.party.net*3}%).`,5500); }
+const FAMACT=[['play','Play with the kids','Free, once a day.',0,10,k=>k>0],['dinner','Family dinner','A proper meal together.',80,20,()=>true],['date','Date night','Just the two of you.',120,25,()=>true],['trip','Family vacation','A week away. Everyone remembers it.',1500,60,()=>true]];
+function famDo(id){ const a=FAMACT.find(x=>x[0]===id), d=LF(); if(!a||!famOn()) return; if(id==='play'){ if(d.playDay===today()) return; d.playDay=today(); } const price=id==='play'?0:Math.round(a[3]*(id==='date'?1:1+0.25*(famSize()-2)));
+ if(CAR.wallet<price){ toast(`You need ${fmt$(price)}.`,3000); return; } if(price){ CAR.wallet=Math.round((CAR.wallet-price)*100)/100; txAdd(a[1],-price,'life'); }
+ d.happy=Math.min(100,d.happy+a[4]); if(id==='dinner') d.food=Math.min(100,d.food+40); xpAdd(id==='trip'?150:10); carSave(); careerSync(); try{ sfxPlay(price?'buy':'pet',true); }catch(e){} }
+const meter=(l,v,c,sub)=>`<div class="lf-m"><div class="l"><span>${l}</span><b>${Math.round(v)}%</b></div><div class="m"><i style="width:${Math.max(0,Math.min(100,v))}%;background:${c}"></i></div>${sub?`<em>${sub}</em>`:''}</div>`;
+function needsHTML(){ const d=LF(); return `<div class="lf-needs">${meter('Food',d.food,d.food>30?'var(--up)':'var(--down)',hungry()?'Hungry: job pay −50%, XP −25%':wellFed()?'Well fed: +10% XP':'')}
+ <div class="lf-m"><div class="l"><span>Fitness</span><b>${d.fit} workouts</b></div><div class="m"><i style="width:${d.fit%5*20}%;background:var(--accent)"></i></div><em>${fitPts()} skill point${fitPts()===1?'':'s'} earned · ${5-d.fit%5} to the next</em></div>
+ ${famOn()?meter('Family happiness',d.happy,d.happy>=70?'var(--up)':d.happy>20?'#e8b93e':'var(--down)',d.happy>=70?'Happy home: +10% XP':d.happy<=20?'Neglected: −10% XP':''):''}
+ <div class="lf-m"><div class="l"><span>Network</span><b>${d.party.net} contact${d.party.net===1?'':'s'}</b></div><em>+${d.party.net*3}% job pay · parties come with payouts</em></div></div>`; }
+function storeHTML(){ const k=famSize(); return `<p class="sub" style="margin:0 0 10px">Food runs down over time and with every session and workout. ${k>1?`You shop for ${k} people.`:''}</p><div class="shop-list">${FOODS.map(f=>{ const price=Math.round(f[3]*(1+0.5*(k-1))); return `<div class="shop-it"><i class="dot" style="background:#2f9e5b"></i><div class="nm"><b>${f[1]}</b><span>${fmt$(price)} · +${f[4]} food · ${f[2]}</span></div><button class="primary" data-food="${f[0]}" ${CAR.wallet<price?'disabled':''}>Buy</button></div>`; }).join('')}</div>`; }
+function gymHTML(){ const d=LF(), done=d.gymDay===today(), left=Math.max(0,Math.ceil(((d.gymTill||0)-Date.now())/864e5));
+ return `<div class="card gym"><div class="card-h"><b>Iron District Gym</b><span class="badge ${gymOn()?'ok':''}">${gymOn()?left+' DAY'+(left===1?'':'S')+' LEFT':'NO MEMBERSHIP'}</span></div>
+ <p class="sub" style="margin:0">One workout a day. Every 5 workouts earns a permanent skill point. A workout uses ${GYM.food} food.</p>
+ ${gymOn()?(done?`<div class="hint">Workout done for today. Rest, eat, and come back tomorrow.</div>`:`<div class="meter"><div class="l"><span id="gymN">${d.reps||0} / ${GYM.reps} reps</span></div><div class="m"><i id="gymBar" style="width:${(d.reps||0)/GYM.reps*100}%"></i></div></div><button class="primary job-btn" id="gymRep">Lift</button>`)
+  :`<button class="primary" id="gymJoin" ${CAR.wallet<GYM.week?'disabled':''}>Join for 7 days · ${fmt$(GYM.week)}</button>`}
+ ${gymOn()?`<button class="link" id="gymJoin">Extend 7 days · ${fmt$(GYM.week)}</button>`:''}</div>`; }
+function famLifeHTML(){ if(!famOn()) return ''; const d=LF(), kids=(CAR.fam.kids||[]).length; return `<div class="sec">Family time</div><div class="shop-list">${FAMACT.filter(a=>a[5](kids)).map(a=>{ const price=a[0]==='play'?0:Math.round(a[3]*(a[0]==='date'?1:1+0.25*(famSize()-2))), used=a[0]==='play'&&d.playDay===today();
+  return `<div class="shop-it"><i class="dot" style="background:#e0567d"></i><div class="nm"><b>${a[1]}</b><span>${price?fmt$(price):'Free'} · +${a[4]} happiness · ${a[2]}</span></div><button class="primary" data-fam="${a[0]}" ${used||CAR.wallet<price?'disabled':''}>${used?'Done today':'Go'}</button></div>`; }).join('')}</div>`; }
+function lifeBind(B){ B.querySelectorAll('[data-food]').forEach(b=>b.onclick=()=>foodBuy(b.dataset.food)); B.querySelectorAll('[data-fam]').forEach(b=>b.onclick=()=>famDo(b.dataset.fam));
+ const j=B.querySelectorAll('#gymJoin'); j.forEach(x=>x.onclick=gymJoin); const r=B.querySelector('#gymRep'); if(r){ r.onclick=gymRep; r.addEventListener('keydown',e=>{ if(e.repeat) e.preventDefault(); }); } }
+
 /* ---- Career page: character, accounts, shop, job, leaderboard, profile ---- */
 const HUB={page:'life',shop:'Clothes',try:null,feed:[],lb:null,lbAt:0,lbErr:'',auth:'in',jt:0};
 const CR=HUB;
@@ -5225,7 +5279,7 @@ function careerSync(){
 function careerScene(){ const t=$('crTilt'); if(!t) return; const eq=eqNow(); if(HUB.try){ const it=ITEM[HUB.try]; eq[it.slot]=it.id; } t.innerHTML=avScene(eq,CAR.look); }
 function careerWave(){ const t=$('crTilt'); if(!t) return; t.classList.remove('wave'); void t.offsetWidth; t.classList.add('wave'); }
 function careerOpen(tab){ if(tab && ['Clothes','Accessories','Home','Cars','Extras','Look'].includes(tab)){ HUB.shop=tab; hubOpen('shop'); } else hubOpen(); }
-const jobMult=()=>1+(skill('pay1')?0.25:0)+(skill('pay2')?0.5:0);
+const jobMult=()=>(1+(skill('pay1')?0.25:0)+(skill('pay2')?0.5:0)+0.03*LF().party.net)*(hungry()?0.5:1);
 const jobRole=()=>{ let r=JOBS[0], i=0; JOBS.forEach((j,k)=>{ if(CAR.job.clicks>=j[0]){ r=j; i=k; } }); return {i,name:r[1],pay:Math.round(r[2]*jobMult()*100)/100,next:JOBS[i+1]||null,from:r[0]}; };
 setInterval(()=>{ if(skill('auto') && typeof hubShown==='function' && hubShown() && HUB.page==='job' && !document.hidden){ HUB.jt=0; jobClick(); } },3000);
 function hubRank(){ const A=CAR.accts; return A.some(a=>a.stage==='funded')?['FUNDED TRADER','ok']:A.length?['IN EVALUATION','run']:['PRACTICE','']; }
@@ -5281,9 +5335,11 @@ function hubRender(){
  } else if(P==='xaccounts'){
   B.innerHTML=`<div class="hub-wide"><h2>Accounts</h2><p class="sub">Buy an evaluation, pass it, and trade the funded account for payouts. The switch on each account decides whether your trades count on it.</p><div id="hubAccts"></div></div>`;
  } else if(P==='life'){
-  const tabs=['Clothes','Accessories','Home','Cars','Extras','Family','Look'];
+  const tabs=['Clothes','Accessories','Home','Cars','Extras','Store','Gym','Family','Look'];
   let body;
-  if(HUB.shop==='Family') body=famHTML();
+  if(HUB.shop==='Family') body=famHTML()+famLifeHTML();
+  else if(HUB.shop==='Store') body=storeHTML();
+  else if(HUB.shop==='Gym') body=gymHTML();
   else if(HUB.shop==='Look'){ const L=CAR.look, sw=(k,vals)=>vals.map(v=>`<button data-lk="${k}" data-v="${v}" class="${lk(L,k)===v||L[k]===v?'act':''}" style="background:${v}"></button>`).join('');
    body=`<div class="cr-look"><div><div class="sec" style="margin-top:0">Skin</div><div class="sws">${sw('skin',['#f6d3bd','#e8b796','#d09a72','#a8734f','#7b4f33','#523222'])}</div></div>
     <div><div class="sec">Hair colour</div><div class="sws">${sw('hair',['#16110d','#2b2118','#5a3a22','#9a6a3a','#d8b46a','#b23b2e','#8d95a6','#2f80ff'])}</div></div>
@@ -5300,8 +5356,8 @@ function hubRender(){
    <div class="hub-main"><h2>Life</h2><p class="sub">Your home, your character and everything you own. Wallet money comes from payouts and the job.${CAR.eq.pet?' Click your dog to pet it.':''}</p>
     <div class="stats4">${[['Wallet',usd(CAR.wallet)],['Savings',usd((CAR.sav&&CAR.sav.bal)||0)],['Living costs',fmt$(dailyCost())+' / day'],['Net worth',fmt$(netWorth())]].map(([l,v])=>`<div><span>${l}</span><b>${v}</b></div>`).join('')}</div>
     <div class="card house"><div class="card-h"><b>Household</b><button class="link" data-phone="bank">Open bank</button></div>${costLines().length?`<div class="rows">${costLines().map(([a,b])=>`<div><span>${cesc(a)}</span><span class="mut">${fmt$(b)} / day</span></div>`).join('')}</div>`:'<div class="hint">No running costs yet. Homes, cars, family and pets cost a little every day you own them.</div>'}${skill('frugal')?'<div class="hint">Frugal living: −30% applied.</div>':''}</div>
-    <div class="pills">${tabs.map(t=>`<button data-st="${t}" class="${t===HUB.shop?'act':''}">${t}</button>`).join('')}</div>${body}</div></div>`;
-  stageBind(); famBind(B); { const mc=$('myCard'); if(mc) mc.onclick=myProfCard; } B.querySelectorAll('[data-phone]').forEach(b=>b.onclick=()=>{ hubOpen('chart'); phoneOpen(b.dataset.phone); });
+    ${needsHTML()}<div class="pills">${tabs.map(t=>`<button data-st="${t}" class="${t===HUB.shop?'act':''}">${t}</button>`).join('')}</div>${body}</div></div>`;
+  stageBind(); famBind(B); lifeBind(B); { const mc=$('myCard'); if(mc) mc.onclick=myProfCard; } B.querySelectorAll('[data-phone]').forEach(b=>b.onclick=()=>{ hubOpen('chart'); phoneOpen(b.dataset.phone); });
   B.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{ HUB.shop=b.dataset.st; HUB.try=null; hubRender(); });
   B.querySelectorAll('[data-lk]').forEach(b=>b.onclick=()=>{ CAR.look[b.dataset.lk]=b.dataset.v; carSave(); hubRender(); });
   B.querySelectorAll('.shop-it').forEach(el=>{ el.onmouseenter=()=>{ HUB.try=el.dataset.it; careerScene(); }; el.onmouseleave=()=>{ HUB.try=null; careerScene(); }; });
@@ -5348,7 +5404,7 @@ function jobPaint(){
 function jobClick(){
  const now=performance.now(); if(now-HUB.jt<50) return; HUB.jt=now;
  const before=jobRole(), j=CAR.job;
- j.clicks=(j.clicks||0)+1; j.earned=Math.round(((j.earned||0)+before.pay)*100)/100; CAR.wallet=Math.round((CAR.wallet+before.pay)*100)/100; txAdd('Order desk',before.pay,'job'); misBump('job100',1);
+ j.clicks=(j.clicks||0)+1; j.earned=Math.round(((j.earned||0)+before.pay)*100)/100; CAR.wallet=Math.round((CAR.wallet+before.pay)*100)/100; txAdd('Order desk',before.pay,'job'); misBump('job100',1); foodUse(0.04);
  const sym=['NQ','ES','MNQ','MES','CL','GC'][Math.floor(Math.random()*6)], px={NQ:21400,ES:6050,MNQ:21400,MES:6050,CL:71,GC:2650}[sym]*(1+(Math.random()-0.5)*0.01);
  HUB.feed.unshift([`${Math.random()<0.5?'BUY':'SELL'} ${1+Math.floor(Math.random()*5)} ${sym} @ ${px.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})} · filled`,before.pay]); HUB.feed.length=Math.min(HUB.feed.length,6);
  const after=jobRole(); if(after.i>before.i) toast(`<b>Promoted to ${after.name}.</b> You now earn ${usd(after.pay)} per ticket.`,4500);
@@ -5370,7 +5426,7 @@ function hubOpen(page){
 }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape' && hubShown() && !/^(INPUT|TEXTAREA|SELECT)$/.test((e.target||{}).tagName||'')) hubOpen('chart'); });
 
-try{ Object.assign(window.__bt,{chTicks,chSpd,chClockStop,chClockRun,CH,chart,eqChart,oscChart,chAfterPull,chSnap,txAdd,financeItem,loanPay,chAccept,chEnd,chTick,CHS,phoneOpen,misBump,misClaim,achCheck,credit,hofAdd,openPos,closePos,CAR,careerSync,hubOpen,HUB,jobClick,skBuy,xpAdd,skill,planSpec,chartFull,bgfxSync,cfg:()=>cfg,famScene,sfxPlay,sessSave,sessApply}); }catch(e){}
+try{ Object.assign(window.__bt,{LF,foodBuy,gymJoin,gymRep,partyCheck,partyGo,famDo,lifeTick,chTicks,chSpd,chClockStop,chClockRun,CH,chart,eqChart,oscChart,chAfterPull,chSnap,txAdd,financeItem,loanPay,chAccept,chEnd,chTick,CHS,phoneOpen,misBump,misClaim,achCheck,credit,hofAdd,openPos,closePos,CAR,careerSync,hubOpen,HUB,jobClick,skBuy,xpAdd,skill,planSpec,chartFull,bgfxSync,cfg:()=>cfg,famScene,sfxPlay,sessSave,sessApply}); }catch(e){}
 
 
 /* ---- save the chart session (symbol, replay spot, trades) in this browser and online ---- */
