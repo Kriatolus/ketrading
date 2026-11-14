@@ -196,7 +196,7 @@ main{flex:1;display:flex;min-height:0}
 #replayBar{flex:none;display:flex;flex-wrap:wrap;gap:6px;row-gap:6px;align-items:center;justify-content:center;padding:7px 10px;background:var(--panel);border-top:1px solid var(--border)}
 #replayBar.hidden{display:none}
 #replayBar .grp{display:flex;align-items:center;gap:5px}
-#gotoDate{width:160px}#mode{width:104px}#sessSel{width:148px}#tickMs{width:104px}#pace{width:128px}
+#gotoDate{width:184px}#mode{width:104px}#sessSel{width:148px}#tickMs{width:104px}#pace{width:128px}
 #playBtn{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600;min-width:86px}
 #playBtn:hover{background:color-mix(in srgb,var(--accent) 88%,#fff)}
 #playBtn svg.ki,#btnStep svg.ki{width:16px;height:16px}
@@ -285,7 +285,7 @@ kbd{font:500 10px var(--font);background:var(--btn);border:1px solid var(--borde
 #top>*{flex-shrink:0}#top>#symSel{flex-shrink:1}
 @media(max-width:1760px){.chip.opt{display:none}}
 @media(max-width:1620px){#top .lb{display:none}#top button.wl{width:var(--h);padding:0}.lbl .lt{display:none}#replayBar .lb{display:none}#btnSelect{width:var(--h);padding:0}}
-@media(max-width:1380px){#tfBtns{display:none}#tf{display:block}#sessSel{width:122px}#mode{width:92px}#speed{width:56px}#playBtn{min-width:78px}#gotoDate{width:150px}#replayBar{gap:5px;padding:7px 6px}#replayBar button:not(.icon):not(#playBtn){padding:0 7px}#replayBar .sep{display:none}#btnSessNext{font-size:0;gap:0;width:var(--h);padding:0!important}#sessSel{width:112px}aside{width:304px}body.jwide aside{width:440px}}
+@media(max-width:1380px){#tfBtns{display:none}#tf{display:block}#sessSel{width:122px}#mode{width:92px}#speed{width:56px}#playBtn{min-width:78px}#gotoDate{width:176px}#replayBar{gap:5px;padding:7px 6px}#replayBar button:not(.icon):not(#playBtn){padding:0 7px}#replayBar .sep{display:none}#btnSessNext{font-size:0;gap:0;width:var(--h);padding:0!important}#sessSel{width:112px}aside{width:304px}body.jwide aside{width:440px}}
 @media(max-width:1180px){.wordmark{display:none}.brand{padding:0 12px}aside{width:292px}.chip{display:none}}
 
 /* ===== v2: split view, HUD, eval, coin ===== */
@@ -318,6 +318,7 @@ kbd{font:500 10px var(--font);background:var(--btn);border:1px solid var(--borde
 #riskLine{margin-top:8px;min-height:16px}
 #riskLine b{color:var(--text);font-weight:600}
 button.on:not(.ghost){border-color:var(--accent);color:var(--accent)}
+button.primary.on:not(.ghost){color:var(--accent-ink);box-shadow:inset 0 0 0 1px rgba(255,255,255,.28);filter:brightness(1.08)}
 .ecard{border:1px solid var(--border);border-radius:10px;padding:11px 12px;margin-bottom:14px;background:var(--bg)}
 .ehead{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .ehead b{font-size:13px;font-weight:600}
@@ -371,7 +372,7 @@ button.on:not(.ghost){border-color:var(--accent);color:var(--accent)}
 .help p b{color:var(--text);font-weight:600}
 @media(max-width:1500px){#tfBtns{display:none}#tf{display:block}}
 @media(max-width:1240px){#pxChip{display:none}}
-@media(max-width:1500px){#replayBar .sep{display:none}#btnSessNext{font-size:0;gap:0;width:var(--h);padding:0!important}#sessSel{width:128px}#gotoDate{width:150px}}
+@media(max-width:1500px){#replayBar .sep{display:none}#btnSessNext{font-size:0;gap:0;width:var(--h);padding:0!important}#sessSel{width:128px}#gotoDate{width:176px}}
 /* ---- v3: toast, indicator dialog, career, mindset ---- */
 #toast{position:fixed;left:50%;bottom:54px;transform:translate(-50%,12px);z-index:150;max-width:min(560px,90vw);background:var(--pop);color:var(--text);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:10px;padding:10px 14px;font-size:12.5px;line-height:1.5;box-shadow:0 14px 40px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
 #toast.on{opacity:1;transform:translate(-50%,0)}
@@ -494,11 +495,15 @@ button.link:hover{background:none;text-decoration:underline}
 @media(max-width:1260px){#top #btnMind,#top #btnView{display:none}}
 @media(max-width:1940px){#tfBtns{display:none}#tf{display:block}}
 .snd-list{display:flex;flex-direction:column;gap:6px;margin:8px 0}
-.snd-row{display:grid;grid-template-columns:1fr 170px 30px;gap:6px;align-items:center;font-size:12.5px}
+.snd-row{display:grid;grid-template-columns:minmax(0,1fr) 158px 28px;gap:6px;align-items:center;font-size:12.5px}.snd-row>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .snd-row select{width:100%}.snd-row button{width:30px;padding:0}
 .av-pet{cursor:pointer}
+input[type=number]{-moz-appearance:textfield;appearance:textfield}input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input,select{color-scheme:dark}
 .ev-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}@media(max-width:1100px){.ev-grid{grid-template-columns:1fr}}
 .ev .ev-k{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 10px}.ev .ev-k div{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 9px;display:flex;flex-direction:column;gap:2px}.ev .ev-k span{font-size:11px;color:var(--muted)}.ev .ev-k b{font-size:13px}
+.props-h{align-items:flex-start;margin-bottom:14px}.props-h .sub{margin-bottom:0}
+.hub-wide .hub-main{display:flex;flex-direction:column;gap:14px}.hub-wide .hub-main>.stats4{margin:0}
 .badge.sz{background:var(--btn);color:var(--text);margin-right:4px}
 #evStore.flash{animation:evFlash 1.2s ease}@keyframes evFlash{0%{color:var(--accent)}100%{color:inherit}}
 .pet-heart{position:absolute;pointer-events:none;font-size:22px;color:#ff5c8a;animation:petUp 1.1s ease-out forwards;z-index:3}
@@ -1461,7 +1466,7 @@ function openPos(side, fillPx, slOv, tpOv, why, qtyOv){
  S.pos={side, entry:price, idx:i, time:t, qty:qtyOv ?? (+$('qty').value||1), pv:+$('contract').value||1, comm:+$('comm').value||0,
   sl: slP>0 ? price-side*slP : null, tp: tpP>0 ? price+side*tpP : null, risk: slP>0 ? slP : null};
  try{ S.pos.sync=syncEnter(); }catch(e){ S.pos.sync=[]; } S.pos.nSync=S.pos.sync.length;
- S.markers.push({time:t, position:side>0?'belowBar':'aboveBar', color:side>0?SIG.up:SIG.down, shape:side>0?'arrowUp':'arrowDown', text:(why?why+' ':'')+(side>0?'BUY ':'SELL ')+price.toFixed(2)});
+ S.markers.push({time:t, position:side>0?'belowBar':'aboveBar', color:side>0?SIG.up:SIG.down, shape:side>0?'arrowUp':'arrowDown', size:0.8, text:''});
  sfxPlay('entry');
  if(!why) msg(''); sessSave(true); drawLines(); refresh();
 }
@@ -1499,7 +1504,7 @@ function drawOrders(){
  (S.ordLines||[]).forEach(l=>candles.removePriceLine(l));
  S.ordLines=[];
  const box=$('ordersBox');
- box.innerHTML = S.orders.length ? '<h3>Pending orders</h3>'+S.orders.map(o=>`<div class="symrow"><span class="${o.side>0?'pos':'neg'}">${o.side>0?'BUY':'SELL'} ${o.type==='stop'?'STP':'LMT'} ${o.price.toFixed(2)}</span><span>${o.sl?'SL '+o.sl+' ':''}${o.tp?'TP '+o.tp:''}</span><button data-cancel="${o.id}">Cancel</button></div>`).join('') : '';
+ box.innerHTML = S.orders.length ? '<h3>Working orders</h3>'+S.orders.map(o=>`<div class="symrow"><span class="${o.side>0?'pos':'neg'}">${o.side>0?'BUY':'SELL'} ${o.type==='stop'?'STP':'LMT'} ${o.price.toFixed(2)}</span><span>${o.sl?'SL '+o.sl+' ':''}${o.tp?'TP '+o.tp:''}</span><button data-cancel="${o.id}">Cancel</button></div>`).join('') : '';
  box.querySelectorAll('[data-cancel]').forEach(b=>b.onclick=()=>cancelOrder(+b.dataset.cancel));
 }
 function manualClose(){
@@ -2444,6 +2449,7 @@ function placeOrder(side,price,type,slO,tpO,qty){
 
 /* ---- modal dialog ---- */
 let DLG=null;
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && DLG && DLG.close && !$('dlg').hidden){ e.stopImmediatePropagation(); DLG.close(false); } },true);
 function dialog(title,tabs,onOk,onCancel){
  const m=$('dlg'); DLG={onOk,onCancel};
  m.innerHTML=`<div class="dlg-box"><div class="dlg-h"><b>${title}</b><button class="dlg-x" id="dlgX">&times;</button></div>
@@ -2454,6 +2460,8 @@ function dialog(title,tabs,onOk,onCancel){
  m.querySelectorAll('[data-tab]').forEach(el=>el.onclick=()=>{ m.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('act',x===el)); m.querySelectorAll('[data-pane]').forEach(p=>p.hidden=p.dataset.pane!==el.dataset.tab); });
  const close=ok=>{ m.hidden=true; (ok?onOk:onCancel)&&(ok?onOk:onCancel)(); DLG=null; };
  $('dlgOk').onclick=()=>close(true); $('dlgCancel').onclick=()=>close(false); $('dlgX').onclick=()=>close(false);
+ DLG.close=close; m.onmousedown=e=>{ if(e.target===m) close(false); };
+ if(!onOk && !onCancel){ $('dlgCancel').hidden=true; $('dlgOk').textContent='Close'; }
  tabs.forEach(t=>t.bind&&t.bind(m));
 }
 const DASHES='<option value="solid">&#8212;&#8212; solid</option><option value="dashed">- - - dashed</option><option value="dotted">&middot;&middot;&middot; dotted</option>';
@@ -2611,6 +2619,7 @@ function submitOP(){
  }
  opUpdate(); refresh();
 }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !$('op').hidden && !(e.target&&/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) && (typeof hubShown!=='function'||!hubShown())) toggleOP(false); });
 function toggleOP(show,side){
  const p=$('op'); p.hidden = show===undefined ? !p.hidden : !show;
  if(side) OP.side=side;
@@ -2764,12 +2773,12 @@ function updateStats(){
   cell('Win rate', s.wr.toFixed(1)+'%', s.n ? (s.wr>=50?'pos':'neg') : ''),
   cell(`Long WR (${s.ln})`, s.lwr.toFixed(1)+'%'),
   cell(`Short WR (${s.sn})`, s.swr.toFixed(1)+'%'),
-  cell('Profit factor', isFinite(s.pf)?s.pf.toFixed(2):'inf', s.pf>=1?'pos':'neg'),
+  cell('Profit factor', s.n?(isFinite(s.pf)?s.pf.toFixed(2):'∞'):'-', s.n?(s.pf>=1?'pos':'neg'):''),
   cell('Expectancy $/trade', sg(s.exp), cls(s.exp)),
   cell('Avg R (needs SL)', s.avgR==null?'-':sg(s.avgR)+'R', s.avgR==null?'':cls(s.avgR)),
   cell('Max losing streak', s.maxL),
-  cell('Avg win $', sg(s.avgW), 'pos'),
-  cell('Avg loss $', s.avgL.toFixed(2), 'neg'),
+  cell('Avg win $', sg(s.avgW), s.avgW?'pos':''),
+  cell('Avg loss $', s.avgL.toFixed(2), s.avgL?'neg':''),
   cell('Best trade $', sg(s.best), cls(s.best)),
   cell('Worst trade $', sg(s.worst), cls(s.worst)),
   cell('Max drawdown $', (s.mdd>0?'-':'')+s.mdd.toFixed(2), s.mdd>0?'neg':''),
@@ -3133,7 +3142,7 @@ function ordGhost(w,h){
 }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape' && S.ordMode) ordMode(0); });
 
-/* ---- Lucid 25K accounts: bought evaluations, funded accounts, payouts, trade syncer ---- */
+/* ---- Lucid accounts (25K / 50K / 150K): bought evaluations, funded accounts, payouts, trade syncer ---- */
 const EVAL={start:25000,lock:100,minis:2,micros:20,price:100,tgt:1250,mll:1000,cons:0.5,max:5};
 /* LucidFlex sizes: target, end-of-day trailing max loss (locks at start + $100), size limits, list price, payout cap, minimum profit for a winning day */
 const LSIZES={25:{k:25,start:25000,tgt:1250,mll:1000,minis:2,micros:20,price:100,cap:1000,minDay:100},
@@ -3251,7 +3260,7 @@ function acctUpdate(){
    if(ex) S.pos.sync=S.pos.sync.filter(x=>x!==a.id);
    CAR.accts=CAR.accts.filter(x=>x!==a); CAR.blown++; delete SYNC.prev[a.id]; dirty=true;
    try{ sfxPlay('blown',true); }catch(e){}
-   toast(`<b>${cesc(a.name)} hit the max loss limit.</b> The ${a.stage==='funded'?'funded account':'evaluation'} is closed. Buy a new evaluation on the Career page to go again.`,7000);
+   toast(`<b>${cesc(a.name)} hit the max loss limit.</b> The ${a.stage==='funded'?'funded account':'evaluation'} is closed. Buy a new evaluation under Prop firms to go again.`,7000);
   } else { SYNC.prev[a.id]={n:S.eq.length,floor:c.floor,k,ok};
    if(a.stage==='eval' && c.pass && !a.passFx){ a.passFx=1; dirty=true; try{ sfxPlay('pass',true); }catch(e){} toast(`<b>You did it! ${cesc(a.name)} passed the evaluation.</b> Open Prop firms to move it to a funded account.`,7000); } }
  }
@@ -3300,7 +3309,7 @@ function acctRender(){
    (A.length?`<div class="ac-grid">${A.map((a,i)=>acctCard(a,C[i],true)).join('')}</div>`:`<div class="card empty">You have no account yet. Pick an evaluation below, pass it, and it becomes a funded account that pays out.</div>`)+
    `<div class="sec" id="evStore">Eval store <span>LucidFlex · one-time fee · list prices</span></div><div class="ev-grid">${Object.values(LSIZES).map(P=>{ const short=P.price-CAR.wallet;
     return `<div class="card prod ev"><div class="card-h"><b>${P.k}K evaluation</b><span class="price">${money(P.price)}</span></div>
-     <div class="ev-k"><div><span>Profit target</span><b>${money(P.tgt)}</b></div><div><span>Max loss (EOD)</span><b>${money(P.mll)}</b></div><div><span>Max size</span><b>${P.minis} minis / ${P.micros} micros</b></div><div><span>Payout cap</span><b>${money(P.cap)}</b></div></div>
+     <div class="ev-k"><div><span>Profit target</span><b>${money(P.tgt)}</b></div><div><span>Max loss (EOD)</span><b>${money(P.mll)}</b></div><div><span>Minis / micros</span><b>${P.minis} / ${P.micros}</b></div><div><span>Payout cap</span><b>${money(P.cap)}</b></div></div>
      <ul class="erules"><li>Starts at ${money(P.start)}. Max loss trails your end-of-day balance and locks at ${money(P.start+EVAL.lock)}.</li><li>Consistency: your best day can be at most 50% of total profit when you pass.</li><li>Funded: 5 winning days of ${money(P.minDay)}+ each, then up to 50% of profit (min $500, max ${money(P.cap)}). You keep 90%.</li></ul>
      <button class="primary ac-btn" data-buy="${P.k}" ${full||short>0?'disabled':''}>${full?`Limit of ${EVAL.max} accounts reached`:short>0?`Need ${money(short)} more`:'Buy '+P.k+'K evaluation'}</button>${!full&&short>0?`<button class="link ac-link" data-hub="job">Earn it at the job</button>`:''}</div>`; }).join('')}</div>
    <div class="sec">Tools</div><div class="hub-grid2">
@@ -3415,7 +3424,7 @@ function coinBuild(){
   const move=ev=>{ cfg.coin.x=Math.max(0,Math.min(r.width-60,ev.clientX-ox)); cfg.coin.y=Math.max(0,Math.min(r.height-60,ev.clientY-oy)); place(); };
   const up=()=>{ window.removeEventListener('mousemove',move); window.removeEventListener('mouseup',up); saveCfg(); };
   window.addEventListener('mousemove',move); window.addEventListener('mouseup',up); });
- window.addEventListener('resize',place);
+ window.addEventListener('resize',place); try{ new ResizeObserver(place).observe($('chartRow')); }catch(e){}
  coinBuild.sync=()=>{ c.hidden=!cfg.coin.on; $('coinTxt').textContent=contractName()&&contractName()!=='Custom'?contractName():'K'; place(); };
  coinBuild.sync();
 }
@@ -3433,8 +3442,8 @@ function helpDialog(){
   {name:'Replay',html:'<div class="help">'+P('<b>1. Pick a start.</b> Use Select bar, a date, or the session jump (NY AM open, London, Asia) on the bar under the chart.')+P('<b>2. Press Play.</b> Live mode moves price one tick per second on every timeframe. Candles mode reveals one whole candle per step.')+P('<b>3. Switch timeframe any time.</b> Every timeframe stays at the same moment and keeps playing.')+P('<b>Split screen</b> shows your second symbol (for example ES) next to the main chart. Drag the divider to resize it.')+'</div>'},
   {name:'Trading',html:'<div class="help">'+P('<b>Market order:</b> Buy or Sell in the Trade tab, the buttons on the chart, or keys B and S.')+P('<b>Pending order:</b> press Buy on chart or Sell on chart, then click the price. Below the market a buy becomes a limit; above it becomes a stop. The reverse applies to sells.')+P('<b>Move things:</b> drag any order, stop loss or take profit line. Press TP or SL on a line to add an exit.')+P('<b>Your open P&amp;L</b> is shown live on the chart and in the Trade tab.')+'</div>'},
   {name:'Indicators',html:'<div class="help">'+P('<b>Quarter boxes</b> draw each quarter on the chart. <b>Quarter timeline</b> is the strip under the chart. They are two separate switches in Settings.')+P('<b>Session highs and lows</b> mark the high and low of Asia, London, NY AM and NY PM in New York time.')+P('<b>True opens</b> and <b>SMT</b> are also in Settings, with themes, accent and chart colours.')+'</div>'},
-  {name:'Lucid 25K',html:'<div class="help">'+P('Turn it on in the <b>Dashboard</b> tab. You start at $25,000 and must reach the profit target in closed profit.')+P('The <b>max loss floor</b> starts $1,000 below your balance, moves up only at the end of a trading day, and locks at $25,100. If equity touches it, the attempt fails.')+P('Size is limited to 2 minis or 20 micros. LucidFlex adds the 50% consistency rule.')+'</div>'},
-  {name:'Career',html:'<div class="help">'+P('<b>The Career page.</b> Press Career in the top bar. It holds your character, accounts, the eval store, the shop, the job and the leaderboard.')+P('<b>1. Get an evaluation.</b> You start with $50, the price of one Lucid 25K evaluation. If your wallet is empty, earn money at the job.')+P('<b>2. Pass.</b> Reach +$1,250 in closed profit without touching the max loss limit, then move the account to funded.')+P('<b>3. Payouts.</b> After five winning days you can request up to half of the profit, at most $1,000. 90% goes to your wallet.')+P('<b>4. Trade syncer.</b> For $1,800 you can trade several accounts at once. Every entry is copied to each account that is switched on.')+P('<b>Practice mode.</b> With no account switched on, trades are not scored.')+P('<b>Sounds.</b> A take profit plays an order-filled sound and a stop loss plays a laugh. Change or mute them in Settings.')+'</div>'}
+  {name:'Prop firms',html:'<div class="help">'+P('<b>Buy an evaluation</b> under <b>Prop firms</b>: Lucid 25K ($100), 50K ($130) or 150K ($345). Each has Lucid\'s own profit target, end-of-day trailing max loss and size limit.')+P('<b>Pass it</b> by reaching the profit target in closed profit without touching the max loss, with no single day over 50% of your total profit (the consistency rule).')+P('<b>Funded:</b> no consistency rule. After five winning days ($100 / $150 / $250 or more each, by size) you can take up to half your profit, between $500 and the cap for the size. You keep 90%.')+'</div>'},
+  {name:'Sections',html:'<div class="help">'+P('<b>Trading</b> is the chart. <b>Life</b> is your home, character and shop. <b>Prop firms</b> holds your accounts and the eval store. <b>Job</b> pays wallet money per ticket.')+P('<b>Saving.</b> Your replay spot, closed trades and settings save in this browser, and online too when you sign in under your profile.')+P('<b>Trade syncer.</b> For $1,800 you can trade several accounts at once. Every entry is copied to each account that is switched on.')+P('<b>Sounds.</b> Pick a sound for every event (entry, take profit, stop loss, passing, payouts, your dog) in Settings.')+'</div>'}
  ],null,null);
 }
 on('btnSplit',()=>setSplit(!cfg.split));
@@ -3486,9 +3495,9 @@ const OSCS=[['none','None'],['dqt','Quarter timeline (Daye)'],['rsi','RSI'],['ma
 
 /* ---- sounds ---- */
 const SFX={ctx:null,out:null,last:{},voice:null};
-const SND_EVENTS=[['entry','Enter a trade','school'],['tp','Take profit (order filled)','voice'],['sl','Stop loss','laugh'],['close','Close a trade yourself','chime'],
- ['pass','Pass an evaluation','youdid'],['payout','Get a payout','cash'],['buy','Buy something','cash'],['blown','Lose an account','sad'],['pet','Pet your dog','bark'],['job','Process a job ticket','click'],['alert','Price alert','ding']];
-const SND_LIB=[['none','None'],['school','School bell'],['bell','Small bell'],['voice','"Order filled" (man\'s voice)'],['youdid','"You did it!" hit'],['chime','Chime'],['ding','Ding'],['laugh','Laugh'],['cash','Cash register'],['sad','Sad trombone'],['bark','Dog bark'],['boom','Impact hit'],['click','Click'],['own','My own sound file']];
+const SND_EVENTS=[['entry','Enter a trade','school'],['tp','Take profit','voice'],['sl','Stop loss','laugh'],['close','Close by hand','chime'],
+ ['pass','Pass an eval','youdid'],['payout','Payout','cash'],['buy','Buy something','cash'],['blown','Lose an account','sad'],['pet','Pet your dog','bark'],['job','Job ticket','click'],['alert','Price alert','ding']];
+const SND_LIB=[['none','None'],['school','School bell'],['bell','Small bell'],['voice','Voice: "Order filled"'],['youdid','Hit + "You did it!"'],['chime','Chime'],['ding','Ding'],['laugh','Laugh'],['cash','Cash register'],['sad','Sad trombone'],['bark','Dog bark'],['boom','Impact hit'],['click','Click'],['own','My own sound file']];
 const sndPick=ev=>{ const m=(cfg.sound.map||{}); if(m[ev]) return m[ev]; try{ if(localStorage.getItem('ke_snd_'+ev)) return 'own'; }catch(e){} const d=SND_EVENTS.find(x=>x[0]===ev); return d?d[2]:'none'; };
 function sfxCtx(){ if(!SFX.ctx){ const A=window.AudioContext||window.webkitAudioContext; if(!A) return null; SFX.ctx=new A(); SFX.out=SFX.ctx.createGain(); SFX.out.connect(SFX.ctx.destination); }
  if(SFX.ctx.state==='suspended') SFX.ctx.resume(); SFX.out.gain.value=cfg.sound.vol??0.7; return SFX.ctx; }
@@ -3867,7 +3876,7 @@ function hubRender(){
  const B=$('hubBody'), P=HUB.page, name=cesc(CAR.look.name||'You');
  if(P==='props'){
   const rk=hubRank(), nx=hubNext(), A=CAR.accts, C=A.map(acctCalc);
-  B.innerHTML=`<div class="hub-two"><div class="hub-side">${stageHTML()}<div class="who"><b>${name}</b><span class="badge ${rk[1]}">${rk[0]}</span></div></div>
+  B.innerHTML=`<div class="hub-wide"><div class="card-h props-h"><div><h2>Prop firms</h2><p class="sub">Buy an evaluation, pass it under Lucid's rules, then trade the funded account for payouts.</p></div><span class="badge ${rk[1]}">${rk[0]}</span></div>
    <div class="hub-main">
     <div class="card next"><span class="eyebrow">Next step</span><b>${nx[0]}</b><p>${nx[1]}</p><button class="primary" data-hub="${nx[3]}">${nx[2]}</button></div>
     <div class="stats4">${[['Wallet',usd(CAR.wallet)],['Evaluations passed',CAR.passes],['Payouts taken',CAR.payouts],['Total paid out',usd(CAR.paid)]].map(([l,v])=>`<div><span>${l}</span><b>${v}</b></div>`).join('')}</div>
@@ -3876,9 +3885,7 @@ function hubRender(){
     <div class="hub-grid2" hidden>
      <div class="card"><div class="card-h"><b>Accounts</b><button class="link" data-hub="accounts">${A.length?'Manage':'Eval store'}</button></div>
       ${A.length?`<div class="rows">${A.map((a,i)=>`<div><span>${cesc(a.name)}</span><span class="mut">${a.stage==='funded'?`Funded · ${Math.min(C[i].winDays,FUND.days)}/${FUND.days} winning days`:`Evaluation · ${money(Math.round(C[i].profit))} of ${money(C[i].tgt)}`}</span></div>`).join('')}</div>`:`<div class="hint">No account yet. Accounts lost so far: ${CAR.blown}.</div>`}</div>
-     <div class="card"><div class="card-h"><b>Leaderboard</b><button class="link" data-hub="leaderboard">See all</button></div><div id="lbMini" class="hint">Loading...</div></div>
     </div></div></div>`;
-  stageBind(); lbRender();
  } else if(P==='xaccounts'){
   B.innerHTML=`<div class="hub-wide"><h2>Accounts</h2><p class="sub">Buy an evaluation, pass it, and trade the funded account for payouts. The switch on each account decides whether your trades count on it.</p><div id="hubAccts"></div></div>`;
  } else if(P==='life'){
