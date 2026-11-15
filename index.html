@@ -1508,6 +1508,7 @@ function rebuildSeries(){
  else if(cfg.osc==='mfi') HL(OL('mfi','#26a69a'),80,20);
  else if(cfg.osc==='obv') OL('obv','#2962ff');
  oscEl.style.display = cfg.osc==='none' ? 'none' : 'block';
+ eqEl.style.display = (cfg.qbox||cfg.osc==='dqt') ? 'block' : 'none';
  oscEl.style.height = cfg.osc==='dqt' ? (30+18*QT_ORDER.filter(([f])=>cfg.qtRows[f]!==false && !(typeof CHA==='function'&&CHA()&&'MQY'.includes(f))).length)+'px' : '140px';
  volume.applyOptions({visible:cfg.vol});
  resizeAll();
@@ -1951,26 +1952,32 @@ function checkExits(i){
  if(p.tp!=null && (p.side>0 ? b.high>=p.tp : b.low<=p.tp))
   closePos(p.side>0 ? Math.max(p.tp,b.open) : Math.min(p.tp,b.open), i, 'TP');
 }
-function closePos(price, i, reason){
- const p=S.pos; if(!p) return; riskTrack(p);
+function closePos(price, i, reason, qtyPart){
+ const p0=S.pos; if(!p0) return; riskTrack(p0);
+ const part=qtyPart>0 && qtyPart<p0.qty-1e-9, p=part?Object.assign({},p0,{qty:qtyPart}):p0;
  const t=S.bars[i].time, pts=(price-p.entry)*p.side;
  const pnl=pts*p.pv*p.qty - 2*p.comm*p.qty;
  S.realized+=pnl;
  const day=Math.floor(t/86400); S.dayPnl[day]=(S.dayPnl[day]||0)+pnl;
- S.trades.push({n:S.trades.length+1, side:p.side>0?'LONG':'SHORT', entryTime:p.time, exitTime:t, entry:p.entry, exit:price,
-  points:pts, pnl, reason, bars:i-p.idx, r:(p.risk&&!p.noR)?pts/Math.max(p.risk,p.maxRisk||0):null});
+ S.trades.push({n:S.trades.length+1, side:p.side>0?'LONG':'SHORT', entryTime:p.time, exitTime:t, at:Date.now(), entry:p.entry, exit:price,
+  points:pts, pnl, reason, qty:p.qty, part:part||undefined, bars:i-p.idx, r:(p.risk&&!p.noR)?pts/Math.max(p.risk,p.maxRisk||0):null});
  S.markers.push({time:t, position:p.side>0?'aboveBar':'belowBar', color:pnl>=0?SIG.up:SIG.down, shape:'circle', size:0.6, text:''});
  try{ syncClose(p,pnl,t); }catch(e){}
- S.pos=null; clearLines();
+ if(part){ p0.qty=Math.round((p0.qty-qtyPart)*1e6)/1e6; try{ drawLines(); }catch(e){} } else { S.pos=null; clearLines(); }
  try{ tradeFx(reason,pnl,t); }catch(e){}
  try{ sessSave(true); }catch(e){}
 }
 function openPos(side, fillPx, slOv, tpOv, why, qtyOv){
  if(!S.bars.length) return;
- if(evalBlock(qtyOv ?? (+$('qty').value||1))){ refresh(); return; }
  const i=S.cursor, t=displayBar(i).time, price=fillPx ?? (side>0 ? priceNow()+spreadPx() : priceNow());
- if(S.pos && S.pos.side===side){ msg('Already '+(side>0?'long':'short')+'.'); return; }
- if(S.pos) closePos(price, i, 'FLIP');
+ let q=qtyOv ?? (+$('qty').value||1); if(!(q>0)) q=1;
+ if(S.pos && S.pos.side===side) return addToPos(price, q, slOv, tpOv, why);
+ if(S.pos){ const pq=S.pos.qty, r=(why==='LMT'||why==='STP')?why:'MANUAL';
+  if(q<pq-1e-9){ closePos(price, i, r, q); msg(`${side>0?'Bought':'Sold'} ${q} at ${fmtP(price)}. Still ${S.pos.side>0?'long':'short'} ${S.pos.qty}.`); try{ sessSave(true); }catch(e){} refresh(); return; }
+  closePos(price, i, q>pq+1e-9?'FLIP':r);
+  if(q<=pq+1e-9){ msg(`${side>0?'Bought':'Sold'} ${q} at ${fmtP(price)}. Position closed.`); refresh(); return; }
+  q=Math.round((q-pq)*1e6)/1e6; qtyOv=q; }
+ if(evalBlock(q)){ refresh(); return; }
  const lim=+$('dailyLimit').value||0;
  if(lim && (S.dayPnl[Math.floor(t/86400)]||0) <= -lim){ msg('Daily loss limit hit. No new entries until the next UTC day.'); refresh(); return; }
  const slP=slOv ?? (+$('slPts').value||0), tpP=tpOv ?? (+$('tpPts').value||0);
@@ -1980,6 +1987,20 @@ function openPos(side, fillPx, slOv, tpOv, why, qtyOv){
  S.markers.push({time:t, position:side>0?'belowBar':'aboveBar', color:side>0?SIG.up:SIG.down, shape:side>0?'arrowUp':'arrowDown', size:0.8, text:''});
  sfxPlay('entry');
  if(!why) msg(''); sessSave(true); drawLines(); refresh();
+}
+function addToPos(price, q, slOv, tpOv, why){   // same direction: scale in, average the entry like TradingView
+ const p=S.pos, i=S.cursor, t=displayBar(i).time;
+ if(evalBlock(p.qty+q)){ refresh(); return; }
+ const lim=+$('dailyLimit').value||0;
+ if(lim && (S.dayPnl[Math.floor(t/86400)]||0) <= -lim){ msg('Daily loss limit hit. No new entries until the next UTC day.'); refresh(); return; }
+ const nq=Math.round((p.qty+q)*1e6)/1e6; p.entry=(p.entry*p.qty+price*q)/nq; p.qty=nq;
+ const slP=slOv ?? (+$('slPts').value||0), tpP=tpOv ?? (+$('tpPts').value||0);
+ if(p.sl==null && slP>0) p.sl=p.entry-p.side*slP; if(p.tp==null && tpP>0) p.tp=p.entry+p.side*tpP;
+ if(p.sl!=null) p.risk=Math.abs(p.entry-p.sl);
+ S.markers.push({time:t, position:p.side>0?'belowBar':'aboveBar', color:p.side>0?SIG.up:SIG.down, shape:p.side>0?'arrowUp':'arrowDown', size:0.6, text:''});
+ try{ sfxPlay('entry'); }catch(e){}
+ msg(`Added ${q}. Now ${p.side>0?'long':'short'} ${nq} at an average of ${fmtP(p.entry)}.`);
+ try{ sessSave(true); }catch(e){} drawLines(); refresh();
 }
 /* ---------- limit orders ---------- */
 function placeLimit(side, price, slP, tpP, qty){
@@ -1993,9 +2014,12 @@ function placeLimit(side, price, slP, tpP, qty){
 }
 function fillOrder(o, px){
  S.orders=S.orders.filter(x=>x!==o);
- if(S.pos && S.pos.side===o.side){ msg('Limit hit but you are already '+(o.side>0?'long':'short')+', so it was skipped.'); drawOrders(); return; }
+ const had=S.pos?{side:S.pos.side,qty:S.pos.qty}:null;
  openPos(o.side, px, o.sl, o.tp, o.type==='stop'?'STP':'LMT', o.qty);
- msg(`${o.side>0?'Buy':'Sell'} ${o.type==='stop'?'stop':'limit'} filled at ${px.toFixed(2)}.`); drawOrders();
+ const kind=`${o.side>0?'Buy':'Sell'} ${o.type==='stop'?'stop':'limit'} ${o.qty}`, now=S.pos;
+ msg(!had||had.side===o.side ? `${kind} filled at ${fmtP(px)}.${had?` Now ${now.side>0?'long':'short'} ${now.qty} at an average of ${fmtP(now.entry)}.`:''}`
+  : `${kind} filled at ${fmtP(px)}. ${now? (now.side===had.side?`Took profit on ${o.qty}. Still ${now.side>0?'long':'short'} ${now.qty}.`:`Closed the ${had.side>0?'long':'short'} and reversed to ${now.side>0?'long':'short'} ${now.qty}.`) : 'Position closed.'}`);
+ drawOrders();
 }
 function checkOrders(i){
  if(!S.orders.length) return; const b=S.bars[i];
@@ -2272,14 +2296,15 @@ const TOOLDEF={}; Object.values(TOOLS).forEach(g=>g.items.forEach(([id,name,icon
 const DEFCOL={hilite:'rgba(255,214,0,0.45)',arrowup:'#089981',arrowdown:'#f23645',avwap:'#ff9800',vprofile:'#2962ff',flag:'#f23645'};
 const DR={list:[],tool:null,sel:null,drag:null,creating:null,magnet:false,lock:false,hide:false,smtHover:null,smtPin:null};
 window.__bt={DR,S,oscChart,chart};
+try{ Object.assign(window.__bt,{openPos,closePos,placeLimit,fillOrder,addToPos,evalBlock,priceNow}); }catch(e){}
 const dc=document.createElement('canvas'); dc.id='drawCanvas'; chartEl.appendChild(dc);
-const dctx=dc.getContext('2d');
+let dctx=dc.getContext('2d'); let DCX=null;   // DCX: set only while the second chart's drawings are handled
 const TICK={20:.25,2:.25,50:.25,5:.25,100:.1,10:.1,1000:.01,1:.01};
 function lastIdx(){ return S.bars.length-1; }
-function timeToIdx(t){ const L=lastIdx(); if(L<0) return 0; if(t>S.bars[L].time) return L+Math.round((t-S.bars[L].time)/S.tfSec); return lowerBound(S.bars,t); }
-function idxToTime(i){ const L=lastIdx(); if(i<=0) return S.bars[0].time; if(i<=L) return S.bars[i].time; return S.bars[L].time+(i-L)*S.tfSec; }
-const X=t=>chart.timeScale().logicalToCoordinate(timeToIdx(t));
-const Yp=p=>candles.priceToCoordinate(p);
+function timeToIdx(t){ if(DCX) return DCX.t2i(t); const L=lastIdx(); if(L<0) return 0; if(t>S.bars[L].time) return L+Math.round((t-S.bars[L].time)/S.tfSec); return lowerBound(S.bars,t); }
+function idxToTime(i){ if(DCX) return DCX.i2t(i); const L=lastIdx(); if(i<=0) return S.bars[0].time; if(i<=L) return S.bars[i].time; return S.bars[L].time+(i-L)*S.tfSec; }
+const X=t=>(DCX?DCX.ts:chart.timeScale()).logicalToCoordinate(timeToIdx(t));
+const Yp=p=>(DCX?DCX.ser:candles).priceToCoordinate(p);
 function paneSize(){ return {w:chart.timeScale().width(), h:chartEl.clientHeight-chart.timeScale().height()}; }
 let INDC={key:'',R:null};
 function indValuesAt(i){ const keys=Object.keys(S.ser); if(!keys.length) return [];
@@ -3195,7 +3220,8 @@ function pnlWUpdate(){
  if(p){ const now=p.side>0?bidPx():askPx(), pts=(now-p.entry)*p.side; open=pts*p.pv*p.qty-2*p.comm*p.qty;
   const rk=p.risk||(p.sl!=null?Math.abs(p.entry-p.sl):null); if(rk) rTxt=(pts/rk>=0?'+':'')+(pts/rk).toFixed(2)+'R';
   sub=`${p.side>0?'Long':'Short'} ${p.qty} @ ${fmtP(p.entry)} · ${pts>=0?'+':''}${Math.round(pts/tickSz())} ticks`; }
- const day=Math.floor(displayBar(S.cursor).time/86400), today=(S.dayPnl&&S.dayPnl[day])||0;
+ const dk=ms=>{ const d=new Date(ms); return d.getFullYear()*10000+d.getMonth()*100+d.getDate(); }, nowK=dk(Date.now());
+ const today=(S.trades||[]).reduce((a,x)=>a+((x.at&&dk(x.at)===nowK)?x.pnl:0),0);
  const big=$('pwBig'), v=p?open:today; big.textContent=(v>0?'+':'')+usd2(v);
  big.className='pw-big '+(v>0.004?'pos':v<-0.004?'neg':''); if(w.dataset.last!==big.textContent){ if(w.dataset.last!=null){ big.classList.add('flash'); setTimeout(()=>big.classList.remove('flash'),260); } w.dataset.last=big.textContent; }
  $('pwSub').textContent=p?sub:'Flat · realized today';
@@ -3762,7 +3788,7 @@ function ordGhost(w,h){
 document.addEventListener('keydown',e=>{ if(e.key==='Escape' && S.ordMode) ordMode(0); });
 
 /* ---- Lucid accounts (25K / 50K / 150K): bought evaluations, funded accounts, payouts, trade syncer ---- */
-const EVAL={start:25000,lock:100,minis:2,micros:20,price:100,tgt:1250,mll:1000,cons:0.5,max:5};
+const EVAL={start:25000,lock:100,minis:2,micros:20,price:100,tgt:1250,mll:1000,cons:0.5,max:Infinity};
 const FUND={days:5,min:500,cap:1000,pct:0.5,split:0.9};
 const SYNCER_PRICE=1800;
 
@@ -3794,7 +3820,7 @@ const carSaveLocal=()=>{ try{ CAR.sigv=1; const j=JSON.stringify(CAR); localStor
 try{ const j=localStorage.getItem('ke_career_v1'), g=localStorage.getItem('ke_career_sig'); if(j && !CAR.tamper && ((g && g!==carHash(j)) || (!g && /"sigv":1/.test(j)))) CAR.tamper=Date.now(); }catch(e){}
 const carSave=()=>{ CAR.ts=Date.now(); carSaveLocal(); try{ cloudPush(); }catch(e){} };
 const SYNC={prev:{},last:null};
-const syncOwned=()=>!!CAR.owned.syncer;
+const syncOwned=()=>true;   // every account can trade at once
 const acctIn=a=>!!(S.pos&&S.pos.sync&&S.pos.sync.includes(a.id));
 const acctOpen=a=>acctIn(a) ? S.pos.side*(priceNow()-S.pos.entry)*S.pos.pv*S.pos.qty : 0;
 const evalNow=()=>S.bars.length ? ((S.partial&&S.raw.length)?replayNow():S.bars[S.cursor].time) : 0;
@@ -3988,7 +4014,7 @@ function acctRender(){
  const hub=$('hubAccts'), hk=base+'|'+CAR.wallet.toFixed(2)+'|'+(HUB.plan||'flex')+'|'+Object.keys(CAR.skills||{}).join(',');
  if(hub && hub.dataset.key!==hk){
   const full=A.length>=EVAL.max, sshort=SYNCER_PRICE-CAR.wallet;
-  hub.innerHTML=`<div class="sec">Your accounts <span>${A.length} of ${EVAL.max}</span></div>`+
+  hub.innerHTML=`<div class="sec">Your accounts <span>${A.length} ${A.length===1?'account':'accounts'} · ${A.filter(a=>a.on).length} trading</span></div>`+
    (A.length?`<div class="ac-grid">${A.map((a,i)=>acctCard(a,C[i],true)).join('')}</div>`:`<div class="card empty">You have no account yet. Pick an evaluation below, pass it, and it becomes a funded account that pays out.</div>`)+
    `<div class="sec" id="evStore">Eval store <span>Lucid Trading · one-time fee · list prices</span></div>
    <div class="plan-tabs">${Object.values(PLANS).map(L=>`<button data-plan="${L.id}" class="${(HUB.plan||'flex')===L.id?'act':''}"><b>${L.name}</b><span>${L.tag}${L.skill&&!skill(L.skill)?' · <i class="lk">locked</i>':''}</span></button>`).join('')}</div>
@@ -3998,11 +4024,7 @@ function acctRender(){
      return `<div class="card prod ev"><div class="card-h"><b>${L.name} ${k}K</b><span class="price">${money(P.price)}</span></div>
       <div class="rt">${planRules(P).map(([a,b])=>`<span>${a}</span><b>${b}</b>`).join('')}</div>
       <button class="primary ac-btn" data-buy="${L.id}:${k}" ${lock||full||short>0?'disabled':''}>${lock?'Locked':full?`Limit of ${EVAL.max} accounts reached`:short>0?`Need ${money(short)} more`:(L.direct?'Buy funded account':'Buy evaluation')}</button>${!lock&&!full&&short>0?`<button class="link ac-link" data-hub="job">Earn it at the job</button>`:''}</div>`; }).join('')}</div>`; })()}
-   <div class="sec">Tools</div><div class="hub-grid2">
-    <div class="card prod"><div class="card-h"><b>Trade syncer</b><span class="price">${own?'Owned':money(SYNCER_PRICE)}</span></div>
-     <ul class="erules"><li>Trade several accounts at once. Every entry is copied to each account that is switched on.</li><li>Same size, stop and target on each. All accounts trade the same direction.</li><li>Each account keeps its own progress, so they can be at different stages.</li><li>Without it, one account trades at a time.</li></ul>
-     ${own?`<div class="hint">Unlocked. Use the switches on your accounts to choose which ones trade.</div>`:!skill('copy')?`<button class="ac-btn" data-hub="skills">Needs the Copy trading licence skill</button>`:`<button class="primary ac-btn" data-buy="syncer" ${sshort>0?'disabled':''}>${sshort>0?`Need ${money(sshort)} more`:'Unlock trade syncer'}</button>`}</div></div>
-   <div class="sec">Good to know</div><div class="card"><ul class="erules" style="margin:0"><li>Max loss trails your end-of-day balance and locks at the starting balance + $100.</li><li>A soft daily loss limit does not close the account. It takes the account out of trading until the next day.</li><li>Every payout is split 90/10. The minimum payout is $500.</li><li>Accounts are saved, so restarting the replay does not reset them.</li></ul></div>`;
+   <div class="sec">Good to know</div><div class="card"><ul class="erules" style="margin:0"><li>Max loss trails your end-of-day balance and locks at the starting balance + $100.</li><li>A soft daily loss limit does not close the account. It takes the account out of trading until the next day.</li><li>Every payout is split 90/10. The minimum payout is $500.</li><li>Switch on as many accounts as you like. Every trade in an evaluation session is copied to each account that is on, with the same size, stop and target.</li><li>Accounts are saved, so restarting the replay does not reset them.</li></ul></div>`;
   acctBind(hub); hub.dataset.key=hk;
  }
  const ln=$('acctLine'); if(ln){ const on=A.filter(a=>a.on), t=on.length?`Trading on ${on.map(a=>a.name).join(', ')}`:(A.length?'Practice mode: no account is switched on':'Practice mode: no account yet'); if(ln.dataset.t!==t){ ln.dataset.t=t; ln.innerHTML=`<span>${cesc(t)}</span><button class="link" id="acctLineB">${A.length?'Change':'Get one'}</button>`; $('acctLineB').onclick=()=>{ A.length?sideTab('pStats'):hubOpen('store'); }; } }
@@ -4048,15 +4070,13 @@ function pairNowBar(idx){   // pair candle built only from what the replay has r
  if(lm && lm.t<end){ const x=S.pairRaw[lowerBound(S.pairRaw,lm.t)]; if(x && x.time===lm.t){ const pts=pathOf([x]).slice(0,lm.j+1); add(pts[0],Math.max(...pts),Math.min(...pts),pts[pts.length-1]); } }
  return q;
 }
-function splitSync(){ if(!cfg.split) return; const r=chart.timeScale().getVisibleRange(); if(r) try{ c2.timeScale().setVisibleRange(r); }catch(e){} }
-chart.timeScale().subscribeVisibleLogicalRangeChange(splitSync);
 function splitUpdate(){
  if(!cfg.split || !S.bars.length) return;
  if(!S.pairBars.length){ if(P2.idx!==-1){ candles2.setData([]); P2.idx=-1; P2.key=''; $('c2Head').innerHTML='<b>No second symbol</b><small>pick one in the SMT menu</small>'; } return; }
  const tb=displayBar(S.cursor).time, idx=lowerBound(S.pairBars,tb+1)-1;
  if(idx<0){ candles2.setData([]); P2.idx=-1; return; }
  const cur=pairNowBar(idx), key=S.tf+'|'+cfg.pair+'|'+S.pairBars.length;
- const full=()=>{ const arr=S.pairBars.slice(0,idx).map(candleBar); if(cur) arr.push(cur); candles2.setData(arr); P2.key=key; splitSync(); };
+ const full=()=>{ const arr=S.pairBars.slice(0,idx).map(candleBar); if(cur) arr.push(cur); candles2.setData(arr); const fresh=P2.key!==key; P2.key=key; splitSync(fresh); };
  if(key!==P2.key || idx<P2.idx || idx>P2.idx+1) full();
  else { try{ if(idx===P2.idx+1 && idx>0) candles2.update(candleBar(S.pairBars[idx-1])); if(cur) candles2.update(cur); }catch(e){ full(); } }
  P2.idx=idx;
@@ -4074,6 +4094,281 @@ $('split').addEventListener('mousedown',e=>{ e.preventDefault();
  const move=ev=>{ const r=$('chartRow').getBoundingClientRect(); cfg.splitW=Math.round(Math.max(220,Math.min(r.width-260,r.right-ev.clientX))); chart2El.style.width=cfg.splitW+'px'; resizeAll(); };
  const up=()=>{ window.removeEventListener('mousemove',move); window.removeEventListener('mouseup',up); document.body.style.cursor=''; saveCfg(); splitSync(); };
  document.body.style.cursor='col-resize'; window.addEventListener('mousemove',move); window.addEventListener('mouseup',up); });
+
+/* ---- split screen v2: free second chart (two-way time link, crosshair link, drawings, swap) ---- */
+const SY={act:0,mute:{1:0,2:0},wt:0};
+const D2={list:[],key:null,sel:null,drag:null,creating:null};
+const D2_SKIP=['long','short','avwap','vprofile','image','polyline'];   // need main-chart data, stay on the main chart
+const c2BodyEl=$('c2Body');
+(function(){
+ const st=document.createElement('style');
+ st.textContent=`#c2Bar{position:absolute;left:10px;top:8px;right:76px;z-index:4;display:flex;flex-wrap:wrap;gap:6px;align-items:center;pointer-events:none}
+#chart2 #c2Head{position:static;white-space:nowrap;max-width:100%;overflow:hidden}
+#c2Bar button{pointer-events:auto;height:24px;min-width:0;padding:0 8px;font-size:11px;font-weight:600;line-height:1;display:inline-flex;align-items:center;gap:5px;background:rgba(18,20,26,.85);color:#e6e8ee;border:1px solid #2a2e39;border-radius:6px;cursor:pointer;white-space:nowrap}
+#c2Bar button:hover{background:rgba(40,44,56,.95)}
+#c2Bar button svg{width:13px;height:13px;flex:none}
+#c2Link{width:26px;padding:0!important;justify-content:center;color:#8b90a0!important}
+#c2Link.on{color:var(--accent,#2962ff)!important;border-color:var(--accent,#2962ff)!important}
+#c2Bar[data-empty="1"] button{display:none}
+#drawCanvas2{position:absolute;left:0;top:0;pointer-events:none;z-index:3}
+.xsync{position:absolute;top:0;width:0;border-left:1px dashed #787b86;pointer-events:none;z-index:2}
+#d2Bar{position:absolute;top:40px;left:10px;z-index:5;background:var(--pop);border:1px solid var(--border);border-radius:8px;padding:4px 5px;display:flex;gap:5px;align-items:center;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+#d2Bar button{height:24px;padding:0 7px}#d2Bar select{height:24px}#d2Bar input[type=color]{width:26px;height:24px;padding:0;border:0;background:none}`;
+ document.head.appendChild(st);
+ const bar=document.createElement('div'); bar.id='c2Bar'; chart2El.insertBefore(bar,$('c2Head')); bar.appendChild($('c2Head'));
+ const svg=p=>`<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+ const lk=document.createElement('button'); lk.id='c2Link'; lk.innerHTML=svg('<path d="M8.5 11.5a3.2 3.2 0 0 0 4.5 0l2.6-2.6a3.2 3.2 0 0 0-4.5-4.5l-.9.9"/><path d="M11.5 8.5a3.2 3.2 0 0 0-4.5 0l-2.6 2.6a3.2 3.2 0 0 0 4.5 4.5l.9-.9"/>');
+ const tr=document.createElement('button'); tr.id='c2Trade'; tr.title='Make this the main chart you trade on. The current main chart moves here. Replay time and timeframe stay the same.';
+ tr.innerHTML=svg('<path d="M4 7h12l-3-3M16 13H4l3 3"/>')+'<span>Trade this chart</span>';
+ bar.appendChild(lk); bar.appendChild(tr);
+ const dc2=document.createElement('canvas'); dc2.id='drawCanvas2'; chart2El.appendChild(dc2);
+ const db=document.createElement('div'); db.id='d2Bar'; db.hidden=true; chart2El.appendChild(db);
+ const x1=document.createElement('div'); x1.className='xsync'; x1.id='xs1'; x1.hidden=true; chartEl.appendChild(x1);
+ const x2=document.createElement('div'); x2.className='xsync'; x2.id='xs2'; x2.hidden=true; chart2El.appendChild(x2);
+ lk.onclick=()=>{ lk.blur(); sp2SetLink(cfg.splitLink===false); };
+ tr.onclick=()=>{ tr.blur(); splitSwap(); };
+})();
+const ctx2=$('drawCanvas2').getContext('2d');
+
+/* -- fractional bar index <-> time, so two charts with different bar lists line up on time -- */
+function fI2T(B,x){ const L=B.length-1; if(L<0) return null; if(x<=0) return B[0].time+x*S.tfSec; if(x>=L) return B[L].time+(x-L)*S.tfSec; const i=Math.floor(x); return B[i].time+(x-i)*(B[i+1].time-B[i].time); }
+function fT2I(B,t){ const L=B.length-1; if(L<0) return null; if(t<=B[0].time) return (t-B[0].time)/S.tfSec; if(t>=B[L].time) return L+(t-B[L].time)/S.tfSec; const k=lowerBound(B,t); if(B[k].time===t) return k; return k-1+(t-B[k-1].time)/(B[k].time-B[k-1].time); }
+const sp2On=()=>!!cfg.split && !chart2El.hidden && S.bars.length>0 && S.pairBars.length>0;
+
+/* -- two-way time link. src 1 = main chart moved, 2 = second chart moved -- */
+function sp2Push(src,force){
+ if(!sp2On()) return false;
+ if(cfg.splitLink===false && !force) return false;
+ const A=src===1?chart:c2, B=src===1?c2:chart, BA=src===1?S.bars:S.pairBars, BB=src===1?S.pairBars:S.bars;
+ const r=A.timeScale().getVisibleLogicalRange(); if(!r) return false;
+ const f=fT2I(BB,fI2T(BA,r.from)), t=fT2I(BB,fI2T(BA,r.to)); if(f==null||t==null||!(t>f)) return false;
+ const cur=B.timeScale().getVisibleLogicalRange();
+ if(cur && Math.abs(cur.from-f)<0.02 && Math.abs(cur.to-t)<0.02) return false;
+ SY.mute[src===1?2:1]=performance.now()+150;      // the chart we move must not answer back
+ try{ B.timeScale().setVisibleLogicalRange({from:f,to:t}); }catch(e){}
+ return true;
+}
+function splitSync(force){ sp2Push(1,force===true); }
+chart.timeScale().subscribeVisibleLogicalRangeChange(()=>{ if(SY.act===2) return; if(performance.now()<SY.mute[1]) return; sp2Push(1); });
+c2.timeScale().subscribeVisibleLogicalRangeChange(()=>{ if(SY.act===1) return; if(SY.act!==2 && performance.now()<SY.mute[2]) return; sp2Push(2); });
+chartEl.addEventListener('pointerdown',()=>{ SY.act=1; },true);
+chart2El.addEventListener('pointerdown',()=>{ SY.act=2; },true);
+window.addEventListener('pointerup',()=>{ SY.act=0; },true);
+window.addEventListener('pointercancel',()=>{ SY.act=0; },true);
+const sp2Wheel=n=>()=>{ SY.act=n; clearTimeout(SY.wt); SY.wt=setTimeout(()=>{ if(SY.act===n) SY.act=0; },260); };
+chartEl.addEventListener('wheel',sp2Wheel(1),{capture:true,passive:true});
+chart2El.addEventListener('wheel',sp2Wheel(2),{capture:true,passive:true});
+function sp2LinkUI(){ const on=cfg.splitLink!==false, b=$('c2Link'); b.classList.toggle('on',on); b.title=on?'Time axis is linked to the main chart: moving one chart moves the other. Click to unlink.':'Time axis is unlinked: this chart moves on its own. Click to link it to the main chart again.'; }
+function sp2SetLink(on){ cfg.splitLink=!!on; saveCfg(); sp2LinkUI(); if(on) sp2Push(1,true); msg(on?'Charts linked: both follow the same time.':'Charts unlinked: the second chart moves on its own.'); }
+sp2LinkUI();
+function sp2ResetView(){
+ try{ c2.priceScale('right').applyOptions({autoScale:true}); }catch(e){}
+ if(cfg.splitLink===false){ c2.timeScale().resetTimeScale(); c2.timeScale().scrollToRealTime(); }
+ else { chart.timeScale().resetTimeScale(); chart.timeScale().scrollToRealTime(); setTimeout(()=>sp2Push(1,true),60); }
+}
+
+/* -- crosshair link: the time under the mouse on one chart is marked on the other -- */
+function sp2Cross(src,param){
+ const line=$(src===1?'xs2':'xs1'); if(!sp2On() || !param || !param.point || param.logical==null){ line.hidden=true; return; }
+ const BA=src===1?S.bars:S.pairBars, BB=src===1?S.pairBars:S.bars, T=src===1?c2:chart, host=src===1?c2BodyEl:chartEl;
+ const t=fI2T(BA,param.logical), x=T.timeScale().logicalToCoordinate(Math.round(fT2I(BB,t)));
+ if(x==null || x<0 || x>T.timeScale().width()){ line.hidden=true; return; }
+ try{ line.style.borderLeftColor=chart.options().crosshair.vertLine.color||'#787b86'; }catch(e){}
+ line.style.left=Math.round(x)+'px'; line.style.height=(host.clientHeight-T.timeScale().height())+'px'; line.hidden=false;
+}
+chart.subscribeCrosshairMove(p=>sp2Cross(1,p));
+c2.subscribeCrosshairMove(p=>sp2Cross(2,p));
+chartEl.addEventListener('mouseleave',()=>{ $('xs2').hidden=true; });
+chart2El.addEventListener('mouseleave',()=>{ $('xs1').hidden=true; });
+
+/* -- drawings on the second chart: same tools, same renderer, stored under the second symbol -- */
+const CX2={ts:c2.timeScale(), ser:candles2,
+ t2i(t){ const B=S.pairBars, L=B.length-1; if(L<0) return 0; if(t>B[L].time) return L+Math.round((t-B[L].time)/S.tfSec); return lowerBound(B,t); },
+ i2t(i){ const B=S.pairBars, L=B.length-1; if(i<=0) return B[0].time; if(i<=L) return B[i].time; return B[L].time+(i-L)*S.tfSec; }};
+function with2(fn){ const kc=dctx, kx=DCX; dctx=ctx2; DCX=CX2; try{ return fn(); } finally { dctx=kc; DCX=kx; } }
+const d2Key=()=>'bt_draw_'+(cfg.pair||S.pairName||'pair');
+const d2Strip=d=>{ const {_hp,_fp,_h,...r}=d; return r; };
+function d2Load(){ D2.key=d2Key(); try{ D2.list=JSON.parse(localStorage.getItem(D2.key)||'[]'); }catch(e){ D2.list=[]; } D2.sel=null; D2.drag=null; D2.creating=null; d2Bar(); }
+function d2Save(){ try{ localStorage.setItem(D2.key||d2Key(), JSON.stringify(D2.list.map(d2Strip))); }catch(e){} }
+function d2Pane(){ return {w:c2.timeScale().width(), h:c2BodyEl.clientHeight-c2.timeScale().height()}; }
+function d2XY(e){ const r=c2BodyEl.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
+function d2Bar2(i){ if(i<0||i>P2.idx) return null; return i<P2.idx ? S.pairBars[i] : pairNowBar(i); }      // only candles the replay has shown
+function d2Pt(x,y,noSnap){
+ const lg=c2.timeScale().coordinateToLogical(x); let p=candles2.coordinateToPrice(y); if(lg==null||p==null) return null;
+ const i=Math.round(lg);
+ if((DR.magnet==='weak'||DR.magnet==='strong') && !noSnap){ const b=d2Bar2(i); if(b){ let best=null; const lim=DR.magnet==='strong'?Infinity:18;
+  for(const v of [b.open,b.high,b.low,b.close]){ const yy=candles2.priceToCoordinate(v); if(yy==null) continue; const dy=Math.abs(yy-y); if(dy<lim && (!best||dy<best.dy)) best={v,dy}; } if(best) p=best.v; } }
+ return {t:CX2.i2t(i), p};
+}
+function d2Draw(){
+ const cv=$('drawCanvas2'), dpr=window.devicePixelRatio||1, W=c2BodyEl.clientWidth, H=c2BodyEl.clientHeight;
+ if(cv.width!==W*dpr||cv.height!==H*dpr){ cv.width=W*dpr; cv.height=H*dpr; cv.style.width=W+'px'; cv.style.height=H+'px'; }
+ ctx2.setTransform(dpr,0,0,dpr,0,0); ctx2.clearRect(0,0,W,H);
+ const eb=$('c2Bar'), em=S.pairBars.length?'0':'1'; if(eb.dataset.empty!==em) eb.dataset.empty=em;
+ if(!sp2On()){ if(D2.sel){ D2.sel=null; d2Bar(); } return; }
+ if(D2.key!==d2Key()) d2Load();
+ if(DR.hide) return;
+ const {w,h}=d2Pane(); ctx2.save(); ctx2.beginPath(); ctx2.rect(0,0,w,h); ctx2.clip();
+ with2(()=>{ for(const d of D2.list){ if(D2_SKIP.includes(d.tool)||!TOOLDEF[d.tool]) continue; dctx.save(); try{ renderDrawing(d,w,h); }catch(e){} dctx.restore(); if(d===D2.sel && d._h) d._h.forEach(q=>handle(q.x,q.y)); } });
+ ctx2.restore();
+}
+(function loop2(){ try{ if(cfg.split) d2Draw(); }catch(e){} requestAnimationFrame(loop2); })();
+function d2Hit(x,y){
+ if(DR.hide) return null;
+ const dpr=window.devicePixelRatio||1; ctx2.save(); ctx2.setTransform(dpr,0,0,dpr,0,0); ctx2.lineWidth=10;
+ try{
+  if(D2.sel && D2.sel._h){ const k=D2.sel._h.findIndex(q=>Math.hypot(x-q.x,y-q.y)<8); if(k>=0) return {d:D2.sel, mode:D2.sel._h[k].m||k}; }
+  for(let i=D2.list.length-1;i>=0;i--){ const d=D2.list[i]; if(D2_SKIP.includes(d.tool) || (!d._hp && !d._fp)) continue;
+   if(d._h){ const k=d._h.findIndex(q=>Math.hypot(x-q.x,y-q.y)<8); if(k>=0) return {d, mode:d._h[k].m||k}; }
+   if((d._hp && ctx2.isPointInStroke(d._hp,x*dpr,y*dpr)) || (d._fp && ctx2.isPointInPath(d._fp,x*dpr,y*dpr))) return {d, mode:'move'}; }
+ } finally { ctx2.restore(); }
+ return null;
+}
+function d2Select(d){ D2.sel=d; if(d && DR.sel) select(null); d2Bar(); }
+function d2Bar(){
+ const bar=$('d2Bar'), d=D2.sel; if(!d){ bar.hidden=true; return; }
+ const col=d.color||DEFCOL[d.tool]||'#2962ff';
+ bar.innerHTML=`<span class="db-name">${TOOLDEF[d.tool].name}</span><input type="color" id="d2Col" value="${col.startsWith('#')&&col.length===7?col:'#2962ff'}" title="Color"><select id="d2W" title="Line width">${[1,2,3,4].map(v=>`<option ${(d.width||2)==v?'selected':''}>${v}</option>`).join('')}</select><button id="d2Del" class="icon" title="Delete (Del)">${IC.trash}</button>`;
+ bar.hidden=false;
+ $('d2Col').oninput=e=>{ d.color=e.target.value; d2Save(); }; $('d2W').onchange=e=>{ d.width=+e.target.value; d2Save(); };
+ $('d2Del').onclick=e=>{ e.stopPropagation(); d2Remove(d); };
+}
+function d2Remove(d){ if(DR.lock){ msg('Drawings are locked.'); return; } D2.list=D2.list.filter(x=>x!==d); if(D2.sel===d) d2Select(null); d2Save(); msg('Drawing deleted.'); }
+function d2Finish(){
+ const d=D2.creating; D2.creating=null; if(!d) return;
+ if(d.tool==='path'){ if(d.pts.length>2) d.pts.pop(); }
+ if(['text','note','callout'].includes(d.tool)){ const t=prompt('Text:', d.text||''); if(t===null){ D2.list=D2.list.filter(x=>x!==d); setTool(null); return; } d.text=t||' '; }
+ d2Select(d); d2Save(); setTool(null);
+}
+function d2Cancel(){ if(D2.creating){ D2.list=D2.list.filter(x=>x!==D2.creating); D2.creating=null; } D2.drag=null; }
+const d2Over=e=>!!(e.target&&e.target.closest&&e.target.closest('#c2Bar button,#d2Bar'));
+chartEl.addEventListener('mousedown',()=>{ if(D2.sel) d2Select(null); if(D2.creating) d2Cancel(); },true);
+chart2El.addEventListener('mousedown',e=>{
+ if(d2Over(e) || e.button!==0 || !sp2On()) return;
+ const {x,y}=d2XY(e), {w,h}=d2Pane(); if(x>w||y>h) return;
+ $('flyout').hidden=true; if(DR.sel) select(null);
+ if(DR.tool){
+  e.stopPropagation(); e.preventDefault();
+  const def=TOOLDEF[DR.tool];
+  if(D2_SKIP.includes(DR.tool)){ msg(`${def.name.split(' (')[0]} only works on the main chart. Press "Trade this chart" to make this the main chart.`); return; }
+  const pt=d2Pt(x,y); if(!pt) return;
+  if(D2.creating){ const d=D2.creating; d.pts[d.pts.length-1]={...pt};
+   if(def.n==='multi'){ d.pts.push({...pt}); return; }
+   if(d.pts.length>=def.n){ d2Finish(); return; } d.pts.push({...pt}); return; }
+  const d=applyDefaults({tool:DR.tool, pts:[{...pt}], color:DEFCOL[DR.tool]});
+  D2.list.push(d);
+  if(def.n===1){ D2.creating=d; d2Finish(); return; }
+  d.pts.push({...pt}); D2.creating=d; D2.drag={creating:true, sx:x, sy:y, free:def.n==='free'}; return;
+ }
+ const hit=d2Hit(x,y);
+ if(hit){ e.stopPropagation(); e.preventDefault(); d2Select(hit.d); if(DR.lock) return;
+  D2.drag={...hit, start:d2Pt(x,y,true), orig:JSON.parse(JSON.stringify(d2Strip(hit.d)))}; }
+ else if(D2.sel) d2Select(null);
+},true);
+chart2El.addEventListener('dblclick',e=>{
+ if(d2Over(e) || !sp2On()) return;
+ if(D2.creating && TOOLDEF[D2.creating.tool].n==='multi'){ e.stopPropagation(); d2Finish(); return; }
+ const {x,y}=d2XY(e), {w,h}=d2Pane(); if(x>w||y>h||DR.tool) return;
+ if(d2Hit(x,y)) return;
+ sp2ResetView();
+},true);
+chart2El.addEventListener('contextmenu',e=>{
+ if(d2Over(e) || !sp2On()) return; e.preventDefault(); e.stopPropagation();
+ if(D2.creating){ d2Finish(); return; }
+ const {x,y}=d2XY(e), hit=d2Hit(x,y), n=D2.list.filter(d=>!D2_SKIP.includes(d.tool)).length, items=[];
+ if(hit){ d2Select(hit.d); items.push({icon:IC.trash,label:'Delete drawing',key:'Del',fn:()=>d2Remove(hit.d)},'-'); }
+ items.push({label:'Reset this chart',fn:sp2ResetView},{label:cfg.splitLink===false?'Link time to the main chart':'Unlink time from the main chart',fn:()=>sp2SetLink(cfg.splitLink===false)});
+ if(n) items.push('-',{icon:IC.trash,label:`Remove ${n} drawing(s) on this chart`,fn:()=>{ if(DR.lock){ msg('Drawings are locked.'); return; } D2.list=D2.list.filter(d=>D2_SKIP.includes(d.tool)); d2Select(null); d2Save(); }});
+ showMenu(items,e.clientX,e.clientY);
+},true);
+window.addEventListener('mousemove',e=>{
+ if(!D2.creating && !D2.drag){
+  if(cfg.split && c2BodyEl.contains(e.target)){ const {x,y}=d2XY(e), {w,h}=d2Pane(); c2BodyEl.style.cursor=(x>w||y>h)?'':DR.tool?'crosshair':d2Hit(x,y)?'pointer':''; }
+  return; }
+ const {x,y}=d2XY(e);
+ if(D2.creating && !D2.drag){ const pt=d2Pt(x,y); if(pt) D2.creating.pts[D2.creating.pts.length-1]=pt; return; }
+ e.stopPropagation(); e.preventDefault();
+ const pt=d2Pt(x,y); if(!pt) return;
+ if(D2.drag.creating){ const d=D2.creating; if(!d) return;
+  if(D2.drag.free){ const last=d.pts[d.pts.length-1], lx=c2.timeScale().logicalToCoordinate(CX2.t2i(last.t)), ly=candles2.priceToCoordinate(last.p); if(Math.abs(lx-x)+Math.abs(ly-y)>3) d.pts.push(pt); }
+  else d.pts[d.pts.length-1]=pt; return; }
+ const {d,mode}=D2.drag, o=D2.drag.orig;
+ if(typeof mode==='number'){ d.pts[mode]=pt; if(d.tool==='vline') d.pts[mode].p=o.pts[mode].p; }
+ else if(mode==='move'){ const s=D2.drag.start; if(!s||!o.pts) return; const di=CX2.t2i(pt.t)-CX2.t2i(s.t), dp=pt.p-s.p;
+  d.pts=o.pts.map(q=>({t:CX2.i2t(CX2.t2i(q.t)+di), p:q.p+dp})); }
+},true);
+window.addEventListener('mouseup',e=>{
+ if(!D2.drag) return; e.stopPropagation();
+ if(D2.drag.creating){ const {x,y}=d2XY(e); const moved=Math.hypot(x-D2.drag.sx,y-D2.drag.sy)>5, def=TOOLDEF[D2.creating?D2.creating.tool:'trend'];
+  D2.drag=null;
+  if(def.n==='free'){ d2Finish(); return; }
+  if(moved && def.n===2){ d2Finish(); return; }
+  if(moved && def.n===3 && D2.creating){ D2.creating.pts.push({...D2.creating.pts[D2.creating.pts.length-1]}); }
+  return; }
+ D2.drag=null; d2Save();
+},true);
+document.addEventListener('keydown',e=>{
+ if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)) return;
+ if((e.key==='Delete'||e.key==='Backspace') && D2.sel){ d2Remove(D2.sel); e.preventDefault(); }
+ if(e.key==='Enter' && D2.creating) d2Finish();
+ if(e.key==='Escape'){ d2Cancel(); d2Select(null); }
+});
+
+/* -- "Trade this chart": the second symbol becomes the main chart, the old main chart moves here -- */
+async function splitSwap(sure){
+ if(CHA()){ msg('Locked during an evaluation session.'); return false; }
+ const np=cfg.pair, old=S.symKey;
+ if(!np || !old || old==='__demo' || !S.pairRaw.length || !S.bars.length || !META.find(m=>m.name===np) || !META.find(m=>m.name===old)){ msg('Swapping needs two saved symbols: one as the main chart and one as the second symbol.'); return false; }
+ const nm=k=>symLabel(k).split(' (')[0];
+ if(S.pos){ msg(`You have an open ${S.pos.side>0?'long':'short'} position on ${nm(old)}. Close it first, then press "Trade this chart".`); return false; }
+ const nT=S.trades.length, nO=(S.orders||[]).length, nA=(S.alerts||[]).length;
+ if((nT||nO||nA) && sure!==true){
+  const parts=[]; if(nT) parts.push(`<b>${nT} closed practice trade${nT===1?'':'s'}</b>`); if(nO) parts.push(`<b>${nO} pending order${nO===1?'':'s'}</b>`); if(nA) parts.push(`<b>${nA} price alert${nA===1?'':'s'}</b>`);
+  dialog('Trade this chart',[{name:'Swap charts',html:`<div class="help"><p><b>${nm(np)}</b> becomes the chart you trade on and <b>${nm(old)}</b> moves to the second chart. The replay stays at the same time and timeframe.</p><p>Your ${parts.join(', ')} on ${nm(old)} will be cleared, because they belong to that chart. Drawings on both charts are kept.</p></div>`}],()=>{ splitSwap(true); },()=>{});
+  try{ $('dlgOk').textContent='Swap charts'; }catch(e){}
+  return false; }
+ stopPlay();
+ const nowT=replayNow(), a=S.raw, b=S.pairRaw, yrs=(cfg.years||{})[old];
+ d2Cancel(); d2Select(null); select(null);
+ if(yrs) cfg.years=Object.assign(cfg.years||{},{[np]:yrs});
+ cfg.last=np; cfg.pair=old; S.symKey=np; S.pairRaw=a;
+ $('symSel').value=np; try{ fillYears(); }catch(e){} $('pairSel').value=old; saveCfg();
+ loadRaw(b, symLabel(np));
+ if(S.raw!==b){ msg('Could not swap the charts.'); return false; }
+ /* put the new main chart at the same replay minute, showing only what has been seen (same idea as a timeframe switch) */
+ let idx=Math.max(0,Math.min(S.bars.length-1, lowerBound(S.bars, bucketStart(nowT,S.tf))));
+ if(S.bars[idx].time>nowT && idx>0) idx--;
+ S.partial=null; S.ticks=null;
+ const bar=S.bars[idx], end=bucketEnd(bar.time,S.tf);
+ if(end-S.baseSec>nowT){
+  const r0=lowerBound(S.raw,bar.time), r1=lowerBound(S.raw,nowT+1)-1;
+  if(r1<r0){ if(idx>0) idx--; }       // nothing of this candle has been seen yet on the new symbol: stay on the candle before it
+  else { const seen=S.raw.slice(r0,r1+1), rest=[]; let j=r1+1; while(j<S.raw.length && S.raw[j].time<end) rest.push(S.raw[j++]);
+   if(rest.length){ const q={time:bar.time, open:seen[0].open, high:Math.max(...seen.map(x=>x.high)), low:Math.min(...seen.map(x=>x.low)), close:seen[seen.length-1].close, volume:seen.reduce((s,x)=>s+(x.volume||0),0)};
+    S.partial=q; S.ticks=[q.close].concat(pathOf(rest)); S.tk=0; S.tickInfo={per:4, lead:1, idx0:r1+1, before:nowT}; } }
+ }
+ S.cursor=Math.max(1,idx); if(S.cursor!==idx){ S.partial=null; S.ticks=null; }
+ S.eq=[]; for(let i=0;i<=S.cursor;i++) S.eq.push({time:displayBar(i).time, value:0});
+ /* point value follows the symbol (NQ <-> ES, micro stays micro) */
+ try{ const c=$('contract'), v=c.value, to=/USATECH|NQ/i.test(np)?({50:'20',5:'2'})[v]:/USA500|ES/i.test(np)?({20:'50',2:'5'})[v]:null; if(to && [...c.options].some(o=>o.value===to)){ c.value=to; c.dispatchEvent(new Event('change')); c.dispatchEvent(new Event('input')); } }catch(e){}
+ P2.key=''; P2.idx=-2;
+ renderAll(); drawLines(); drawOrders(); markTf();
+ try{ updateTrades(true); }catch(e){}
+ try{ splitUpdate(); sp2Push(1,true); coinBuild.sync&&coinBuild.sync(); }catch(e){}
+ try{ sessSave(); }catch(e){}
+ msg(`Now trading ${nm(np)}. ${nm(old)} moved to the second chart. Replay is still at ${fmtLocal(replayNow())} ${tzName()}.`);
+ return true;
+}
+try{ Object.assign(window.__bt,{c2,candles2,P2,D2,SY,cfg:window.__bt.cfg||(()=>cfg),splitSwap,splitUpdate,setSplit,sp2SetLink,sp2Push,sp2ResetView,replayNow,
+ sp2:{range1:()=>chart.timeScale().getVisibleLogicalRange(), range2:()=>c2.timeScale().getVisibleLogicalRange(),
+  times1:()=>{ const r=chart.timeScale().getVisibleLogicalRange(); return r&&{from:fI2T(S.bars,r.from),to:fI2T(S.bars,r.to)}; },
+  times2:()=>{ const r=c2.timeScale().getVisibleLogicalRange(); return r&&{from:fI2T(S.pairBars,r.from),to:fI2T(S.pairBars,r.to)}; },
+  last2:()=>{ try{ return candles2.dataByIndex(1e9,-1); }catch(e){ return null; } },
+  count2:()=>P2.idx,
+  xy2:(t,p)=>{ const r=c2BodyEl.getBoundingClientRect(); return {x:r.left+c2.timeScale().logicalToCoordinate(CX2.t2i(t)), y:r.top+candles2.priceToCoordinate(p)}; },
+  pane2:()=>{ const r=c2BodyEl.getBoundingClientRect(), p=d2Pane(); return {left:r.left,top:r.top,w:p.w,h:p.h}; },
+  cross:()=>({x1:$('xs1').hidden?null:parseFloat($('xs1').style.left), x2:$('xs2').hidden?null:parseFloat($('xs2').style.left)}),
+  list2:()=>D2.list.map(d2Strip), key2:()=>D2.key}}); }catch(e){}
 
 /* ---- live position HUD, price ticker, risk line ---- */
 let pxPrev=null;
@@ -4125,7 +4420,7 @@ function screenshot(){
 function helpDialog(){
  const P=s=>`<p>${s}</p>`;
  dialog('How KETRADING works',[
-  {name:'Replay',html:'<div class="help">'+P('<b>1. Pick a start.</b> Use Select bar, a date, or the session jump (NY AM open, London, Asia) on the bar under the chart.')+P('<b>2. Press Play.</b> Live mode moves price one tick per second on every timeframe. Candles mode reveals one whole candle per step.')+P('<b>3. Switch timeframe any time.</b> Every timeframe stays at the same moment and keeps playing.')+P('<b>Split screen</b> shows your second symbol (for example ES) next to the main chart. Drag the divider to resize it.')+'</div>'},
+  {name:'Replay',html:'<div class="help">'+P('<b>1. Pick a start.</b> Use Select bar, a date, or the session jump (NY AM open, London, Asia) on the bar under the chart.')+P('<b>2. Press Play.</b> Live mode moves price one tick per second on every timeframe. Candles mode reveals one whole candle per step.')+P('<b>3. Switch timeframe any time.</b> Every timeframe stays at the same moment and keeps playing.')+P('<b>Split screen</b> shows your second symbol (for example ES) next to the main chart. Drag the divider to resize it. You can pan, zoom and draw on it like the main chart. The link button keeps both charts on the same time, and <b>Trade this chart</b> swaps the two symbols.')+'</div>'},
   {name:'Trading',html:'<div class="help">'+P('<b>Market order:</b> Buy or Sell in the Trade tab, the buttons on the chart, or keys B and S.')+P('<b>Pending order:</b> press Buy on chart or Sell on chart, then click the price. Below the market a buy becomes a limit; above it becomes a stop. The reverse applies to sells.')+P('<b>Move things:</b> drag any order, stop loss or take profit line. Press TP or SL on a line to add an exit.')+P('<b>Your open P&amp;L</b> is shown live on the chart and in the Trade tab.')+'</div>'},
   {name:'Indicators',html:'<div class="help">'+P('<b>Quarter boxes</b> draw each quarter on the chart. <b>Quarter timeline</b> is the strip under the chart. They are two separate switches in Settings.')+P('<b>Session highs and lows</b> mark the high and low of Asia, London, NY AM and NY PM in New York time.')+P('<b>True opens</b> and <b>SMT</b> are also in Settings, with themes, accent and chart colours.')+'</div>'},
   {name:'Prop firms',html:'<div class="help">'+P('<b>Evaluation sessions.</b> Your accounts only trade in sessions the Lucid desk sends to your phone: one random, hidden trading day from 09:30 to 16:00 New York time. The market runs live and cannot be paused, rewound or skipped. Pick a speed from 1 second to 15 minutes of market time per real second. At 16:00 open positions close and the date is revealed. Trades outside sessions are practice.')+P('<b>Four Lucid account types</b> in 25K, 50K and 150K, each with Lucid\'s own rules: <b>LucidFlex</b> and <b>LucidDaily</b> evaluations (50% consistency rule), <b>LucidPro</b> (no consistency rule while evaluating, soft daily loss limit on 50K and 150K) and <b>LucidDirect</b> (no evaluation, you start funded; unlock it in Skills).')+P('<b>Max loss</b> trails your end-of-day balance and locks at the starting balance + $100. A soft daily loss limit only benches the account until the next day.')+P('<b>Payouts:</b> Flex after five winning days; Pro after three trading days and the cycle goal with a 40% consistency rule; Daily on any day with net profit above a buffer; Direct after the cycle profit goal, five trading days and a 20% consistency rule. You keep 90%.')+'</div>'},
@@ -4564,7 +4859,7 @@ const SKILLS=[
  {b:'Chart',id:'coin',n:'3D symbol coin',d:'A spinning 3D coin of the symbol you trade, on the chart.',c:2,r:['themes']},
  {b:'Chart',id:'bgfx',n:'Live backgrounds',d:'Animated backgrounds behind the chart: falling stars, snow and rain.',c:1,r:[]},
  {b:'Chart',id:'bgfx2',n:'Premium backgrounds',d:'Aurora, constellation network and deep-space nebula.',c:2,r:['bgfx']},
- {b:'Funding',id:'copy',n:'Copy trading licence',d:'Lets you buy the trade syncer and trade several accounts at once.',c:1,r:[]},
+ {b:'Funding',id:'copy',n:'Copy trading licence',d:'No longer needed: every account can now trade at once. Respec in Skills to get the point back.',c:1,r:[]},
  {b:'Funding',id:'scale',n:'Scaling',d:'+50% XP from closed trades.',c:2,r:['copy']},
  {b:'Funding',id:'direct',n:'Instant funding',d:'Unlocks LucidDirect: start funded, no evaluation.',c:2,r:[]},
  {b:'Life',id:'family',n:'Family',d:'Get married and have up to three kids. They live in your home.',c:1,r:[]},
@@ -5427,6 +5722,7 @@ function hubOpen(page){
 document.addEventListener('keydown',e=>{ if(e.key==='Escape' && hubShown() && !/^(INPUT|TEXTAREA|SELECT)$/.test((e.target||{}).tagName||'')) hubOpen('chart'); });
 
 try{ Object.assign(window.__bt,{LF,foodBuy,gymJoin,gymRep,partyCheck,partyGo,famDo,lifeTick,chTicks,chSpd,chClockStop,chClockRun,CH,chart,eqChart,oscChart,chAfterPull,chSnap,txAdd,financeItem,loanPay,chAccept,chEnd,chTick,CHS,phoneOpen,misBump,misClaim,achCheck,credit,hofAdd,openPos,closePos,CAR,careerSync,hubOpen,HUB,jobClick,skBuy,xpAdd,skill,planSpec,chartFull,bgfxSync,cfg:()=>cfg,famScene,sfxPlay,sessSave,sessApply}); }catch(e){}
+try{ Object.assign(window.__bt,{rebuildSeries,pnlWUpdate}); }catch(e){}
 
 
 /* ---- save the chart session (symbol, replay spot, trades) in this browser and online ---- */
