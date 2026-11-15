@@ -3820,7 +3820,7 @@ const carSaveLocal=()=>{ try{ CAR.sigv=1; const j=JSON.stringify(CAR); localStor
 try{ const j=localStorage.getItem('ke_career_v1'), g=localStorage.getItem('ke_career_sig'); if(j && !CAR.tamper && ((g && g!==carHash(j)) || (!g && /"sigv":1/.test(j)))) CAR.tamper=Date.now(); }catch(e){}
 const carSave=()=>{ CAR.ts=Date.now(); carSaveLocal(); try{ cloudPush(); }catch(e){} };
 const SYNC={prev:{},last:null};
-const syncOwned=()=>true;   // every account can trade at once
+const syncOwned=()=>!!CAR.owned.syncer;
 const acctIn=a=>!!(S.pos&&S.pos.sync&&S.pos.sync.includes(a.id));
 const acctOpen=a=>acctIn(a) ? S.pos.side*(priceNow()-S.pos.entry)*S.pos.pv*S.pos.qty : 0;
 const evalNow=()=>S.bars.length ? ((S.partial&&S.raw.length)?replayNow():S.bars[S.cursor].time) : 0;
@@ -4024,7 +4024,11 @@ function acctRender(){
      return `<div class="card prod ev"><div class="card-h"><b>${L.name} ${k}K</b><span class="price">${money(P.price)}</span></div>
       <div class="rt">${planRules(P).map(([a,b])=>`<span>${a}</span><b>${b}</b>`).join('')}</div>
       <button class="primary ac-btn" data-buy="${L.id}:${k}" ${lock||full||short>0?'disabled':''}>${lock?'Locked':full?`Limit of ${EVAL.max} accounts reached`:short>0?`Need ${money(short)} more`:(L.direct?'Buy funded account':'Buy evaluation')}</button>${!lock&&!full&&short>0?`<button class="link ac-link" data-hub="job">Earn it at the job</button>`:''}</div>`; }).join('')}</div>`; })()}
-   <div class="sec">Good to know</div><div class="card"><ul class="erules" style="margin:0"><li>Max loss trails your end-of-day balance and locks at the starting balance + $100.</li><li>A soft daily loss limit does not close the account. It takes the account out of trading until the next day.</li><li>Every payout is split 90/10. The minimum payout is $500.</li><li>Switch on as many accounts as you like. Every trade in an evaluation session is copied to each account that is on, with the same size, stop and target.</li><li>Accounts are saved, so restarting the replay does not reset them.</li></ul></div>`;
+   <div class="sec">Tools</div><div class="hub-grid2">
+    <div class="card prod"><div class="card-h"><b>Trade syncer</b><span class="price">${own?'Owned':money(SYNCER_PRICE)}</span></div>
+     <ul class="erules"><li>Trade several accounts at once. Every entry is copied to each account that is switched on.</li><li>Same size, stop and target on each. All accounts trade the same direction.</li><li>Each account keeps its own progress, so they can be at different stages.</li><li>Without it, one account trades at a time.</li></ul>
+     ${own?`<div class="hint">Unlocked. Use the switches on your accounts to choose which ones trade.</div>`:!skill('copy')?`<button class="ac-btn" data-hub="skills">Needs the Copy trading licence skill</button>`:`<button class="primary ac-btn" data-buy="syncer" ${sshort>0?'disabled':''}>${sshort>0?`Need ${money(sshort)} more`:'Unlock trade syncer'}</button>`}</div></div>
+   <div class="sec">Good to know</div><div class="card"><ul class="erules" style="margin:0"><li>Max loss trails your end-of-day balance and locks at the starting balance + $100.</li><li>A soft daily loss limit does not close the account. It takes the account out of trading until the next day.</li><li>Every payout is split 90/10. The minimum payout is $500.</li><li>Own as many accounts as you like. To trade the same entry on several at once you need the trade syncer.</li><li>Accounts are saved, so restarting the replay does not reset them.</li></ul></div>`;
   acctBind(hub); hub.dataset.key=hk;
  }
  const ln=$('acctLine'); if(ln){ const on=A.filter(a=>a.on), t=on.length?`Trading on ${on.map(a=>a.name).join(', ')}`:(A.length?'Practice mode: no account is switched on':'Practice mode: no account yet'); if(ln.dataset.t!==t){ ln.dataset.t=t; ln.innerHTML=`<span>${cesc(t)}</span><button class="link" id="acctLineB">${A.length?'Change':'Get one'}</button>`; $('acctLineB').onclick=()=>{ A.length?sideTab('pStats'):hubOpen('store'); }; } }
@@ -4859,7 +4863,7 @@ const SKILLS=[
  {b:'Chart',id:'coin',n:'3D symbol coin',d:'A spinning 3D coin of the symbol you trade, on the chart.',c:2,r:['themes']},
  {b:'Chart',id:'bgfx',n:'Live backgrounds',d:'Animated backgrounds behind the chart: falling stars, snow and rain.',c:1,r:[]},
  {b:'Chart',id:'bgfx2',n:'Premium backgrounds',d:'Aurora, constellation network and deep-space nebula.',c:2,r:['bgfx']},
- {b:'Funding',id:'copy',n:'Copy trading licence',d:'No longer needed: every account can now trade at once. Respec in Skills to get the point back.',c:1,r:[]},
+ {b:'Funding',id:'copy',n:'Copy trading licence',d:'Lets you buy the trade syncer and trade several accounts at once.',c:1,r:[]},
  {b:'Funding',id:'scale',n:'Scaling',d:'+50% XP from closed trades.',c:2,r:['copy']},
  {b:'Funding',id:'direct',n:'Instant funding',d:'Unlocks LucidDirect: start funded, no evaluation.',c:2,r:[]},
  {b:'Life',id:'family',n:'Family',d:'Get married and have up to three kids. They live in your home.',c:1,r:[]},
