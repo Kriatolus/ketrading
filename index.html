@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261116212140">
+<meta name="ke-build" content="20261116214557">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -3519,6 +3519,7 @@ document.addEventListener('keydown',e=>{
 
 /* ---------- TradingView-style order panel + on-chart position / TP / SL / order lines ---------- */
 const OP={side:1,type:'market',tpOn:false,slOn:false,tpT:75,slT:25,tif:'gtc',oneClick:false};
+window.__bt.OP=OP;window.__bt.opUpdate=opUpdate;window.__bt.submitOP=submitOP;window.__bt.refresh=refresh;
 const tickSz=()=>TICK[$('contract').value]||0.25;
 const spreadPx=()=>(cfg.spreadTicks??1)*tickSz();
 const bidPx=()=>priceNow(), askPx=()=>priceNow()+spreadPx();
@@ -3729,6 +3730,17 @@ function posRender(w,h){
   const u=usd(now-p.entry);
   lineRow(p.entry,col,bt.concat([{t:(p.side>0?'LONG ':'SHORT ')+q,solid:col},{t:fmtUSD(u).replace(' USD',''),fg:u>=0?TAGC.tp:TAGC.sl},{t:ex(now-p.entry),fg:sub},{t:'×',act:'close',fg:sub}]),'entry');
  }
+ if(!p && OP.type==='market'){
+  const side=OP.side, ref=side>0?askPx():bidPx(), tk=tickSz(), pvq=(+$('contract').value||1)*(+$('qty').value||1), usdD=k=>k*tk*pvq;
+  const dcol=side>0?TAGC.long:TAGC.short, dl=(side>0?'BUY ':'SELL ')+(+$('qty').value||1);
+  const bts=[{t:'DRAFT '+dl,solid:dcol}];
+  if(!OP.tpOn) bts.push({t:'+TP',act:'onTP',fg:TAGC.tp});
+  if(!OP.slOn) bts.push({t:'+SL',act:'onSL',fg:TAGC.sl});
+  bts.push({t:fmtP(ref),fg:ink});
+  lineRow(ref,dcol,bts,'dref');
+  if(OP.tpOn) lineRow(ref+side*OP.tpT*tk,TAGC.tp,[{t:'TP',solid:TAGC.tp},{t:'DRAFT',fg:sub},{t:fmtUSD(usdD(OP.tpT)).replace(' USD',''),fg:TAGC.tp},{t:'+'+OP.tpT+'t',fg:sub},{t:'×',act:'offTP',fg:sub}],'dtp');
+  if(OP.slOn) lineRow(ref-side*OP.slT*tk,TAGC.sl,[{t:'SL',solid:TAGC.sl},{t:'DRAFT',fg:sub},{t:fmtUSD(-usdD(OP.slT)).replace(' USD',''),fg:TAGC.sl},{t:'-'+OP.slT+'t',fg:sub},{t:'×',act:'offSL',fg:sub}],'dsl');
+ }
  for(const o of S.orders){
   const col=o.type==='stop'?TAGC.stp:TAGC.lmt, lab=(o.side>0?'BUY ':'SELL ')+(o.type==='stop'?'STP':'LMT');
   const oq=o.qty||1, opv=+$('contract').value||1, ousd=d=>d*opv*oq;
@@ -3747,7 +3759,7 @@ function posRender(w,h){
 }
 function posHit(x,y){
  for(const u of (S.posUI||[])) if(u.kind==='btn' && x>=u.x && x<=u.x+u.w && y>=u.y && y<=u.y+u.h) return u;
- for(const u of (S.posUI||[])) if(u.kind==='line' && Math.abs(y-u.y)<=8) return u;
+ for(const u of (S.posUI||[])) if(u.kind==='line' && u.which!=='dref' && Math.abs(y-u.y)<=8) return u;
  return null;
 }
 chartEl.addEventListener('mousedown',e=>{
@@ -3764,9 +3776,14 @@ chartEl.addEventListener('mousedown',e=>{
   else if(u.act==='addTP'||u.act==='addSL'){ S.posDrag={which:u.act==='addTP'?'tp':'sl', id:u.id, create:true, sy:y, moved:false}; msg('Drag up or down to place it, or just release for the default distance.'); return; }
   else if(u.act==='rev' && p){ const q=p.qty; openPos(-p.side, undefined, 0, 0, 'REV', q); msg('Position reversed.'); }
   else if(u.act==='cancel'){ cancelOrder(u.id); msg('Order cancelled.'); }
+  else if(u.act==='onTP'){ OP.tpOn=true; opUpdate(true); msg('Take profit set. Drag its line to place it before you press Buy.'); }
+  else if(u.act==='onSL'){ OP.slOn=true; opUpdate(true); msg('Stop loss set. Drag its line to place it before you press Buy.'); }
+  else if(u.act==='offTP'){ OP.tpOn=false; opUpdate(true); msg('Take profit removed from the draft.'); }
+  else if(u.act==='offSL'){ OP.slOn=false; opUpdate(true); msg('Stop loss removed from the draft.'); }
   refresh(); return;
  }
  S.posDrag={which:u.which,id:u.id};
+ if(u.which==='dref'){ S.posDrag=null; return; }
 },true);
 window.addEventListener('mousemove',e=>{
  const {x,y}=localXY(e);
@@ -3777,8 +3794,15 @@ window.addEventListener('mousemove',e=>{
  if(Math.abs(y-(d.sy??y))>3) d.moved=true;
  if(d.create && !d.moved) return;
  const t=tickSz();
+ if(d.which==='dtp'||d.which==='dsl'){
+  const side=OP.side, ref=side>0?askPx():bidPx(), k=Math.round(((d.which==='dtp')?(pr-ref)*side:(ref-pr)*side)/t);
+  d.bad = k<1;
+  if(!d.bad){ if(d.which==='dtp') OP.tpT=k; else OP.slT=k; }
+  opUpdate(true); return;
+ }
  if(d.id!=null && (d.which==='tp'||d.which==='sl')){ const o=S.orders.find(o=>o.id===d.id); if(o){ const dist=(pr-o.price)*o.side; if(d.which==='tp') o.tp=Math.max(t,dist); else o.sl=Math.max(t,-dist); } return; }
  if(d.which==='entry' && p){ d.which = (pr-p.entry)*p.side>0 ? 'tp' : 'sl'; }
+ if(p && ((d.which==='sl' && (pr-(p.side>0?bidPx():askPx()))*p.side>=0) || (d.which==='tp' && (pr-(p.side>0?bidPx():askPx()))*p.side<=0))) return;
  if(d.which==='tp' && p) p.tp=pr;
  else if(d.which==='sl' && p){ p.sl=pr; if(p.risk==null) p.risk=Math.abs(p.entry-pr); }
  else if(d.which==='order'){ const o=S.orders.find(o=>o.id===d.id); if(o) o.price=pr; }
@@ -3786,6 +3810,11 @@ window.addEventListener('mousemove',e=>{
 window.addEventListener('mouseup',e=>{
  if(!S.posDrag) return; e.stopPropagation();
  const d=S.posDrag, p=S.pos; S.posDrag=null;
+ if(d.which==='dtp'||d.which==='dsl'){
+  if(d.bad) msg(d.which==='dtp'?'Take profit has to be on the profit side of the price, so it keeps its last valid place.':'Stop loss has to be on the loss side of the price, so it keeps its last valid place.');
+  else msg(`${d.which==='dtp'?'Take profit':'Stop loss'} set to ${d.which==='dtp'?OP.tpT:OP.slT} ticks. It is placed when you press Buy or Sell.`);
+  refresh(); return;
+ }
  if(d.create && !d.moved){ const t=tickSz(), tpD=OP.tpT*t, slD=OP.slT*t;
   if(d.id!=null){ const o=S.orders.find(o=>o.id===d.id); if(o){ if(d.which==='tp') o.tp=tpD; else o.sl=slD; } }
   else if(p){ if(d.which==='tp') p.tp=roundTick(p.entry+p.side*tpD); else { p.sl=roundTick(p.entry-p.side*slD); if(p.risk==null) p.risk=slD; } }
@@ -7052,6 +7081,7 @@ try{ Object.assign(window.__bt,{rebuildSeries,pnlWUpdate}); }catch(e){}
  }
  setTimeout(check,20000); setInterval(check,120000); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) check(); });
 })();
+
 
 
 
