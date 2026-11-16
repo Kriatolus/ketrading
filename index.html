@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261116063129">
+<meta name="ke-build" content="20261116070157">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1295,6 +1295,7 @@ body.pnlw-on #hud{display:none!important}
 @keyframes sndChip{0%{opacity:0;transform:translateY(0)}15%{opacity:1}100%{opacity:0;transform:translateY(-18px)}}
 @media (prefers-reduced-motion: reduce){.snd-nudge{animation:none}.snd-chip{animation:none;display:none}.snd-tip{transition:none}}
 </style>
+<style id="v18k">.ac.hascol{border-left:3px solid var(--acc)}.ac-cols{display:flex;gap:6px;margin:8px 0 2px}.ac-col{width:16px;height:16px;min-width:16px;padding:0;border-radius:999px;border:2px solid transparent;cursor:pointer}.ac-col.on{border-color:var(--text)}</style>
 </head>
 <body>
 <style id="v18b">
@@ -4130,7 +4131,7 @@ function carMigrate(o){
 }
 const carDefault=()=>({v:2,priceMig:1,wallet:EVAL.price,passes:0,blown:0,paid:0,payouts:0,accts:[],owned:{},eq:{},job:{clicks:0,earned:0},look:{name:'You',skin:'#e8b796',hair:'#2b2118',style:'short'}});
 const CAR=(()=>{ const d=carDefault(); try{ const s=JSON.parse(localStorage.getItem('ke_career_v1')||'null'); if(s){ const o=Object.assign(d,s,{look:Object.assign(d.look,s.look||{})}); o.v=s.v||0; return carMigrate(o); } }catch(e){} return d; })();
-const EXT_KEYS=['chSlots','life','login','bills','sav','prestige','xp','skills','fam','ch','loans','loansPaid','tx','hof','hofBest','mis','ach','inbox','streak','lastDay','pets','priceMig','tamper','cleanMig','loanLate','loanCfg','paidItems','debtSt','friend'];
+const EXT_KEYS=['chSlots','daily','life','login','bills','sav','prestige','xp','skills','fam','ch','loans','loansPaid','tx','hof','hofBest','mis','ach','inbox','streak','lastDay','pets','priceMig','tamper','cleanMig','loanLate','loanCfg','paidItems','debtSt','friend'];
 const carExt=()=>{ const o={}; EXT_KEYS.forEach(k=>{ if(CAR[k]!==undefined) o[k]=CAR[k]; }); if(o.tx) o.tx=o.tx.slice(0,80); if(o.inbox) o.inbox=o.inbox.slice(0,30); if(o.ch) o.ch=Object.assign({},o.ch,{prev:null}); return o; };
 const carHash=t=>{ let h=2166136261; t='ke1|'+t; for(let i=0;i<t.length;i++){ h^=t.charCodeAt(i); h=Math.imul(h,16777619); } return (h>>>0).toString(36); };
 const carSaveLocal=()=>{ try{ CAR.sigv=1; const j=JSON.stringify(CAR); localStorage.setItem('ke_career_v1',j); localStorage.setItem('ke_career_sig',carHash(j)); }catch(e){} };
@@ -4271,7 +4272,8 @@ function acctPayout(id){
  if(S.pos){ const m='Close your position before you request a payout.'; msg(m); toast(m,3500); return; }
  const c=acctCalc(a); if(!c.canPay) return;
  const amt=c.maxPay, net=Math.round(amt*FUND.split*(skill('legacy')?1.1:1)*100)/100; try{ xpAdd(200); }catch(e){}
- a.ledger.push({d:c.today,pnl:-amt,pay:1}); CAR.wallet=Math.round((CAR.wallet+net)*100)/100; txAdd(`Payout · ${a.name}`,net,'payout'); setTimeout(()=>{ try{ partyCheck(); }catch(e){} },1500); if(CAR.prestige){ const pb=Math.round(net*0.05*CAR.prestige*100)/100; CAR.wallet=Math.round((CAR.wallet+pb)*100)/100; txAdd(`Prestige bonus · ${a.name}`,pb,'refund'); } CAR.paid=Math.round((CAR.paid+net)*100)/100; CAR.payouts++; delete SYNC.prev[a.id]; carSave(); careerSync(); try{ sfxPlay('payout',true); }catch(e){}
+ a.ledger.push({d:c.today,pnl:-amt,pay:1}); CAR.wallet=Math.round((CAR.wallet+net)*100)/100; txAdd(`Payout · ${a.name}`,net,'payout'); setTimeout(()=>{ try{ partyCheck(); }catch(e){} },1500); if(skill('bonus')){ const bb=Math.round(net*0.03*100)/100; CAR.wallet=Math.round((CAR.wallet+bb)*100)/100; txAdd(`Performance bonus · ${a.name}`,bb,'payout'); }
+ if(CAR.prestige){ const pb=Math.round(net*0.05*CAR.prestige*100)/100; CAR.wallet=Math.round((CAR.wallet+pb)*100)/100; txAdd(`Prestige bonus · ${a.name}`,pb,'refund'); } CAR.paid=Math.round((CAR.paid+net)*100)/100; CAR.payouts++; delete SYNC.prev[a.id]; carSave(); careerSync(); try{ sfxPlay('payout',true); }catch(e){}
  toast(`<b>Payout approved on ${cesc(a.name)}.</b> ${usd(amt)} requested, ${usd(net)} (90%${skill('legacy')?' + 10% legacy':''}) is in your wallet.`,6000);
 }
 function acctRemove(id){
@@ -4305,7 +4307,8 @@ function evalBuild(){ try{ acctUpdate(); }catch(e){} }
 function evalUpdate(){ acctUpdate(); }
 function acctCard(a,c,full){
  const F=a.stage==='funded', id=a.id;
- return `<div class="ac ${a.on?'on':''}"><div class="ac-h">${full?`<input class="ac-n" data-nm="${id}" maxlength="16" value="${cesc(a.name)}" title="Rename this account">`:`<b class="ac-t">${cesc(a.name)}</b>`}<span class="badge sz">${planShort(SPEC(a))}</span><span class="badge" data-f="${id}:badge"></span><label class="sw" title="Trade this account"><input type="checkbox" data-on="${id}" ${a.on?'checked':''}><i></i></label></div>
+ return `<div class="ac ${a.on?'on':''} ${a.col?'hascol':''}" style="${a.col?'--acc:'+a.col:''}"><div class="ac-h">${full?`<input class="ac-n" data-nm="${id}" maxlength="16" value="${cesc(a.name)}" title="Rename this account">`:`<b class="ac-t">${cesc(a.name)}</b>`}<span class="badge sz">${planShort(SPEC(a))}</span><span class="badge" data-f="${id}:badge"></span><label class="sw" title="Trade this account"><input type="checkbox" data-on="${id}" ${a.on?'checked':''}><i></i></label></div>
+  ${full?`<div class="ac-cols">${ACC_COLS.map(c=>`<button class="ac-col ${a.col===c?'on':''}" data-col="${id}" data-c="${c}" style="background:${c}" title="Colour for this account"></button>`).join('')}</div>`:''}
   <div class="meter"><div class="l"><span data-f="${id}:pl"></span><b data-f="${id}:p"></b></div><div class="m"><i data-f="${id}:pb"></i></div></div>
   <div class="ac-r"><span>Balance <b data-f="${id}:bal"></b></span><span>Room to max loss <b data-f="${id}:room"></b></span></div>
   ${full?`<div class="hint" data-f="${id}:note"></div>`:''}
@@ -4316,6 +4319,7 @@ function acctBind(box){
  const q=s=>box.querySelectorAll(s);
  q('[data-hub]').forEach(e=>e.onclick=()=>hubOpen(e.dataset.hub));
  q('[data-on]').forEach(e=>e.onchange=()=>acctToggle(e.dataset.on,e.checked));
+ q('[data-col]').forEach(e=>e.onclick=()=>{ const a=CAR.accts.find(x=>x.id===e.dataset.col); if(a){ a.col=e.dataset.c; carSave(); acctRender(); } });
  q('[data-nm]').forEach(e=>e.onchange=()=>{ const a=CAR.accts.find(x=>x.id===e.dataset.nm); if(a){ a.name=e.value.trim()||'Account'; carSave(); acctRender(); } });
  q('[data-rm]').forEach(e=>e.onclick=()=>{ if(!e.dataset.arm){ e.dataset.arm='1'; e.textContent='Click again to close it for good'; e.classList.add('arm'); return; } acctRemove(e.dataset.rm); });
  q('[data-claim]').forEach(e=>e.onclick=()=>acctClaim(e.dataset.claim));
@@ -5303,7 +5307,10 @@ const SKILLS=[
  {b:'Life',id:'frugal',n:'Frugal living',d:'30% lower daily living costs for homes, cars and family.',c:1,r:[]},
  {b:'Life',id:'loyal',n:'Loyalty',d:'+50% on every daily login reward.',c:1,r:['frugal']},
  {b:'Trader',id:'collector',n:'Collector',d:'Missions and trophies give +50% XP.',c:2,r:['mentor']},
- {b:'Desk',id:'auto',n:'Assistant',d:'Processes a ticket for you every 3 seconds while you are on the Job page.',c:3,r:['pay2']}
+ {b:'Desk',id:'auto',n:'Assistant',d:'Processes a ticket for you every 3 seconds while you are on the Job page.',c:3,r:['pay2']},
+ {b:'Career',id:'network',n:'Networking',d:'+5% job pay. Your party contacts count for more.',c:1,r:[]},
+ {b:'Career',id:'promo',n:'Promotion',d:'+15% job pay per ticket.',c:2,r:['network']},
+ {b:'Career',id:'bonus',n:'Performance bonus',d:'Every payout you take pays 3% extra into your wallet.',c:3,r:['promo']}
 ];
 const SK=Object.fromEntries(SKILLS.map(s=>[s.id,s]));
 const skill=id=>!!(CAR.skills&&CAR.skills[id]);
@@ -5672,6 +5679,60 @@ function chTick(){
  carSave(); try{ sfxPlay('alert',true); }catch(e){}
  toast(`<b>New evaluation session.</b> Open your phone to accept it.`,5000);
 }
+/* ---- partner reacts to trading, daily challenge, account colours ---- */
+const ACC_COLS=['#2f80ff','#18a3a3','#1b8a5a','#c27a1a','#e0567d','#7e57c2'];
+function partnerNote(pnl,n){
+ const f=CAR.fam; if(!f||!f.partner||!n) return;
+ const who=f.partner.name||'Partner', late=(()=>{ const h=new Date().getHours(); return h>=23||h<5; })();
+ const t= pnl>0 ? 'Good session, I am proud of you.' : pnl<0 ? 'Rough one. You do not have to win every day.' : 'A quiet one. That is fine too.';
+ const body= t+(late?' It is late, though. Come to bed soon.':'')+(pnl<0?' Dinner is on me tonight.':'');
+ msgAdd({k:'fam',from:who,title:pnl>0?'Proud of you':pnl<0?'Rough day, I am here':'How did it go?',body});
+}
+const dailyKey=()=>new Date().toISOString().slice(0,10);
+function dailyRng(key){ let h=2166136261; for(const c of key){ h^=c.charCodeAt(0); h=Math.imul(h,16777619); }
+ return ()=>{ h|=0; h=h+0x6D2B79F5|0; let t=Math.imul(h^h>>>15,1|h); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function dailyReq(){   // the same session for both players on the same UTC day
+ const sym=chSym(); if(!sym) return null; const key=dailyKey(), rnd=dailyRng(key), ys=(window.BT_MANIFEST[sym]||[]).slice(); if(!ys.length) return null;
+ const now=new Date(), maxT=Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate())-7*864e5;
+ for(let k=0;k<200;k++){ const y=ys[Math.floor(rnd()*ys.length)], t=Date.UTC(y,0,1)+Math.floor(rnd()*365)*864e5;
+  if(t>maxT) continue; if(!ys.includes(y-1) && t<Date.UTC(y,0,1)+CH_HIST*864e5) continue;
+  const wd=new Date(t).getUTCDay(); if(wd>=1&&wd<=5) return {id:'daily-'+key,sym,y,D:Math.floor(t/864e5),n:0,daily:true,key}; }
+ return null;
+}
+function dailyBtn(){
+ const k=dailyKey(), d=CAR.daily&&CAR.daily[k];
+ if(CHA()) return '';
+ if(d) return `<button id="chDaily" disabled data-why="Done today. A new daily challenge tomorrow">Daily ${d.bestR!=null?d.bestR.toFixed(1)+'R':fmt$(d.pnl)} · done</button>`;
+ return '<button id="chDaily">Daily challenge</button>';
+}
+async function dailyStart(){
+ if(CHA()){ toast('Finish your evaluation session first.',3000); return; }
+ if(S.pos){ toast('Close your open position first.',3000); return; }
+ if(CH.busy||CH.loading) return;
+ const k=dailyKey(); if(CAR.daily&&CAR.daily[k]){ toast('You have done today\'s challenge already.',3000); return; }
+ const r=dailyReq(); if(!r){ toast('No daily challenge is available right now.',3000); return; }
+ CH.busy=true; try{ await chAccept2(r,'300'); } finally{ CH.busy=false; CH.loading=false; }
+}
+function dailyFinish(early){
+ const a=CHS(); if(!a) return;
+ stopPlay(); chClockStop(); if(CH.prevMode){ $('mode').value=CH.prevMode.mode; $('pace').value=CH.prevMode.pace; CH.prevMode=null; try{ $('mode').dispatchEvent(new Event('change')); }catch(e){} }
+ S.orders=[]; try{ drawOrders(); }catch(e){}
+ if(S.pos){ CH.ending=true; closePos(S.pos.side>0?priceNow():priceNow()+spreadPx(), S.cursor, 'EOD'); CH.ending=false; }
+ chSnap();
+ const T=S.trades, n=T.length, wins=T.filter(t=>t.pnl>0).length, pnl=Math.round(S.realized*100)/100, rs=T.filter(t=>t.r!=null).map(t=>t.r), bestR=rs.length?Math.round(Math.max(...rs)*100)/100:null;
+ CAR.daily=CAR.daily||{}; CAR.daily[a.dkey||dailyKey()]={pnl,n,wins,bestR,at:Date.now()};
+ CAR.ch.act=null; document.body.classList.remove('challenge');
+ try{ foodUse(12); }catch(e){} xpAdd(20+(pnl>0?25:0)+(early?0:10));
+ const back=CAR.ch.prev; CAR.ch.prev=null; S.pos=null; S.symKey='__session_done';
+ carSave();
+ const txt=`Daily challenge: ${n} trade${n===1?'':'s'}, ${pnl>=0?'+':''}${fmt$(pnl)}${bestR!=null?`, best ${bestR.toFixed(1)}R`:''}.`;
+ toast(`<b>Daily challenge done.</b> ${txt}`,6000);
+ const fr=(typeof chatFriend==='function')?chatFriend():null, me=chatApi.me();
+ if(fr&&me&&chatApi.ready()) chatApi.send(me,fr.id,{kind:'text',body:txt}).catch(()=>{});
+ (async()=>{ try{ if(back && await sessApply(back,true)) return; }catch(e){} try{ $('symSel').value=cfg.last||$('symSel').value; fillYears(); await openSymbol(); }catch(e){} })();
+ chBar();
+}
+
 const CH_SLOT_KEYS=['req','act','next','prev'];
 function chSlotSwitch(from,to){   // park the session of one evaluation and bring back another's
  CAR.ch=CAR.ch||{day:0,req:null,act:null,hist:[],next:0};
@@ -5719,8 +5780,8 @@ async function chAccept2(r,tf){
  const raw=await loadSymbol(r.sym,y0,r.y); CH.loading=false; const k0=raw.findIndex(b=>b.time>=t0);
  if(k0<0 || raw[k0].time>t0+10*60 || k0<2){ CAR.ch.req=null; CAR.ch.next=0; msgDrop(r.id); carSave(); chTick(); toast('That day had no trading. A new session request is on its way.',4000); return; }
  const p0=raw[k0].open, off=Math.round(p0*(0.08+Math.random()*0.17)*(Math.random()<0.5?-1:1)*4)/4;
- CAR.ch.seq=Math.max(CAR.ch.day||0,CAR.ch.seq||0)+1;
- CAR.ch.act={id:r.id,sym:r.sym,y0,y1:r.y,D:r.D,t0,tEnd,off,tf:chTfNorm(tf),day:CAR.ch.seq,cur:t0,fresh:true,trades:[],markers:[],realized:0,dayPnl:{},pos:null,started:Date.now()};
+ if(!r.daily) CAR.ch.seq=Math.max(CAR.ch.day||0,CAR.ch.seq||0)+1;
+ CAR.ch.act={id:r.id,sym:r.sym,y0,y1:r.y,D:r.D,t0,tEnd,off,tf:chTfNorm(tf),day:r.daily?0:CAR.ch.seq,daily:!!r.daily,dkey:r.key||null,cur:t0,fresh:true,trades:[],markers:[],realized:0,dayPnl:{},pos:null,started:Date.now()};
  CAR.ch.req=null; msgDrop(r.id); carSave();
  await chLoad(raw); toast(`<b>Evaluation session ${CHS().day} started.</b> Trades now count on your active accounts. The session runs 09:30 to 16:00 New York time.`,6000);
 }
@@ -5858,6 +5919,7 @@ function chAfterPull(){
 function chSnap(){ const a=CHS(); if(!a||!S.bars.length||CH.allow||CH.loading||CH.loadedId!==a.id) return; a.cur=chNow(); a.v=3; CAR.ts=Date.now(); a.trades=S.trades.slice(-300); a.markers=S.markers.slice(-600); a.realized=S.realized; a.dayPnl=S.dayPnl; a.pos=S.pos?JSON.parse(JSON.stringify(S.pos)):null; }
 function chEnd(early){
  const a=CHS(); if(!a) return;
+ if(a.daily){ dailyFinish(!!early); return; }
  stopPlay(); chClockStop(); if(CH.prevMode){ $('mode').value=CH.prevMode.mode; $('pace').value=CH.prevMode.pace; CH.prevMode=null; try{ $('mode').dispatchEvent(new Event('change')); }catch(e){} } S.orders=[]; try{ drawOrders(); }catch(e){} if(S.pos){ CH.ending=true; closePos(S.pos.side>0?priceNow():priceNow()+spreadPx(), S.cursor, 'EOD'); CH.ending=false; }
  chSnap();
  const T=S.trades, n=T.length, wins=T.filter(t=>t.pnl>0).length, pnl=S.realized, rs=T.filter(t=>t.r!=null).map(t=>t.r), bestR=rs.length?Math.max(...rs):null;
@@ -5867,6 +5929,7 @@ function chEnd(early){
  xpAdd(30+(pnl>0?40:0)); misBump('session',1); if(pnl>0) misBump('green',1);
  msgAdd({k:'res',from:'Lucid Trading desk',title:`Session ${a.day} results: ${pnl>=0?'+':''}${fmt$(Math.round(pnl))}`,body:`${n} trade${n===1?'':'s'}, ${wins} winner${wins===1?'':'s'}${bestR!=null?`, best ${bestR.toFixed(1)}R`:''}. The day you traded was ${dateTxt}.${early?' You ended the session early.':''}`});
  carSave(); acctUpdate(); achCheck();
+ try{ partnerNote(pnl,n); }catch(e){}
  chResult({pnl,n,wins,bestR,dateTxt,day:a.day,early:!!early});
  const back=CAR.ch.prev; CAR.ch.prev=null; S.pos=null; S.symKey='__session_done';
  (async()=>{ try{ if(back && await sessApply(back,true)) return; }catch(e){} try{ $('symSel').value=cfg.last||$('symSel').value; fillYears(); await openSymbol(); }catch(e){} })();
@@ -5881,7 +5944,8 @@ function chResult(r){
 function chBar(){
  let b=$('chBar'); if(!b){ b=document.createElement('div'); b.id='chBar'; const c=$('chart'); if(!c) return; c.appendChild(b); }
  const a=CHS();
- if(!a){ b.dataset.k=''; const on=CAR.accts.filter(x=>x.on); b.className='mode-pill prac'; b.innerHTML=`<i></i><b>Practice</b><span>${on.length?'Accounts only trade in evaluation sessions':'Trades here do not count'}</span>${CAR.ch&&CAR.ch.req?'<button id="chOpen">Session waiting</button>':''}${(()=>{ const P=chParked(); return P.live?`<button id="chPark">${P.live} parked session${P.live>1?'s':''}</button>`:''; })()}`; const o=$('chOpen'); if(o) o.onclick=()=>phoneOpen('messages'); const pk=$('chPark'); if(pk) pk.onclick=()=>{ try{ hubOpen('props'); }catch(e){} toast('Switch on the account whose session you want to continue.',3500); }; return; }
+ if(!a){ b.dataset.k=''; const on=CAR.accts.filter(x=>x.on); b.className='mode-pill prac'; b.innerHTML=`<i></i><b>Practice</b><span>${on.length?'Accounts only trade in evaluation sessions':'Trades here do not count'}</span>${CAR.ch&&CAR.ch.req?'<button id="chOpen">Session waiting</button>':''}${dailyBtn()}${(()=>{ const P=chParked(); return P.live?`<button id="chPark">${P.live} parked session${P.live>1?'s':''}</button>`:''; })()}`; const o=$('chOpen'); if(o) o.onclick=()=>phoneOpen('messages'); const dc=$('chDaily'); if(dc) dc.onclick=()=>dailyStart();
+ const pk=$('chPark'); if(pk) pk.onclick=()=>{ try{ hubOpen('props'); }catch(e){} toast('Switch on the account whose session you want to continue.',3500); }; return; }
  const now=S.bars.length?chNow():a.t0, left=Math.max(0,a.tEnd-now), h=Math.floor(left/3600), m=Math.floor(left%3600/60);
  const on=CAR.accts.filter(x=>x.on);
  const txt=`${on.map(x=>planShort(SPEC(x))).join(' · ')||'no account on'} · live ${chSpdLabel(chSpd())} · ${h}h ${pad2(m)}m to the 16:00 close`;
@@ -6188,7 +6252,7 @@ function careerSync(){
 function careerScene(){ const t=$('crTilt'); if(!t) return; const eq=eqNow(); if(HUB.try){ const it=ITEM[HUB.try]; eq[it.slot]=it.id; } t.innerHTML=avScene(eq,CAR.look); }
 function careerWave(){ const t=$('crTilt'); if(!t) return; t.classList.remove('wave'); void t.offsetWidth; t.classList.add('wave'); }
 function careerOpen(tab){ if(tab && ['Clothes','Accessories','Home','Cars','Extras','Look'].includes(tab)){ HUB.shop=tab; hubOpen('shop'); } else hubOpen(); }
-const jobMult=()=>(1+(skill('pay1')?0.25:0)+(skill('pay2')?0.5:0)+0.03*LF().party.net)*(hungry()?0.5:1);
+const jobMult=()=>(1+(skill('pay1')?0.25:0)+(skill('pay2')?0.5:0)+(skill('network')?0.05:0)+(skill('promo')?0.15:0)+0.03*LF().party.net)*(hungry()?0.5:1);
 const jobRole=()=>{ let r=JOBS[0], i=0; JOBS.forEach((j,k)=>{ if(CAR.job.clicks>=j[0]){ r=j; i=k; } }); return {i,name:r[1],pay:Math.round(r[2]*jobMult()*100)/100,next:JOBS[i+1]||null,from:r[0]}; };
 setInterval(()=>{ if(skill('auto') && typeof hubShown==='function' && hubShown() && HUB.page==='job' && !document.hidden){ HUB.jt=0; jobClick(); } },3000);
 function hubRank(){ const A=CAR.accts; return A.some(a=>a.stage==='funded')?['FUNDED TRADER','ok']:A.length?['IN EVALUATION','run']:['PRACTICE','']; }
@@ -6353,6 +6417,7 @@ try{ Object.assign(window.__bt,{rebuildSeries,pnlWUpdate}); }catch(e){}
  setTimeout(check,20000); setInterval(check,120000); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) check(); });
 })();
 
+try{ Object.assign(window.__bt,{dailyStart,dailyReq,dailyKey,partnerNote}); }catch(e){}
 try{ Object.assign(window.__bt,{chSlotSwitch,chTickSlots,chSlotOf,chParked,chTick,chAccept,CHA,CHS}); }catch(e){}
 
 
