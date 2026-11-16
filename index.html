@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261116152511">
+<meta name="ke-build" content="20261116154022">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -4184,7 +4184,7 @@ const LIVE={dd:{25:1000,50:2000,150:4500},lock:100,tgt:{25:2000,50:4000,150:9000
 const LIVE_SCALE={25:[[0,1],[2000,2]],50:[[0,2],[2000,3],[4000,4]],150:[[0,4],[2000,5],[4000,6],[6000,8],[9000,10]]};   // Lucid Live Scaling Plan (Oct 4 2026), CME column (NQ, ES): [live profit from, minis], micros = 10x, set at each day's close
 const liveSize=(k,p)=>{ const T=LIVE_SCALE[k]||LIVE_SCALE[25]; let n=T[0][1]; for(const [f,q] of T) if(p>=f) n=q; return n; };
 const MAXX={start:{25:1000,50:2000,150:4500},pre:{25:1000,50:2000,150:4500},max:5,coolDays:LIVE.coolDays};   // LucidMaxx: live starting balance; pre-live target (50K $2,000 published, others assumed equal to the live start)
-const OFFER_MS=864e5, PAY_BIZ_DAYS=2;   // 24 hours to choose cashout or live; Lucid disburses approved payouts within 2 business days
+const OFFER_MS=864e5, PAY_BIZ_DAYS=2, PAY_MIN_MS=2*60000, PAY_MAX_MS=5*60000;   // 24 hours to choose cashout or live; payouts arrive 2 to 5 minutes after the request (owner's setting; Lucid itself takes up to 2 business days)
 function inEvalSess(){ return !!(CAR.ch&&CAR.ch.act&&!CAR.ch.act.daily); }   // an evaluation session is running (safe to call while the page is still loading)
 const liveCool=()=>Math.max(0,Math.ceil(((+CAR.liveCool||0)-Date.now())/864e5));
 const resetPrice=a=>Math.round((+a.cost||SPEC(a).price)*LIVE.reset);
@@ -4207,19 +4207,22 @@ function liveCalc(L,open,today,P){
 }
 function bizDue(t,n){ const d=new Date(t); let k=0; while(k<n){ d.setDate(d.getDate()+1); const w=d.getDay(); if(w!==0&&w!==6) k++; } return d.getTime(); }   // n business days later, same time of day
 const dueTxt=t=>new Date(t).toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-function payQueue(o){   // Lucid takes the payout from the account at once and sends it within 2 business days
- CAR.pend=CAR.pend||[]; const p=Object.assign({id:newId(),t:Date.now()},o); p.due=p.due||bizDue(p.t,PAY_BIZ_DAYS); CAR.pend.push(p); return p; }
+const payTxt=t=>new Date(t).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});   // arrival time of a payout, e.g. 15:41
+function payCap(){ const m=Date.now()+PAY_MAX_MS; let n=0; (CAR.pend||[]).forEach(p=>{ if(!(p.due<=m)){ p.due=m; n++; } }); return n; }   // older saves: nothing waits longer than 5 minutes
+function payQueue(o){   // taken from the account at once; the money arrives after a random 2 to 5 minutes, chosen now and saved
+ CAR.pend=CAR.pend||[]; const p=Object.assign({id:newId(),t:Date.now()},o); p.due=p.due||(p.t+Math.round(PAY_MIN_MS+Math.random()*(PAY_MAX_MS-PAY_MIN_MS))); CAR.pend.push(p); return p; }
 function payTick(){
- const P=CAR.pend||[]; if(!P.length) return 0; const now=Date.now(), done=P.filter(p=>now>=p.due); if(!done.length) return 0;
+ const P=CAR.pend||[]; if(!P.length) return 0; payCap(); const now=Date.now(), done=P.filter(p=>now>=p.due); if(!done.length) return 0;
  CAR.pend=P.filter(p=>now<p.due);
  for(const p of done){ for(const [d,a,k] of p.lines){ CAR.wallet=Math.round((CAR.wallet+a)*100)/100; txAdd(d,a,k); } CAR.paid=Math.round((CAR.paid+(+p.net||0))*100)/100;
-  msgAdd({k:'res',from:'Lucid Trading desk',title:`Payout sent: ${usd(p.net)}`,body:`${p.what||'Your payout'} from ${p.name} has been sent: ${usd(p.net)} after the 90/10 split (requested ${dueTxt(p.t)}). It is in your bank account now.`}); }
+  msgAdd({k:'res',from:'Lucid Trading desk',title:`Payout sent: ${usd(p.net)}`,body:`${p.what||'Your payout'} from ${p.name} has been sent: ${usd(p.net)} after the 90/10 split (requested at ${payTxt(p.t)}). It is in your bank account now.`}); }
  try{ sfxPlay('payout',true); }catch(e){}
  toast(`<b>Payout arrived:</b> ${done.map(p=>usd(p.net)).join(' + ')} is in your wallet.`,6000);
  carSave(); try{ careerSync(); }catch(e){} try{ acctRender(); }catch(e){} try{ phoneRender(); }catch(e){} return done.length;
 }
 const pendFor=id=>(CAR.pend||[]).filter(p=>p.aid===id);
 function liveGo(a,auto){   // the account starts trading live
+ if(a.offer && a.offer.daily && a.offer.cash>0){ const g=a.offer.cash, net=Math.round(g*FUND.split*100)/100; payQueue({aid:a.id,name:a.name,gross:g,net,lines:[[`LucidDaily profit above the buffer · ${a.name}`,net,'payout']],kind:'sim',what:'The LucidDaily profit above the buffer'}); }   // paid on the move live too
  delete a.offer; a.liveAt=Date.now(); CAR.lives=(CAR.lives||0)+1; delete SYNC.prev[a.id];
  try{ sfxPlay('pass',true); }catch(e){}
  const mx=SPEC(a).P.maxx;
@@ -4229,13 +4232,13 @@ function liveGo(a,auto){   // the account starts trading live
 }
 function acctLive(id){ const a=CAR.accts.find(x=>x.id===id); if(!a||!a.offer) return; liveGo(a,false); carSave(); careerSync(); acctRender(); }
 function acctCashout(id){   // instead of going live: Lucid's cashout, 90/10
- const a=CAR.accts.find(x=>x.id===id); if(!a||!a.offer) return; const P=SPEC(a), g=a.offer.cash, net=Math.round(g*FUND.split*100)/100;
- const p=payQueue({aid:a.id,name:a.name,gross:g,net,lines:[[`Cashout · ${a.name}`,net,'payout']],kind:'cashout',what:'Your cashout'});
+ const a=CAR.accts.find(x=>x.id===id); if(!a||!a.offer) return; const P=SPEC(a), g=a.offer.cash, net=Math.round(g*FUND.split*100)/100, dl=!!a.offer.daily;
+ const p=g>0?payQueue({aid:a.id,name:a.name,gross:g,net,lines:[[`${dl?'LucidDaily cash-out':'Cashout'} · ${a.name}`,net,'payout']],kind:'cashout',what:dl?'Your LucidDaily cash-out (profit above the buffer)':'Your cashout'}):{due:Date.now()};
  CAR.accts=CAR.accts.filter(x=>x!==a); delete SYNC.prev[a.id]; CAR.cashouts=(CAR.cashouts||0)+1;
  if(P.P.maxx) CAR.maxxCool=Date.now()+MAXX.coolDays*864e5;
  try{ sfxPlay('cash',true); }catch(e){}
- toast(`<b>${cesc(a.name)} cashed out.</b> ${usd(g)} gross, ${usd(net)} after the split, arrives by ${dueTxt(p.due)}.${P.P.maxx?` LucidMaxx cooldown: ${MAXX.coolDays} days before a new LucidMaxx.`:''}`,7000);
- msgAdd({k:'res',from:'Lucid Trading desk',title:`Cashout requested: ${usd(net)}`,body:`${a.name} took the cashout instead of going live: ${usd(g)}, ${usd(net)} after the 90/10 split. It is processing and arrives by ${dueTxt(p.due)}. The account is closed.${P.P.maxx?` A ${MAXX.coolDays}-day cooldown applies before you can buy a new LucidMaxx.`:''}`});
+ toast(`<b>${cesc(a.name)} cashed out.</b> ${usd(g)} gross, ${usd(net)} after the split, arrives at ${payTxt(p.due)}.${P.P.maxx?` LucidMaxx cooldown: ${MAXX.coolDays} days before a new LucidMaxx.`:''}`,7000);
+ msgAdd({k:'res',from:'Lucid Trading desk',title:`Cashout requested: ${usd(net)}`,body:`${a.name} took the cashout instead of going live: ${usd(g)}, ${usd(net)} after the 90/10 split. It is processing and arrives at ${payTxt(p.due)}. The account is closed.${P.P.maxx?` A ${MAXX.coolDays}-day cooldown applies before you can buy a new LucidMaxx.`:''}`});
  carSave(); careerSync(); acctRender();
 }
 function liveOffer(a,cash){ a.stage='live'; a.ledger=[]; a.on=false; a.offer={until:Date.now()+OFFER_MS,cash}; delete a.hwm; delete a.passFx; delete a.step; delete SYNC.prev[a.id]; }
@@ -4262,7 +4265,7 @@ function planRules(s){
   : L.id==='daily' ? `Any day with net profit, everything above a ${m(s.start+s.mll+EVAL.lock)} buffer`
   : `${m(s.dirGoal[0])} profit goal (later ${m(s.dirGoal[1])}), 5 trading days, up to ${m(s.dirCap[0])}${s.dirCap[1]!==s.dirCap[0]?` (4th and 5th: ${m(s.dirCap[1])})`:''}`;
  r.push(['Payout',pay+(L.maxPays?`. Max ${L.maxPays} payouts`:'')]);
- r.push(['Lucid Live',(L.maxPays?`After payout ${L.maxPays}`:`After a ${m(LIVE.dailyMax[s.k])} day`)+`: $0 start, ${m(LIVE.dd[s.k])} EOD drawdown, daily payouts, ${m(LIVE.bonus[s.k])} bonus. Or cash out ${m(LIVE.dd[s.k]*0.5)} within 24 hours`]);
+ r.push(['Lucid Live',(L.maxPays?`After payout ${L.maxPays}`:`After a ${m(LIVE.dailyMax[s.k])} day`)+`: $0 start, ${m(LIVE.dd[s.k])} EOD drawdown, daily payouts, ${m(LIVE.bonus[s.k])} bonus. Or cash out ${L.id==='daily'?'the profit above the buffer (max $15,000)':m(LIVE.dd[s.k]*0.5)} within 24 hours`]);
  r.push(['Live size',`Live scaling plan: minis ${ls(s.k)} live profit`]);
  return r;
 }
@@ -4407,16 +4410,15 @@ function liveCheck(){   // the move to Lucid Live, done after the session like L
  const movers=CAR.accts.filter(a=>a.stage==='funded' && !a.blown && (trig.includes(a) || C.get(a).pays>=1)), gone=CAR.accts.filter(a=>a.stage!=='live' && !movers.includes(a) && a.plan!=='maxx');   // LucidMaxx accounts may be kept alongside live
  let cap=LIVE.simCap, cash=0, refund=0; const lastDay=(CAR.ch&&CAR.ch.day)||0;
  for(const a of movers){ const c=C.get(a), P=c.P;
-  if(P.plan==='daily'){ const last=a.ledger.filter(t=>!t.pay).slice(-1)[0], base=(last&&last.d===lastDay)?c.prevClose:c.bal, x=Math.max(0,Math.min(cap,Math.floor(base-(P.start+P.mll+EVAL.lock)))); cap-=x; cash+=x; }   // sim profit above the buffer, prior close, $15,000 cap
-  a.simPays=c.pays; liveOffer(a,LIVE.dd[P.k]*0.5); }   // 24 hours to choose: live, or cash out 50% of the live starting balance
+  let dx=null; if(P.plan==='daily'){ const last=a.ledger.filter(t=>!t.pay).slice(-1)[0], base=(last&&last.d===lastDay)?c.prevClose:c.bal, x=Math.max(0,Math.min(cap,Math.floor(base-(P.start+P.mll+EVAL.lock)))); cap-=x; cash+=x; dx=x; }   // sim profit above the buffer, prior close, $15,000 cap
+  a.simPays=c.pays; liveOffer(a,dx!==null?dx:LIVE.dd[P.k]*0.5); if(dx!==null) a.offer.daily=1; }   // 24 hours to choose. Standard: cash out 50% of the live starting balance. LucidDaily: the profit above the buffer (LucidDaily Live article), paid either way
  for(const a of gone){ const c=C.get(a); if(!a.blown && c.pays===0 && c.bal-c.floor>=LIVE.refund*c.mll) refund+=(+a.cost||SPEC(a).price); }   // zero-payout accounts with half their drawdown left: fee refunded
  CAR.accts=CAR.accts.filter(a=>!gone.includes(a)); gone.forEach(a=>delete SYNC.prev[a.id]);
- if(cash>0){ const net=Math.round(cash*FUND.split*100)/100; payQueue({aid:'',name:'LucidDaily',gross:cash,net,lines:[['LucidDaily profit paid on the move to live',net,'payout']],kind:'sim',what:'The LucidDaily profit above the buffer'}); }
  if(refund>0){ CAR.wallet=Math.round((CAR.wallet+refund)*100)/100; txAdd('Evaluation fees refunded on the move to live',refund,'refund'); }
  if(!CAR.maxxOk){ CAR.maxxOk=Date.now(); msgAdd({k:'res',from:'Lucid Trading desk',title:'You earned LucidMaxx status',body:`Lucid's risk team invites top performers to LucidMaxx: an evaluation, a pre-live step and then live capital you can withdraw from day one, with daily uncapped payouts. It is open in the eval store now.`}); }
  const names=movers.map(a=>a.name).join(', '), why=trig.map(a=>C.get(a).P.plan==='daily'?`${a.name} hit LucidDaily's max daily profit`:`${a.name} took its fifth payout`).join('; ');
- const body=`${why}. Lucid moves every funded account with at least one payout to Lucid Live together: ${names}. Live accounts start at $0 with an end-of-day drawdown (${movers.map(a=>usd(LIVE.dd[SPEC(a).k]).replace(/\.00$/,'')).join(' / ')}) that locks at $100 once live profit reaches it or at your first payout. No daily loss limit and no consistency rule. Payouts any day, 90/10, with the live scaling plan for size. Choose within 24 hours on each account card (by ${dueTxt(Date.now()+OFFER_MS)}): go live, or cash out ${movers.map(a=>usd(a.offer.cash)).join(' / ')} (50% of the live starting balance, ${movers.map(a=>usd(Math.round(a.offer.cash*FUND.split*100)/100)).join(' / ')} after the split). With no choice the accounts go live. A bonus of ${movers.map(a=>usd(LIVE.bonus[SPEC(a).k]).replace(/\.00$/,'')).join(' / ')} after the profit target and 20 live trading days, again and again.`+
-  (gone.length?` Your other sim accounts are closed (${gone.map(a=>a.name).join(', ')})${refund>0?`, and ${usd(refund)} of evaluation fees is refunded for those with no payout and at least half their drawdown left`:''}.`:'')+(cash>0?` LucidDaily profit above the buffer is paid out: ${usd(Math.round(cash*FUND.split*100)/100)} after the split, processing for up to ${PAY_BIZ_DAYS} business days.`:'');
+ const body=`${why}. Lucid moves every funded account with at least one payout to Lucid Live together: ${names}. Live accounts start at $0 with an end-of-day drawdown (${movers.map(a=>usd(LIVE.dd[SPEC(a).k]).replace(/\.00$/,'')).join(' / ')}) that locks at $100 once live profit reaches it or at your first payout. No daily loss limit and no consistency rule. Payouts any day, 90/10, with the live scaling plan for size. Choose within 24 hours on each account card (by ${dueTxt(Date.now()+OFFER_MS)}): go live, or cash out instead: ${movers.map(a=>`${a.name} ${usd(a.offer.cash)} (${usd(Math.round(a.offer.cash*FUND.split*100)/100)} after the split; ${a.offer.daily?'LucidDaily: the profit above the buffer at the prior day\'s close':'50% of the live starting balance'})`).join(', ')}. With no choice the accounts go live. A bonus of ${movers.map(a=>usd(LIVE.bonus[SPEC(a).k]).replace(/\.00$/,'')).join(' / ')} after the profit target and 20 live trading days, again and again.`+
+  (gone.length?` Your other sim accounts are closed (${gone.map(a=>a.name).join(', ')})${refund>0?`, and ${usd(refund)} of evaluation fees is refunded for those with no payout and at least half their drawdown left`:''}.`:'')+(movers.some(a=>a.offer.daily)?` LucidDaily: Lucid uses your prior day's closing balance (the session of the move does not count). The buffer funds the live drawdown and cannot be withdrawn. The profit above it, capped at $15,000 across all your accounts, is paid whether you go live or cash out: ${usd(cash)} in total, ${usd(Math.round(cash*FUND.split*100)/100)} after the split.`:'');
  msgAdd({k:'res',from:'Lucid Trading desk',title:'Welcome to Lucid Live',body});
  try{ sfxPlay('pass',true); }catch(e){}
  toast(`<b>Lucid Live!</b> ${cesc(names)} ${movers.length===1?'is':'are'} due for Lucid Live. Choose on the account card within 24 hours: go live or cash out. Open your phone for the details.`,8000);
@@ -4432,8 +4434,8 @@ function acctPayout(id){
  const lines=[[`Payout · ${a.name}`,net,'payout']]; if(skill('bonus')) lines.push([`Performance bonus · ${a.name}`,Math.round(net*0.03*100)/100,'payout']); if(CAR.prestige) lines.push([`Prestige bonus · ${a.name}`,Math.round(net*0.05*CAR.prestige*100)/100,'refund']);
  const p=payQueue({aid:a.id,name:a.name,gross:amt,net,lines,kind:a.stage==='live'?'live':'payout'});
  setTimeout(()=>{ try{ partyCheck(); }catch(e){} },1500); CAR.payouts++; delete SYNC.prev[a.id]; carSave(); careerSync(); try{ sfxPlay('cash',true); }catch(e){}
- msgAdd({k:'res',from:'Lucid Trading desk',title:`Payout approved: ${usd(net)}`,body:`${usd(amt)} was taken from ${a.name} now. ${usd(net)} (90%${skill('legacy')?' + 10% legacy':''}) is processing and arrives by ${dueTxt(p.due)}: Lucid sends approved payouts within ${PAY_BIZ_DAYS} business days.`});
- toast(`<b>Payout approved on ${cesc(a.name)}.</b> ${usd(amt)} is taken from the account now. ${usd(net)} (90%${skill('legacy')?' + 10% legacy':''}) is processing and arrives by ${dueTxt(p.due)}.`,6500);
+ msgAdd({k:'res',from:'Lucid Trading desk',title:`Payout approved: ${usd(net)}`,body:`${usd(amt)} was taken from ${a.name} now. ${usd(net)} (90%${skill('legacy')?' + 10% legacy':''}) is processing and arrives at ${payTxt(p.due)}, 2 to 5 minutes after the request.`});
+ toast(`<b>Payout approved on ${cesc(a.name)}.</b> ${usd(amt)} is taken from the account now. ${usd(net)} (90%${skill('legacy')?' + 10% legacy':''}) is processing and arrives at ${payTxt(p.due)}.`,6500);
 }
 function acctRemove(id){
  if(S.pos){ const m='Close your position before you close an account.'; msg(m); toast(m,3500); return; }
@@ -4490,7 +4492,7 @@ function acctCard(a,c,full){
   <div class="meter"><div class="l"><span data-f="${id}:pl"></span><b data-f="${id}:p"></b></div><div class="m"><i data-f="${id}:pb"></i></div></div>
   <div class="ac-r"><span>Balance <b data-f="${id}:bal"></b></span><span>Room to max loss <b data-f="${id}:room"></b></span></div>
   ${full?`<div class="hint" data-f="${id}:note"></div>`:''}
-  ${pendFor(id).length?`<div class="ac-proc"><b>Processing</b> ${pendFor(id).map(p=>`${usd(p.net)} · arrives ${dueTxt(p.due)}`).join('<br>')}</div>`:''}
+  ${pendFor(id).length?`<div class="ac-proc"><b>Processing</b> ${pendFor(id).map(p=>`${usd(p.net)} · arrives ${payTxt(p.due)}`).join('<br>')}</div>`:''}
   ${a.offer?`<div class="ac-choice"><button class="primary ac-btn" data-golive="${id}">Go live</button><button class="ac-btn" data-cashout="${id}">Cash out ${usd(Math.round(a.offer.cash*FUND.split*100)/100)}</button></div>`:
    bl?`<button class="primary ac-btn" data-reset="${id}" ${CAR.wallet<resetPrice(a)||liveCool()>0?'disabled':''}>Reset for ${usd(resetPrice(a)).replace(/\.00$/,'')}</button>`:F?`<button class="primary ac-btn" data-pay="${id}" ${c.canPay?'':'disabled'}>Request ${a.stage==='live'?'live ':''}payout${c.canPay?' '+usd(c.maxPay):''}</button>`:''}
   ${full?`<button class="ac-x" data-rm="${id}">Close account</button>`:''}</div>`;
@@ -4540,7 +4542,7 @@ function acctRender(){
     <div class="card prod"><div class="card-h"><b>Trade syncer</b><span class="price">${own?'Owned':money(SYNCER_PRICE)}</span></div>
      <ul class="erules"><li>Trade several accounts at once. Every entry is copied to each account that is switched on.</li><li>Same size, stop and target on each. All accounts trade the same direction.</li><li>Each account keeps its own progress, so they can be at different stages.</li><li>Without it, one account trades at a time.</li></ul>
      ${own?`<div class="hint">Unlocked. Use the switches on your accounts to choose which ones trade.</div>`:!skill('copy')?`<button class="ac-btn" data-hub="skills">Needs the Copy trading licence skill</button>`:`<button class="primary ac-btn" data-buy="syncer" ${sshort>0?'disabled':''}>${sshort>0?`Need ${money(sshort)} more`:'Unlock trade syncer'}</button>`}</div></div>
-   <div class="sec">Good to know</div><div class="card"><ul class="erules" style="margin:0"><li>Max loss trails your end-of-day balance. Once a day closes above start + max loss + $100 it locks at the starting balance + $100. LucidDaily funded accounts trail intraday, open profit included. A Flex payout moves it straight to the lock.</li><li>The daily loss limit is optional on Flex, Pro and Daily (on by default, as at Lucid). It is soft: the account is taken out of trading until the next session but stays open. Funded Pro and Direct accounts switch to LucidScale (60% of the best end-of-day profit) once a day closes above the trail balance.</li><li>Consistency is your best day divided by total profit. Flex and Daily evaluations: 40%, or 50% as an option. Funded Pro: 40% and Direct: 20% of each payout cycle.</li><li>LucidFlex funded accounts follow Lucid's scaling plan: fewer contracts until the account has profit, set at each session close.</li><li>Every payout is split 90/10. The minimum payout is $500. Flex, Pro and Direct allow five payouts per account.</li><li>A passed evaluation moves to funded by itself (no activation fee) with a fresh starting balance. A failed evaluation can be reset for a fee, or closed.</li><li>Without a daily loss limit, payouts are requested after the session closes. With one, any time you are flat.</li><li><b>Lucid Live:</b> after the fifth payout (Flex, Pro, Direct) or a $6,000 / $8,000 / $12,000 day (Daily), every funded account with a payout moves live together and the other sim accounts close (fees refunded for zero-payout accounts with half their drawdown left). Live starts at $0 with an end-of-day drawdown of $1,000 / $2,000 / $4,500 that locks at $100, no daily loss limit, payouts any day at 90/10, and a repeatable bonus after the profit target and 20 trading days. A blown live account starts a 2-day cooldown on new evaluations.</li><li>When an account becomes due for live you have 24 hours to choose on its card: go live, or cash out 50% of the live starting balance (90/10). With no choice it goes live. Live size follows Lucid's live scaling plan by live profit.</li><li>Payouts are taken from the account when you request them and arrive in your bank within 2 business days (shown as Processing).</li><li><b>LucidMaxx</b> (invite only, earned when an account first becomes due for live): evaluation, pre-live step, then live capital of $1,000 / $2,000 / $4,500 you can withdraw from day one, or a full cashout.</li><li>The daily challenge is practice. It never counts on an account.</li><li>Own as many accounts as you like. To trade the same entry on several at once you need the trade syncer.</li><li>Accounts are saved, so restarting the replay does not reset them.</li></ul></div>`;
+   <div class="sec">Good to know</div><div class="card"><ul class="erules" style="margin:0"><li>Max loss trails your end-of-day balance. Once a day closes above start + max loss + $100 it locks at the starting balance + $100. LucidDaily funded accounts trail intraday, open profit included. A Flex payout moves it straight to the lock.</li><li>The daily loss limit is optional on Flex, Pro and Daily (on by default, as at Lucid). It is soft: the account is taken out of trading until the next session but stays open. Funded Pro and Direct accounts switch to LucidScale (60% of the best end-of-day profit) once a day closes above the trail balance.</li><li>Consistency is your best day divided by total profit. Flex and Daily evaluations: 40%, or 50% as an option. Funded Pro: 40% and Direct: 20% of each payout cycle.</li><li>LucidFlex funded accounts follow Lucid's scaling plan: fewer contracts until the account has profit, set at each session close.</li><li>Every payout is split 90/10. The minimum payout is $500. Flex, Pro and Direct allow five payouts per account.</li><li>A passed evaluation moves to funded by itself (no activation fee) with a fresh starting balance. A failed evaluation can be reset for a fee, or closed.</li><li>Without a daily loss limit, payouts are requested after the session closes. With one, any time you are flat.</li><li><b>Lucid Live:</b> after the fifth payout (Flex, Pro, Direct) or a $6,000 / $8,000 / $12,000 day (Daily), every funded account with a payout moves live together and the other sim accounts close (fees refunded for zero-payout accounts with half their drawdown left). Live starts at $0 with an end-of-day drawdown of $1,000 / $2,000 / $4,500 that locks at $100, no daily loss limit, payouts any day at 90/10, and a repeatable bonus after the profit target and 20 trading days. A blown live account starts a 2-day cooldown on new evaluations.</li><li>When an account becomes due for live you have 24 hours to choose on its card: go live, or cash out 50% of the live starting balance (90/10). LucidDaily instead pays the profit above the buffer at the prior day's close (max $15,000 across your accounts) whether you go live or cash out. With no choice it goes live. Live size follows Lucid's live scaling plan by live profit.</li><li>Payouts are taken from the account when you request them and arrive in your bank 2 to 5 minutes later (shown as Processing, with the arrival time).</li><li><b>LucidMaxx</b> (invite only, earned when an account first becomes due for live): evaluation, pre-live step, then live capital of $1,000 / $2,000 / $4,500 you can withdraw from day one, or a full cashout.</li><li>The daily challenge is practice. It never counts on an account.</li><li>Own as many accounts as you like. To trade the same entry on several at once you need the trade syncer.</li><li>Accounts are saved, so restarting the replay does not reset them.</li></ul></div>`;
   acctBind(hub); hub.dataset.key=hk;
  }
  const ln=$('acctLine'); if(ln){ const on=A.filter(a=>a.on), t=on.length?`Trading on ${on.map(a=>a.name).join(', ')}`:(A.length?'Practice mode: no account is switched on':'Practice mode: no account yet'); if(ln.dataset.t!==t){ ln.dataset.t=t; ln.innerHTML=`<span>${cesc(t)}</span><button class="link" id="acctLineB">${A.length?'Change':'Get one'}</button>`; $('acctLineB').onclick=()=>{ A.length?sideTab('pStats'):hubOpen('store'); }; } }
@@ -4554,6 +4556,7 @@ function acctRender(){
   set(id+':bal',e=>{ e.textContent=usd(c.eq); }); set(id+':room',e=>{ e.textContent=usd(Math.max(0,room)); e.className=room<c.mll*0.25?'neg':''; });
   const note = a.blown ? `Failed: it hit the max loss limit. Lucid sells a reset for a failed evaluation: back to ${usd(c.P.start)} with fresh rules for ${usd(resetPrice(a))}. Or close it.` :
    c.dllHit ? `Daily loss limit (${usd(c.dll)}) reached. This account sits out until tomorrow.` :
+   a.offer && a.offer.daily ? `Due for Lucid Live. LucidDaily pays the profit above the buffer at the prior day's close either way: ${usd(a.offer.cash)}, ${usd(Math.round(a.offer.cash*FUND.split*100)/100)} after the split ($15,000 cap across your accounts; the buffer funds the live drawdown and cannot be withdrawn). Go live to keep a live account as well, or cash out and close it. Choose by ${dueTxt(a.offer.until)}, or it goes live by itself.` :
    a.offer ? `Due for Lucid Live. Go live, or cash out ${usd(a.offer.cash)} (${usd(Math.round(a.offer.cash*FUND.split*100)/100)} after the split) and close the account. Choose by ${dueTxt(a.offer.until)}, or it goes live by itself.` :
    a.stage==='live' && c.maxx ? `LucidMaxx live: ${c.canPay?`withdraw up to ${usd(c.maxPay)} today, 90/10`:'no balance above the $100 max loss'}. Static $100 max loss. Size: ${c.scaleNote}.` :
    a.stage==='live' ? (c.canPay ? `Live payout ready: ${usd(c.maxPay)}. You keep 90%. A payout locks the max loss at $100. Size: ${c.scaleNote}.` : `Live payout needs ${c.why.join(', ')}. The bar shows the next live bonus: profit target and 20 trading days. Size: ${c.scaleNote}.`) :
@@ -4564,7 +4567,7 @@ function acctRender(){
    `${usd(Math.max(0,c.tgt-c.profit))} to go${c.P.step===2?` in the pre-live step (size: ${c.minis} minis by the live scaling plan)`:''}. The floor is at ${usd(c.floor)}${c.locked?' (locked)':''}.`;
   set(id+':note',e=>{ e.textContent=note; }); });
 }
-try{ Object.assign(window.__bt,{SYNC,acctUpdate,acctBuy,syncerBuy,acctClaim,acctPayout,acctToggle,acctCalc,lucidCalc,planSpec,planRules,PLANS,SPEC,syncEnter,syncClose,CHE:()=>CHE(),LIVE,liveCalc,liveCheck,acctReset,acctPromote,liveCool,resetPrice,acctRender,LIVE_SCALE,liveSize,MAXX,bizDue,payQueue,payTick,acctLive,acctCashout,maxxWhyNot,carSave:()=>carSave(),ACH:()=>ACH,achCheck:()=>achCheck()}); }catch(e){}
+try{ Object.assign(window.__bt,{SYNC,acctUpdate,acctBuy,syncerBuy,acctClaim,acctPayout,acctToggle,acctCalc,lucidCalc,planSpec,planRules,PLANS,SPEC,syncEnter,syncClose,CHE:()=>CHE(),LIVE,liveCalc,liveCheck,acctReset,acctPromote,liveCool,resetPrice,acctRender,LIVE_SCALE,liveSize,MAXX,bizDue,payQueue,payTick,payCap,payTxt,acctLive,acctCashout,maxxWhyNot,carSave:()=>carSave(),ACH:()=>ACH,achCheck:()=>achCheck()}); }catch(e){}
 
 /* ---- split screen: second chart for the pair symbol ---- */
 const chart2El=$('chart2');
@@ -4945,7 +4948,7 @@ function helpDialog(){
   {name:'Replay',html:'<div class="help">'+P('<b>1. Pick a start.</b> Use Select bar, a date, or the session jump (NY AM open, London, Asia) on the bar under the chart.')+P('<b>2. Press Play.</b> Live mode moves price one tick per second on every timeframe. Candles mode reveals one whole candle per step.')+P('<b>3. Switch timeframe any time.</b> Every timeframe stays at the same moment and keeps playing.')+P('<b>Split screen</b> shows your second symbol (for example ES) next to the main chart. Drag the divider to resize it. You can pan, zoom and draw on it like the main chart. The link button keeps both charts on the same time, and <b>Trade this chart</b> swaps the two symbols.')+'</div>'},
   {name:'Trading',html:'<div class="help">'+P('<b>Market order:</b> Buy or Sell in the Trade tab, the buttons on the chart, or keys B and S.')+P('<b>Pending order:</b> press Buy on chart or Sell on chart, then click the price. Below the market a buy becomes a limit; above it becomes a stop. The reverse applies to sells.')+P('<b>Move things:</b> drag any order, stop loss or take profit line. Press TP or SL on a line to add an exit.')+P('<b>Your open P&amp;L</b> is shown live on the chart and in the Trade tab.')+'</div>'},
   {name:'Indicators',html:'<div class="help">'+P('<b>Quarter boxes</b> draw each quarter on the chart. <b>Quarter timeline</b> is the strip under the chart. They are two separate switches in Settings.')+P('<b>Session highs and lows</b> mark the high and low of Asia, London, NY AM and NY PM in New York time.')+P('<b>True opens</b> and <b>SMT</b> are also in Settings, with themes, accent and chart colours.')+'</div>'},
-  {name:'Prop firms',html:'<div class="help">'+P('<b>Evaluation sessions.</b> Your accounts only trade in sessions the Lucid desk sends to your phone: one random, hidden trading day from 09:30 to 16:00 New York time. The market runs live and cannot be paused, rewound or skipped. Pick a speed from 1 second to 15 minutes of market time per real second. At 16:00 open positions close and the date is revealed. Trades outside sessions are practice.')+P('<b>Four Lucid account types</b> in 25K, 50K and 150K, each with Lucid\'s own rules: <b>LucidFlex</b> and <b>LucidDaily</b> evaluations (40% consistency rule, 50% as an option), <b>LucidPro</b> (no consistency rule while evaluating) and <b>LucidDirect</b> (no evaluation, you start funded; unlock it in Skills). The daily loss limit is optional on Flex, Pro and Daily and picked when you buy.')+P('<b>Max loss</b> trails your end-of-day balance and locks at the starting balance + $100 (LucidDaily funded trails intraday). A soft daily loss limit only benches the account until the next session. LucidFlex funded accounts follow a scaling plan for size.')+P('<b>Payouts:</b> Flex after five winning days; Pro after three trading days and the cycle goal with a 40% consistency rule; Daily on any day with net profit above a buffer; Direct after the cycle profit goal, five trading days and a 20% consistency rule. Flex, Pro and Direct allow five payouts per account. You keep 90%.')+P('<b>Process:</b> a passed evaluation moves to funded by itself, with no activation fee. A failed evaluation can be reset for a fee. <b>Lucid Live</b> follows the fifth payout (Flex, Pro, Direct) or LucidDaily\'s max daily profit: every funded account with a payout moves live together, starting at $0 with an end-of-day drawdown that locks at $100, no daily loss limit, daily payouts and a repeatable bonus. A blown live account starts a 2-day cooldown. When an account is due for live you have 24 hours to go live or cash out 50% of the live starting balance; with no choice it goes live. Live size follows the live scaling plan.')+P('<b>Payout processing:</b> a payout is taken from the account at once and arrives in your bank within 2 business days. It shows as Processing on the account and in the Bank app.')+P('<b>LucidMaxx</b> is invite only (you earn it when an account first becomes due for live): an evaluation with 40% consistency and 3 trading days, a pre-live step under the live scaling plan, then live capital of $1,000 / $2,000 / $4,500 you can withdraw from day one with a static $100 max loss, or a full cashout. Up to 5 accounts, none new while you hold a live account.')+'</div>'},
+  {name:'Prop firms',html:'<div class="help">'+P('<b>Evaluation sessions.</b> Your accounts only trade in sessions the Lucid desk sends to your phone: one random, hidden trading day from 09:30 to 16:00 New York time. The market runs live and cannot be paused, rewound or skipped. Pick a speed from 1 second to 15 minutes of market time per real second. At 16:00 open positions close and the date is revealed. Trades outside sessions are practice.')+P('<b>Four Lucid account types</b> in 25K, 50K and 150K, each with Lucid\'s own rules: <b>LucidFlex</b> and <b>LucidDaily</b> evaluations (40% consistency rule, 50% as an option), <b>LucidPro</b> (no consistency rule while evaluating) and <b>LucidDirect</b> (no evaluation, you start funded; unlock it in Skills). The daily loss limit is optional on Flex, Pro and Daily and picked when you buy.')+P('<b>Max loss</b> trails your end-of-day balance and locks at the starting balance + $100 (LucidDaily funded trails intraday). A soft daily loss limit only benches the account until the next session. LucidFlex funded accounts follow a scaling plan for size.')+P('<b>Payouts:</b> Flex after five winning days; Pro after three trading days and the cycle goal with a 40% consistency rule; Daily on any day with net profit above a buffer; Direct after the cycle profit goal, five trading days and a 20% consistency rule. Flex, Pro and Direct allow five payouts per account. You keep 90%.')+P('<b>Process:</b> a passed evaluation moves to funded by itself, with no activation fee. A failed evaluation can be reset for a fee. <b>Lucid Live</b> follows the fifth payout (Flex, Pro, Direct) or LucidDaily\'s max daily profit: every funded account with a payout moves live together, starting at $0 with an end-of-day drawdown that locks at $100, no daily loss limit, daily payouts and a repeatable bonus. A blown live account starts a 2-day cooldown. When an account is due for live you have 24 hours to go live or cash out 50% of the live starting balance (LucidDaily: the profit above the buffer at the prior day\'s close, max $15,000, paid either way); with no choice it goes live. Live size follows the live scaling plan.')+P('<b>Payout processing:</b> a payout is taken from the account at once and arrives in your bank 2 to 5 minutes later. It shows as Processing on the account and in the Bank app.')+P('<b>LucidMaxx</b> is invite only (you earn it when an account first becomes due for live): an evaluation with 40% consistency and 3 trading days, a pre-live step under the live scaling plan, then live capital of $1,000 / $2,000 / $4,500 you can withdraw from day one with a static $100 max loss, or a full cashout. Up to 5 accounts, none new while you hold a live account.')+'</div>'},
   {name:'Sections',html:'<div class="help">'+P('<b>Trading</b> is the chart. <b>Life</b> is your home, character, family and shop. <b>Prop firms</b> holds your accounts and the eval store. <b>Job</b> pays wallet money per ticket. <b>Skills</b> is where you spend skill points.')+P('<b>Levels and skills.</b> Trades, passes, payouts and job tickets earn XP. Every level gives a skill point that unlocks chart colours, live backgrounds, the 3D coin, LucidDirect, the trade syncer, family, luxury items and job boosts.')+P('<b>Fullscreen.</b> Press Shift+F or the fullscreen button for a chart-only view. Esc leaves it.')+P('<b>Saving.</b> Your replay spot, closed trades and settings save in this browser, and online too when you sign in under your profile.')+P('<b>Sounds.</b> Pick a sound for every event (entry, take profit, stop loss, passing, payouts, your dog) in Settings.')+'</div>'}
  ],null,null);
 }
@@ -6174,7 +6177,8 @@ const ACH=[['eval1','First evaluation','Buy your first evaluation',()=>CAR.accts
  ['debtfree','Debt free','Pay off a loan',()=>(CAR.loansPaid||0)>=1,100],['hard1','Iron nerves','Finish a hard session in profit',()=>(CAR.hardWins||0)>=1,500],['hard5','Ice cold','Win 5 hard sessions',()=>(CAR.hardWins||0)>=5,1500],['lv10','Level 10','Reach level 10',()=>lvlOf(CAR.xp||0)>=10,0],['three','Fund manager','Have 3 funded accounts at once',()=>CAR.accts.filter(a=>a.stage==='funded').length>=3,600],['live1','Going live','Get a Lucid Live account',()=>(CAR.lives||0)>=1||CAR.accts.some(a=>a.stage==='live'&&!a.offer),1000]];
 function achCheck(){ CAR.ach=CAR.ach||{}; let got=0; for(const [id,n,d,f,x] of ACH){ if(CAR.ach[id]) continue; let ok=false; try{ ok=f(); }catch(e){} if(ok){ CAR.ach[id]=Date.now(); got++; if(x) xpAdd(x*(skill('collector')?1.5:1)); toast(`<b>Achievement unlocked: ${n}.</b> ${d}.`,4500); } } if(got){ carSave(); phoneBadge(); try{ sfxPlay('trophy'); }catch(e){} } }
 setInterval(()=>{ try{ achCheck(); }catch(e){} },20000);
-setInterval(()=>{ try{ payTick(); }catch(e){} },30000); setTimeout(()=>{ try{ payTick(); }catch(e){} },3000);   // payouts arrive after Lucid's processing time, also after a reload
+try{ if(payCap()) carSaveLocal(); }catch(e){}
+setInterval(()=>{ try{ payTick(); }catch(e){} },5000); setTimeout(()=>{ try{ payTick(); }catch(e){} },3000);   // payouts arrive after Lucid's processing time, also after a reload
 /* ---- messages ---- */
 function msgAdd(m){ CAR.inbox=CAR.inbox||[]; CAR.inbox.unshift(Object.assign({t:Date.now(),read:false},m)); if(CAR.inbox.length>60) CAR.inbox.length=60; phoneBadge(); }
 function msgDrop(id){ CAR.inbox=(CAR.inbox||[]).filter(m=>!(m.k==='req'&&m.id===id)); }
@@ -6203,7 +6207,7 @@ function phoneRender(){
    <div class="ph-grid">${PH_APPS.map(([k,n,c,p])=>{ const badge=k==='messages'?unread:k==='missions'?mis:k==='rewards'?(loginTick().claimed?0:1):0; return `<button class="ph-app" data-app="${k}"><i style="--c:${c}">${ico(c,p)}${badge?`<em>${badge}</em>`:''}</i><span>${n}</span></button>`; }).join('')}</div></div>`; }
  else if(A==='bank'){ const L=CAR.loans||[];
   h=head('KE Bank','Checking ·· '+String(Math.abs((CAR.uid||'0000').split('').reduce((a,c)=>a*31+c.charCodeAt(0)|0,7))%10000).padStart(4,'0'))+`<div class="ph-card bankcard"><div class="bk-top"><i class="bk-chip"></i><em class="bk-net">KE<b>PRIME</b></em></div><span>Available balance</span><b data-money="wallet">${usd(CAR.wallet)}</b><div class="bk-row"><div><span>Debt</span><b data-money="debt">${fmt$(debt())}</b></div><div><span>Credit score</span><b>${credit()} · ${creditTier(credit())}</b></div><div><span>Paid out</span><b>${fmt$(CAR.paid)}</b></div></div></div>
-   ${(CAR.pend||[]).length?`<div class="ph-card"><div class="ln-h"><b>Processing</b><span>${usd(CAR.pend.reduce((s,p)=>s+p.net,0))}</span></div>${CAR.pend.map(p=>`<div class="ph-line"><span>${cesc(p.name)} · arrives ${dueTxt(p.due)}</span><b>${usd(p.net)}</b></div>`).join('')}<div class="mut sm">Lucid sends approved payouts within ${PAY_BIZ_DAYS} business days.</div></div>`:''}
+   ${(CAR.pend||[]).length?`<div class="ph-card"><div class="ln-h"><b>Processing</b><span>${usd(CAR.pend.reduce((s,p)=>s+p.net,0))}</span></div>${CAR.pend.map(p=>`<div class="ph-line"><span>${cesc(p.name)} · arrives ${payTxt(p.due)}</span><b>${usd(p.net)}</b></div>`).join('')}<div class="mut sm">Approved payouts arrive 2 to 5 minutes after the request.</div></div>`:''}
    <div class="ph-card sav"><div class="ln-h"><b>Savings account</b><span>${(savRate()*100).toFixed(1)}% a day</span></div><div class="sav-bal" data-money="sav">${usd((CAR.sav&&CAR.sav.bal)||0)}</div><div class="mut sm">Interest earned so far ${fmt$((CAR.sav&&CAR.sav.earned)||0)}. Paid every day, also while you are away (up to 30 days).</div>
     <div class="sav-in"><input id="savAmt" type="number" min="1" step="10" placeholder="Amount"><button data-sav="1">Deposit</button><button data-sav="-1">Withdraw</button></div></div>
    <div class="ph-card"><div class="ln-h"><b>Daily bills</b><span>${fmt$(dailyCost())} / day</span></div>${costLines().map(([a,b])=>`<div class="ph-line"><span>${cesc(a)}</span><b>${fmt$(b)}</b></div>`).join('')||'<div class="mut sm">Nothing to pay. Homes, cars, family and pets have small daily costs.</div>'}</div>
@@ -6615,65 +6619,10 @@ try{ Object.assign(window.__bt,{rebuildSeries,pnlWUpdate}); }catch(e){}
  setTimeout(check,20000); setInterval(check,120000); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) check(); });
 })();
 
-/* ---- self-update: picks up a new version of the site without Ctrl+F5 ---- */
-(()=>{ const meta=document.querySelector('meta[name="ke-build"]'), mine=meta&&meta.content; if(!mine||location.protocol==='file:') return;
- let ready=null;
- const safe=()=>{ try{ return !CHA() && !S.pos && !CH.busy; }catch(e){ return false; } };
- const go=()=>{ try{ carSave(); }catch(e){} try{ sessSave(true); }catch(e){} const u=new URL(location.href); u.searchParams.set('v',ready); location.replace(u.toString()); };
- async function check(){
-  if(document.hidden && !ready) return;
-  try{ const t=await (await fetch(location.pathname+'?kecheck='+Date.now(),{cache:'no-store'})).text(); const m=t.match(/<meta name="ke-build" content="([^"]+)">/); if(m && m[1]!==mine) ready=m[1]; }catch(e){}
-  if(!ready) return;
-  if(safe()){ toast('<b>KETRADING updated.</b> Loading the new version...',2500); setTimeout(()=>{ if(safe()) go(); },2500); }
-  else if(!check.told){ check.told=true; toast('<b>A new version is ready.</b> It loads by itself after your session or position is closed.',6000); }
- }
- setTimeout(check,20000); setInterval(check,120000); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) check(); });
-})();
 
-/* ---- self-update: picks up a new version of the site without Ctrl+F5 ---- */
-(()=>{ const meta=document.querySelector('meta[name="ke-build"]'), mine=meta&&meta.content; if(!mine||location.protocol==='file:') return;
- let ready=null;
- const safe=()=>{ try{ return !CHA() && !S.pos && !CH.busy; }catch(e){ return false; } };
- const go=()=>{ try{ carSave(); }catch(e){} try{ sessSave(true); }catch(e){} const u=new URL(location.href); u.searchParams.set('v',ready); location.replace(u.toString()); };
- async function check(){
-  if(document.hidden && !ready) return;
-  try{ const t=await (await fetch(location.pathname+'?kecheck='+Date.now(),{cache:'no-store'})).text(); const m=t.match(/<meta name="ke-build" content="([^"]+)">/); if(m && m[1]!==mine) ready=m[1]; }catch(e){}
-  if(!ready) return;
-  if(safe()){ toast('<b>KETRADING updated.</b> Loading the new version...',2500); setTimeout(()=>{ if(safe()) go(); },2500); }
-  else if(!check.told){ check.told=true; toast('<b>A new version is ready.</b> It loads by itself after your session or position is closed.',6000); }
- }
- setTimeout(check,20000); setInterval(check,120000); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) check(); });
-})();
 
-/* ---- self-update: picks up a new version of the site without Ctrl+F5 ---- */
-(()=>{ const meta=document.querySelector('meta[name="ke-build"]'), mine=meta&&meta.content; if(!mine||location.protocol==='file:') return;
- let ready=null;
- const safe=()=>{ try{ return !CHA() && !S.pos && !CH.busy; }catch(e){ return false; } };
- const go=()=>{ try{ carSave(); }catch(e){} try{ sessSave(true); }catch(e){} const u=new URL(location.href); u.searchParams.set('v',ready); location.replace(u.toString()); };
- async function check(){
-  if(document.hidden && !ready) return;
-  try{ const t=await (await fetch(location.pathname+'?kecheck='+Date.now(),{cache:'no-store'})).text(); const m=t.match(/<meta name="ke-build" content="([^"]+)">/); if(m && m[1]!==mine) ready=m[1]; }catch(e){}
-  if(!ready) return;
-  if(safe()){ toast('<b>KETRADING updated.</b> Loading the new version...',2500); setTimeout(()=>{ if(safe()) go(); },2500); }
-  else if(!check.told){ check.told=true; toast('<b>A new version is ready.</b> It loads by itself after your session or position is closed.',6000); }
- }
- setTimeout(check,20000); setInterval(check,120000); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) check(); });
-})();
 
-/* ---- self-update: picks up a new version of the site without Ctrl+F5 ---- */
-(()=>{ const meta=document.querySelector('meta[name="ke-build"]'), mine=meta&&meta.content; if(!mine||location.protocol==='file:') return;
- let ready=null;
- const safe=()=>{ try{ return !CHA() && !S.pos && !CH.busy; }catch(e){ return false; } };
- const go=()=>{ try{ carSave(); }catch(e){} try{ sessSave(true); }catch(e){} const u=new URL(location.href); u.searchParams.set('v',ready); location.replace(u.toString()); };
- async function check(){
-  if(document.hidden && !ready) return;
-  try{ const t=await (await fetch(location.pathname+'?kecheck='+Date.now(),{cache:'no-store'})).text(); const m=t.match(/<meta name="ke-build" content="([^"]+)">/); if(m && m[1]!==mine) ready=m[1]; }catch(e){}
-  if(!ready) return;
-  if(safe()){ toast('<b>KETRADING updated.</b> Loading the new version...',2500); setTimeout(()=>{ if(safe()) go(); },2500); }
-  else if(!check.told){ check.told=true; toast('<b>A new version is ready.</b> It loads by itself after your session or position is closed.',6000); }
- }
- setTimeout(check,20000); setInterval(check,120000); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) check(); });
-})();
+
 
 try{ Object.assign(window.__bt,{chSpd,dailyStart,dailyReq,dailyKey,partnerNote}); }catch(e){}
 try{ Object.assign(window.__bt,{chSlotSwitch,chTickSlots,chSlotOf,chParked,chTick,chAccept,CHA,CHS}); }catch(e){}
