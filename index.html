@@ -4129,7 +4129,7 @@ function carMigrate(o){
 }
 const carDefault=()=>({v:2,priceMig:1,wallet:EVAL.price,passes:0,blown:0,paid:0,payouts:0,accts:[],owned:{},eq:{},job:{clicks:0,earned:0},look:{name:'You',skin:'#e8b796',hair:'#2b2118',style:'short'}});
 const CAR=(()=>{ const d=carDefault(); try{ const s=JSON.parse(localStorage.getItem('ke_career_v1')||'null'); if(s){ const o=Object.assign(d,s,{look:Object.assign(d.look,s.look||{})}); o.v=s.v||0; return carMigrate(o); } }catch(e){} return d; })();
-const EXT_KEYS=['life','login','bills','sav','prestige','xp','skills','fam','ch','loans','loansPaid','tx','hof','hofBest','mis','ach','inbox','streak','lastDay','pets','priceMig','tamper','cleanMig','loanLate','loanCfg','paidItems','debtSt','friend'];
+const EXT_KEYS=['chSlots','life','login','bills','sav','prestige','xp','skills','fam','ch','loans','loansPaid','tx','hof','hofBest','mis','ach','inbox','streak','lastDay','pets','priceMig','tamper','cleanMig','loanLate','loanCfg','paidItems','debtSt','friend'];
 const carExt=()=>{ const o={}; EXT_KEYS.forEach(k=>{ if(CAR[k]!==undefined) o[k]=CAR[k]; }); if(o.tx) o.tx=o.tx.slice(0,80); if(o.inbox) o.inbox=o.inbox.slice(0,30); if(o.ch) o.ch=Object.assign({},o.ch,{prev:null}); return o; };
 const carHash=t=>{ let h=2166136261; t='ke1|'+t; for(let i=0;i<t.length;i++){ h^=t.charCodeAt(i); h=Math.imul(h,16777619); } return (h>>>0).toString(36); };
 const carSaveLocal=()=>{ try{ CAR.sigv=1; const j=JSON.stringify(CAR); localStorage.setItem('ke_career_v1',j); localStorage.setItem('ke_career_sig',carHash(j)); }catch(e){} };
@@ -4249,8 +4249,14 @@ function syncerBuy(){
 }
 function acctToggle(id,on){
  const a=CAR.accts.find(x=>x.id===id); if(!a) return;
- if(on && !syncOwned()) CAR.accts.forEach(x=>{ x.on=false; });
- a.on=on; carSave(); acctRender();
+ if(!syncOwned()){   // without the trade syncer every evaluation keeps its own session
+  const cur=CAR.accts.find(x=>x.on);
+  if(on && cur && cur.id!==id){ if(!chSlotSwitch(cur.id,id)){ acctRender(); return; } }
+  else if(on && !cur){ if(!chSlotSwitch(null,id)){ acctRender(); return; } }
+  else if(!on && a.on){ if(!chSlotSwitch(id,null)){ acctRender(); return; } }
+  if(on) CAR.accts.forEach(x=>{ x.on=false; });
+ }
+ a.on=on; carSave(); acctRender(); try{ chBar(); }catch(e){} try{ if($('phone')&&$('phone').classList.contains('on')) phoneRender(); }catch(e){}
 }
 function acctClaim(id){
  const a=CAR.accts.find(x=>x.id===id); if(!a) return;
@@ -5665,7 +5671,37 @@ function chTick(){
  carSave(); try{ sfxPlay('alert',true); }catch(e){}
  toast(`<b>New evaluation session.</b> Open your phone to accept it.`,5000);
 }
-setInterval(()=>{ try{ chTick(); }catch(e){} },15000);
+const CH_SLOT_KEYS=['req','act','next','prev'];
+function chSlotSwitch(from,to){   // park the session of one evaluation and bring back another's
+ CAR.ch=CAR.ch||{day:0,req:null,act:null,hist:[],next:0};
+ const live=CHA();
+ if(live){
+  if(S.pos){ toast('Close your open position before you switch to another evaluation.',4000); try{ sfxPlay('deny'); }catch(e){} return false; }
+  if(CH.loading||CH.busy){ toast('The session is still loading. Try again in a moment.',3000); return false; }
+  chSnap(); stopPlay(); chClockStop(); S.orders=[]; try{ drawOrders(); }catch(e){}
+ }
+ const slots=CAR.chSlots=CAR.chSlots||{};
+ if(from){ const k={}; CH_SLOT_KEYS.forEach(x=>k[x]=CAR.ch[x]??null); if(k.req) k.req.acct=from; slots[from]=k; }
+ const t=(to&&slots[to])||{}; CH_SLOT_KEYS.forEach(x=>CAR.ch[x]=t[x]??(x==='next'?0:null)); if(to) delete slots[to];
+ carSaveLocal();
+ try{ chAfterPull(); }catch(e){}
+ if(live && !CHA()) toast('Session parked. Its market clock is frozen until you switch that account back on.',4500);
+ if(CHA()) toast(`<b>Back in session ${CHS().day}.</b> The market picks up where you left it.`,4000);
+ return true;
+}
+function chTickSlots(){   // every evaluation that is switched off still gets its own session request
+ if(syncOwned()) return; const slots=CAR.chSlots=CAR.chSlots||{}, ids=new Set(CAR.accts.map(a=>a.id)); let n=0, dirty=false;
+ for(const k of Object.keys(slots)) if(!ids.has(k)){ if(slots[k].req) msgDrop(slots[k].req.id); delete slots[k]; dirty=true; }
+ for(const a of CAR.accts){ if(a.on) continue; const s=slots[a.id]||(slots[a.id]={req:null,act:null,next:0,prev:null});
+  if(s.req||s.act||Date.now()<(s.next||0)) continue;
+  const r=chMakeReq(); if(!r) continue; r.acct=a.id; s.req=r; n++;
+  msgAdd({k:'req',id:r.id,from:'Lucid Trading desk',title:`Session ready for ${a.name}`,body:`A random NQ trading day for ${a.name} (${planShort(SPEC(a))}), 09:30 to 16:00 New York time. Each evaluation gets its own session and its own hidden date. Switch to this account to accept it.`}); }
+ if(n||dirty) carSave();
+ if(n && !CHA()){ try{ sfxPlay('alert'); }catch(e){} toast(n===1?'<b>New evaluation session.</b> Open your phone to see which account it is for.':`<b>${n} new evaluation sessions.</b> One for each waiting account.`,5000); }
+}
+const chSlotOf=id=>{ const S0=CAR.chSlots||{}; for(const k in S0) if(S0[k]&&S0[k].req&&S0[k].req.id===id) return k; return null; };
+const chParked=()=>{ const S0=CAR.chSlots||{}; let live=0, wait=0; for(const k in S0){ if(S0[k]&&S0[k].act) live++; else if(S0[k]&&S0[k].req) wait++; } return {live,wait}; };
+setInterval(()=>{ try{ chTick(); }catch(e){} try{ chTickSlots(); }catch(e){} },15000);
 const chTfNorm=v=>({'1':'60','5':'300','15':'900'})[String(v)]||String(v||'300');
 async function chAccept(tf){
  const r=CAR.ch&&CAR.ch.req; if(!r||CHA()||CH.busy) return;
@@ -5682,7 +5718,8 @@ async function chAccept2(r,tf){
  const raw=await loadSymbol(r.sym,y0,r.y); CH.loading=false; const k0=raw.findIndex(b=>b.time>=t0);
  if(k0<0 || raw[k0].time>t0+10*60 || k0<2){ CAR.ch.req=null; CAR.ch.next=0; msgDrop(r.id); carSave(); chTick(); toast('That day had no trading. A new session request is on its way.',4000); return; }
  const p0=raw[k0].open, off=Math.round(p0*(0.08+Math.random()*0.17)*(Math.random()<0.5?-1:1)*4)/4;
- CAR.ch.act={id:r.id,sym:r.sym,y0,y1:r.y,D:r.D,t0,tEnd,off,tf:chTfNorm(tf),day:((CAR.ch.day)||0)+1,cur:t0,fresh:true,trades:[],markers:[],realized:0,dayPnl:{},pos:null,started:Date.now()};
+ CAR.ch.seq=Math.max(CAR.ch.day||0,CAR.ch.seq||0)+1;
+ CAR.ch.act={id:r.id,sym:r.sym,y0,y1:r.y,D:r.D,t0,tEnd,off,tf:chTfNorm(tf),day:CAR.ch.seq,cur:t0,fresh:true,trades:[],markers:[],realized:0,dayPnl:{},pos:null,started:Date.now()};
  CAR.ch.req=null; msgDrop(r.id); carSave();
  await chLoad(raw); toast(`<b>Evaluation session ${CHS().day} started.</b> Trades now count on your active accounts. The session runs 09:30 to 16:00 New York time.`,6000);
 }
@@ -5824,7 +5861,7 @@ function chEnd(early){
  chSnap();
  const T=S.trades, n=T.length, wins=T.filter(t=>t.pnl>0).length, pnl=S.realized, rs=T.filter(t=>t.r!=null).map(t=>t.r), bestR=rs.length?Math.max(...rs):null;
  const real=new Date(a.D*864e5), dateTxt=`${DOW[real.getUTCDay()]} ${real.getUTCDate()} ${MON[real.getUTCMonth()]} ${real.getUTCFullYear()}`;
- CAR.ch.day=a.day; (CAR.ch.hist=CAR.ch.hist||[]).unshift({day:a.day,pnl,n,wins,bestR,date:dateTxt,early:!!early,at:Date.now()}); CAR.ch.hist.length=Math.min(CAR.ch.hist.length,60);
+ CAR.ch.day=Math.max(CAR.ch.day||0,a.day); (CAR.ch.hist=CAR.ch.hist||[]).unshift({day:a.day,pnl,n,wins,bestR,date:dateTxt,early:!!early,at:Date.now(),acct:CAR.accts.filter(x=>x.on).map(x=>x.name).join(', ')}); CAR.ch.hist.length=Math.min(CAR.ch.hist.length,60);
  try{ foodUse(22); }catch(e){} CAR.ch.act=null; CAR.ch.next=Date.now()+90000; document.body.classList.remove('challenge');
  xpAdd(30+(pnl>0?40:0)); misBump('session',1); if(pnl>0) misBump('green',1);
  msgAdd({k:'res',from:'Lucid Trading desk',title:`Session ${a.day} results: ${pnl>=0?'+':''}${fmt$(Math.round(pnl))}`,body:`${n} trade${n===1?'':'s'}, ${wins} winner${wins===1?'':'s'}${bestR!=null?`, best ${bestR.toFixed(1)}R`:''}. The day you traded was ${dateTxt}.${early?' You ended the session early.':''}`});
@@ -5843,7 +5880,7 @@ function chResult(r){
 function chBar(){
  let b=$('chBar'); if(!b){ b=document.createElement('div'); b.id='chBar'; const c=$('chart'); if(!c) return; c.appendChild(b); }
  const a=CHS();
- if(!a){ b.dataset.k=''; const on=CAR.accts.filter(x=>x.on); b.className='mode-pill prac'; b.innerHTML=`<i></i><b>Practice</b><span>${on.length?'Accounts only trade in evaluation sessions':'Trades here do not count'}</span>${CAR.ch&&CAR.ch.req?'<button id="chOpen">Session waiting</button>':''}`; const o=$('chOpen'); if(o) o.onclick=()=>phoneOpen('messages'); return; }
+ if(!a){ b.dataset.k=''; const on=CAR.accts.filter(x=>x.on); b.className='mode-pill prac'; b.innerHTML=`<i></i><b>Practice</b><span>${on.length?'Accounts only trade in evaluation sessions':'Trades here do not count'}</span>${CAR.ch&&CAR.ch.req?'<button id="chOpen">Session waiting</button>':''}${(()=>{ const P=chParked(); return P.live?`<button id="chPark">${P.live} parked session${P.live>1?'s':''}</button>`:''; })()}`; const o=$('chOpen'); if(o) o.onclick=()=>phoneOpen('messages'); const pk=$('chPark'); if(pk) pk.onclick=()=>{ try{ hubOpen('props'); }catch(e){} toast('Switch on the account whose session you want to continue.',3500); }; return; }
  const now=S.bars.length?chNow():a.t0, left=Math.max(0,a.tEnd-now), h=Math.floor(left/3600), m=Math.floor(left%3600/60);
  const on=CAR.accts.filter(x=>x.on);
  const txt=`${on.map(x=>planShort(SPEC(x))).join(' · ')||'no account on'} · live ${chSpdLabel(chSpd())} · ${h}h ${pad2(m)}m to the 16:00 close`;
@@ -5914,7 +5951,7 @@ function phoneRender(){
  else if(A==='loans'){ h=debtLoansHTML(head); }
  else if(A==='messages'){ chatSnap(); const seg=chatSeg(); if(seg!=='desk'){ h=chatView(head); } else { (CAR.inbox||[]).forEach(m=>m.read=true); const r=CAR.ch&&CAR.ch.req;
   h=head('Messages','')+chatSegs('desk')+`<div class="ph-list">${(CAR.inbox||[]).map(m=>`<div class="ph-msg ${m.k}"><div class="mh"><b>${cesc(m.from||'KE')}</b><span>${new Date(m.t).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</span></div><div class="mt">${cesc(m.title)}</div><p>${cesc(m.body)}</p>
-   ${m.k==='req'&&r&&r.id===m.id?`<div class="mr"><label>Timeframe <select id="chTf"><option value="60">1m</option><option value="300" selected>5m</option><option value="900">15m</option></select></label><button class="primary" data-acc>Accept</button><button data-dec>Not now</button></div>`:''}${m.k==='party'?(m.went?'<div class="mr"><em style="color:#2ecf8f;font-style:normal">You went</em></div>':`<div class="mr"><button class="primary" data-party="${m.pid}">Go · ${fmt$(PARTIES[m.pid][3])}</button></div>`):''}</div>`).join('')||'<div class="ph-empty">No messages. When you have an active account, the desk sends you evaluation sessions here.</div>'}</div>`; } phoneBadge(); queueMicrotask(chatAfter); }
+   ${m.k==='req'&&r&&r.id===m.id?`<div class="mr"><label>Timeframe <select id="chTf"><option value="60">1m</option><option value="300" selected>5m</option><option value="900">15m</option></select></label><button class="primary" data-acc>Accept</button><button data-dec>Not now</button></div>`:''}${m.k==='req'&&!(r&&r.id===m.id)&&chSlotOf(m.id)?(()=>{ const ac=CAR.accts.find(x=>x.id===chSlotOf(m.id)); return ac?`<div class="mr"><button class="primary" data-slotacc="${ac.id}">Switch to ${cesc(ac.name)}</button></div>`:''; })():''}${m.k==='party'?(m.went?'<div class="mr"><em style="color:#2ecf8f;font-style:normal">You went</em></div>':`<div class="mr"><button class="primary" data-party="${m.pid}">Go · ${fmt$(PARTIES[m.pid][3])}</button></div>`):''}</div>`).join('')||'<div class="ph-empty">No messages. When you have an active account, the desk sends you evaluation sessions here.</div>'}</div>`; } phoneBadge(); queueMicrotask(chatAfter); }
  else if(A==='hof'){ const me=CAR.hof||[];
   h=head('Hall of Fame','Best R trades from evaluation sessions')+(CAR.tamper?'<div class="ph-note">This save was edited outside the app, so it can\'t enter the global Hall of Fame.</div>':'')+`<div class="ph-seg"><button data-hof="me" class="${PH.hof==='me'?'act':''}">You</button><button data-hof="all" class="${PH.hof==='all'?'act':''}">Everyone</button></div><div id="hofBox" class="ph-list">${PH.hof==='me'?(me.map((e,i)=>`<div class="ph-tx"><div><b>#${i+1} · ${e.r.toFixed(2)}R</b><span>${e.side} · session ${e.day}</span></div><em class="pos">+${fmt$(e.pnl)}</em></div>`).join('')||'<div class="ph-empty">No entries yet. Win a trade with a stop loss in an evaluation session.</div>'):'<div class="ph-empty">Loading...</div>'}</div>`; }
  else if(A==='missions'){ const M=misGet(), mult=1+Math.min(0.5,((CAR.streak||1)-1)*0.1);
@@ -5935,6 +5972,7 @@ function phoneRender(){
  sc.querySelectorAll('[data-hof]').forEach(b=>b.onclick=()=>{ PH.hof=b.dataset.hof; phoneRender(); });
  sc.querySelectorAll('[data-party]').forEach(b=>b.onclick=()=>partyGo(+b.dataset.party));
  const acc=sc.querySelector('[data-acc]'); if(acc) acc.onclick=()=>chAccept($('chTf').value);
+ sc.querySelectorAll('[data-slotacc]').forEach(b=>b.onclick=()=>{ acctToggle(b.dataset.slotacc,true); });
  const dec=sc.querySelector('[data-dec]'); if(dec) dec.onclick=()=>{ const r=CAR.ch.req; if(r){ msgDrop(r.id); CAR.ch.req=null; CAR.ch.next=Date.now()+5*60000; carSave(); toast('No problem. Enjoy life. The desk will send another session later.',3500); phoneRender(); chBar(); } };
  if(A==='hof'&&PH.hof==='all') hofLoad().then(res=>{ const box=$('hofBox'); if(!box) return; box.innerHTML=res.err?`<div class="ph-empty">${res.err==='offline'?'Sign in to see everyone.':/best_rr/.test(res.err)?'The global Hall of Fame needs one database update (see the setup note).':'Could not load: '+cesc(res.err)}</div>`:(res.rows.map((x,i)=>`<div class="ph-tx ${CLOUD.user&&x.id===CLOUD.user.id?'me':''}"><div><b>#${i+1} · ${cesc(x.name||'Trader')}</b><span>Best trade</span></div><em class="pos">${(+x.best_rr).toFixed(2)}R</em></div>`).join('')||'<div class="ph-empty">No entries yet.</div>'); });
 }
@@ -6299,6 +6337,7 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape' && hubShown() && !/
 
 try{ Object.assign(window.__bt,{LF,foodBuy,gymJoin,gymRep,partyCheck,partyGo,famDo,lifeTick,chTicks,chSpd,chClockStop,chClockRun,CH,chart,eqChart,oscChart,chAfterPull,chSnap,txAdd,financeItem,loanPay,chAccept,chEnd,chTick,CHS,phoneOpen,misBump,misClaim,achCheck,credit,hofAdd,openPos,closePos,CAR,careerSync,hubOpen,HUB,jobClick,skBuy,xpAdd,skill,planSpec,chartFull,bgfxSync,cfg:()=>cfg,famScene,sfxPlay,sessSave,sessApply}); }catch(e){}
 try{ Object.assign(window.__bt,{rebuildSeries,pnlWUpdate}); }catch(e){}
+try{ Object.assign(window.__bt,{chSlotSwitch,chTickSlots,chSlotOf,chParked,chTick,chAccept,CHA,CHS}); }catch(e){}
 
 
 /* ---- save the chart session (symbol, replay spot, trades) in this browser and online ---- */
