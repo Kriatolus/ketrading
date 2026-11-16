@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta name="ke-build" content="20261116063129">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6337,6 +6338,21 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape' && hubShown() && !/
 
 try{ Object.assign(window.__bt,{LF,foodBuy,gymJoin,gymRep,partyCheck,partyGo,famDo,lifeTick,chTicks,chSpd,chClockStop,chClockRun,CH,chart,eqChart,oscChart,chAfterPull,chSnap,txAdd,financeItem,loanPay,chAccept,chEnd,chTick,CHS,phoneOpen,misBump,misClaim,achCheck,credit,hofAdd,openPos,closePos,CAR,careerSync,hubOpen,HUB,jobClick,skBuy,xpAdd,skill,planSpec,chartFull,bgfxSync,cfg:()=>cfg,famScene,sfxPlay,sessSave,sessApply}); }catch(e){}
 try{ Object.assign(window.__bt,{rebuildSeries,pnlWUpdate}); }catch(e){}
+/* ---- self-update: picks up a new version of the site without Ctrl+F5 ---- */
+(()=>{ const meta=document.querySelector('meta[name="ke-build"]'), mine=meta&&meta.content; if(!mine||location.protocol==='file:') return;
+ let ready=null;
+ const safe=()=>{ try{ return !CHA() && !S.pos && !CH.busy; }catch(e){ return false; } };
+ const go=()=>{ try{ carSave(); }catch(e){} try{ sessSave(true); }catch(e){} const u=new URL(location.href); u.searchParams.set('v',ready); location.replace(u.toString()); };
+ async function check(){
+  if(document.hidden && !ready) return;
+  try{ const t=await (await fetch(location.pathname+'?kecheck='+Date.now(),{cache:'no-store'})).text(); const m=t.match(/<meta name="ke-build" content="([^"]+)">/); if(m && m[1]!==mine) ready=m[1]; }catch(e){}
+  if(!ready) return;
+  if(safe()){ toast('<b>KETRADING updated.</b> Loading the new version...',2500); setTimeout(()=>{ if(safe()) go(); },2500); }
+  else if(!check.told){ check.told=true; toast('<b>A new version is ready.</b> It loads by itself after your session or position is closed.',6000); }
+ }
+ setTimeout(check,20000); setInterval(check,120000); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) check(); });
+})();
+
 try{ Object.assign(window.__bt,{chSlotSwitch,chTickSlots,chSlotOf,chParked,chTick,chAccept,CHA,CHS}); }catch(e){}
 
 
