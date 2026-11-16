@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261116075134">
+<meta name="ke-build" content="20261116145342">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -711,6 +711,9 @@ aside{background:linear-gradient(180deg,color-mix(in srgb,var(--panel) 97%,#fff)
 .plan-opt button{height:28px;padding:0 12px;border-radius:8px;font-size:12.5px}
 .plan-opt button.act,#hub #hubAccts .plan-opt button.act{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 18%,var(--panel));color:var(--text)}
 .plan-opt i{flex-basis:100%;color:var(--muted);font-style:normal;font-size:11.5px}
+.badge.live,#hub .badge.live,#hub #hubAccts .badge.live,#acctBox .badge.live{background:linear-gradient(90deg,#ff3d6e,#ff9f43);color:#fff;border-color:transparent;font-weight:700;letter-spacing:.04em}
+.badge.bad,#hub .badge.bad,#hub #hubAccts .badge.bad,#acctBox .badge.bad{background:color-mix(in srgb,#f23645 18%,transparent);color:#ff6b78;border-color:color-mix(in srgb,#f23645 40%,transparent)}
+.ac.is-live{box-shadow:0 0 0 1px color-mix(in srgb,#ff3d6e 45%,transparent)}.ac.is-blown{opacity:.8}
 .ev-grid{gap:16px}
 .card.prod.ev{padding:20px;display:flex;flex-direction:column}
 .ev .card-h{flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--line)}
@@ -4127,7 +4130,7 @@ function carMigrate(o){
   delete o.stage; delete o.ledger; delete o.sync; o.v=2;
  }
  if(!Array.isArray(o.accts)) o.accts=[];
- o.accts.forEach((a,i)=>{ if(!a.plan) a.plan='flex'; if(!a.size) a.size=25; if(!Array.isArray(a.ledger)) a.ledger=[]; if(!a.id) a.id=newId()+i; if(!a.name) a.name='Account '+(i+1); a.stage=a.stage==='funded'?'funded':'eval'; a.on=!!a.on; });
+ o.accts.forEach((a,i)=>{ if(!a.plan) a.plan='flex'; if(!a.size) a.size=25; if(!Array.isArray(a.ledger)) a.ledger=[]; if(!a.id) a.id=newId()+i; if(!a.name) a.name='Account '+(i+1); a.stage=['funded','live'].includes(a.stage)?a.stage:'eval'; a.on=!!a.on&&!a.blown; });
  if(!o.job||typeof o.job!=='object') o.job={clicks:0,earned:0};
  if(!o.owned) o.owned={}; if(!o.eq) o.eq={};
  if(!o.priceMig){ o.priceMig=1; if(!o.accts.length && !o.passes) o.wallet=Math.max(+o.wallet||0,LSIZES[25].price); }
@@ -4136,7 +4139,7 @@ function carMigrate(o){
 }
 const carDefault=()=>({v:2,priceMig:1,wallet:EVAL.price,passes:0,blown:0,paid:0,payouts:0,accts:[],owned:{},eq:{},job:{clicks:0,earned:0},look:{name:'You',skin:'#e8b796',hair:'#2b2118',style:'short'}});
 const CAR=(()=>{ const d=carDefault(); try{ const s=JSON.parse(localStorage.getItem('ke_career_v1')||'null'); if(s){ const o=Object.assign(d,s,{look:Object.assign(d.look,s.look||{})}); o.v=s.v||0; return carMigrate(o); } }catch(e){} return d; })();
-const EXT_KEYS=['chSlots','daily','hardOffer','hardDone','hardWins','life','login','bills','sav','prestige','xp','skills','fam','ch','loans','loansPaid','tx','hof','hofBest','mis','ach','inbox','streak','lastDay','pets','priceMig','tamper','cleanMig','loanLate','loanCfg','paidItems','debtSt','friend'];
+const EXT_KEYS=['chSlots','daily','hardOffer','hardDone','hardWins','life','login','bills','sav','prestige','xp','skills','fam','ch','loans','loansPaid','tx','hof','hofBest','mis','ach','inbox','streak','lastDay','pets','priceMig','tamper','cleanMig','loanLate','loanCfg','paidItems','debtSt','friend','liveCool','lives'];
 const carExt=()=>{ const o={}; EXT_KEYS.forEach(k=>{ if(CAR[k]!==undefined) o[k]=CAR[k]; }); if(o.tx) o.tx=o.tx.slice(0,80); if(o.inbox) o.inbox=o.inbox.slice(0,30); if(o.ch) o.ch=Object.assign({},o.ch,{prev:null}); return o; };
 const carHash=t=>{ let h=2166136261; t='ke1|'+t; for(let i=0;i<t.length;i++){ h^=t.charCodeAt(i); h=Math.imul(h,16777619); } return (h>>>0).toString(36); };
 const carSaveLocal=()=>{ try{ CAR.sigv=1; const j=JSON.stringify(CAR); localStorage.setItem('ke_career_v1',j); localStorage.setItem('ke_career_sig',carHash(j)); }catch(e){} };
@@ -4150,13 +4153,13 @@ const evalNow=()=>S.bars.length ? ((S.partial&&S.raw.length)?replayNow():S.bars[
 /* Lucid plans. Rules per plan and size, from Lucid's help centre (support.lucidtrading.com, articles dated Aug-Oct 2026) for LucidFlex / LucidPro / LucidDaily / LucidDirect */
 const PLANS={
  flex:{id:'flex',name:'LucidFlex',tag:'Evaluation',evalCons:0.4,cons50:true,fundCons:0,price:{25:100,50:130,150:345},dll:{},dllOpt:true,noDll:{25:15,50:15,150:45},c50:{25:7,50:15,150:35},scalePlan:true,maxPays:5,
-  blurb:'One-step evaluation with a 40% consistency rule (50% as a paid option). Funded accounts have no consistency rule, follow a scaling plan for size and pay out after five winning days, up to five payouts.'},
+  blurb:'One-step evaluation with a 40% consistency rule (50% as a paid option). Funded accounts have no consistency rule, follow a scaling plan for size and pay out after five winning days. After the fifth payout the account moves to Lucid Live.'},
  pro:{id:'pro',name:'LucidPro',tag:'Evaluation',evalCons:0,fundCons:0.4,price:{25:135,50:185,150:370},dll:{50:1200,150:2700},dllOpt:true,noDll:{25:20,50:25,150:55},lucidScale:true,maxPays:5,
-  blurb:'No consistency rule in the evaluation, so you can pass in one day. Funded accounts pay out when a cycle reaches its profit goal with a 40% consistency rule, above a buffer of the max loss + $100, up to five payouts.'},
+  blurb:'No consistency rule in the evaluation, so you can pass in one day. Funded accounts pay out when a cycle reaches its profit goal with a 40% consistency rule, above a buffer of the max loss + $100. After the fifth payout the account moves to Lucid Live.'},
  daily:{id:'daily',name:'LucidDaily',tag:'Evaluation',evalCons:0.4,cons50:true,fundCons:0,price:{25:137,50:185,150:436},dll:{},dllOpt:true,noDll:{25:15,50:15,150:45},c50:{25:7,50:15,150:35},intraday:true,
-  blurb:'Evaluation with a 40% consistency rule (50% as a paid option). Funded accounts can request a payout on any day, above a buffer, with no cap. The funded drawdown trails intraday.'},
+  blurb:'Evaluation with a 40% consistency rule (50% as a paid option). Funded accounts can request a payout on any day, above a buffer, with no cap. The funded drawdown trails intraday. A $6,000 / $8,000 / $12,000 day (25K / 50K / 150K) moves the account to Lucid Live.'},
  direct:{id:'direct',name:'LucidDirect',tag:'Instant funded',direct:true,evalCons:0,fundCons:0.2,price:{25:329,50:515,150:836},dll:{50:1200,150:3000},mll:{150:5000},lucidScale:true,maxPays:5,skill:'direct',
-  blurb:'No evaluation. You start funded. Each payout cycle needs a profit goal, five trading days and a strict 20% consistency rule, up to five payouts.'}
+  blurb:'No evaluation. You start funded. Each payout cycle needs a profit goal, five trading days and a strict 20% consistency rule. After the fifth payout the account moves to Lucid Live.'}
 };
 const DLL_FIX={25:600,50:1200,150:2700};   // Lucid's optional daily loss limit on Flex, Pro and Daily (eval and funded)
 const FLEX_SCALE={25:[[0,1],[1000,2]],50:[[0,2],[1000,3],[2000,4]],150:[[0,4],[1000,5],[2000,6],[3000,8],[4500,10]]};   // LucidFlex funded scaling plan: [profit from, minis]; micros = 10x
@@ -4171,6 +4174,29 @@ function planSpec(plan,k,o){ const L=PLANS[plan]||PLANS.flex, B=LBASE[k]||LBASE[
  return Object.assign({},B,{k,plan:L.id,P:L,name:L.name,price,mll:(L.mll&&L.mll[k])||B.mll,dll,dllOn,evalCons:L.cons50?(c50?0.5:0.4):L.evalCons,legacy:leg}); }
 const SPEC=a=>planSpec((a&&a.plan)||'flex',(a&&a.size)||25,a?(a.opt||{legacy:true}):undefined);
 const LSIZES={25:planSpec('flex',25),50:planSpec('flex',50),150:planSpec('flex',150)};
+/* Lucid Live (support.lucidtrading.com "New Live Structure" Oct 2026, "LucidDaily Live"): $0 start, EOD drawdown 1,000/2,000/4,500 that locks at $100 once live profit reaches it
+   (or at the first payout), no daily loss limit, no consistency, daily payouts 90/10, repeatable bonus after the profit target and 20 trading days */
+const LIVE={dd:{25:1000,50:2000,150:4500},lock:100,tgt:{25:2000,50:4000,150:9000},bonus:{25:1000,50:2000,150:4500},bonusDays:20,dailyMax:{25:6000,50:8000,150:12000},simCap:15000,coolDays:14,refund:0.5,reset:0.6};
+function inEvalSess(){ return !!(CAR.ch&&CAR.ch.act&&!CAR.ch.act.daily); }   // an evaluation session is running (safe to call while the page is still loading)
+const liveCool=()=>Math.max(0,Math.ceil(((+CAR.liveCool||0)-Date.now())/864e5));
+const resetPrice=a=>Math.round((+a.cost||SPEC(a).price)*LIVE.reset);
+function liveCalc(L,open,today,P){
+ const k=P.k, mll=LIVE.dd[k]||P.mll, lk=LIVE.lock, keep=lk+mll;
+ let bal=0, floor=-mll, day=null, breach=false, pays=0, bonuses=0, bP=0, bD=new Map(), days=new Map();
+ const eod=()=>{ floor=Math.max(floor, bal>=mll?lk:Math.min(bal-mll,lk)); };   // EOD trail; locks at $100 once live profit reaches the starting drawdown
+ for(const t of L){ if(day!==null && t.d!==day) eod(); day=t.d; bal+=t.pnl;
+  if(t.pay){ pays++; floor=Math.max(floor,lk); continue; }   // a payout locks the max loss at $100
+  if(t.bonus){ bonuses++; bP=0; bD=new Map(); continue; }
+  days.set(t.d,(days.get(t.d)||0)+t.pnl); bD.set(t.d,(bD.get(t.d)||0)+t.pnl); bP+=t.pnl; if(bal<=floor) breach=true; }
+ if(day!==null && S.bars.length && today!==day) eod();
+ const eq=bal+open, qd=[...bD.entries()].filter(([d,v])=>d!==today && Math.abs(v)>=1).length, tgt=LIVE.tgt[k];   // a bonus day: a trade and at least $1 net
+ const maxPay=Math.floor(Math.max(0,Math.min(bal-keep, bal-floor-1))), why=[];
+ if(maxPay<FUND.min) why.push(`${usd(FUND.min-maxPay)} more profit to pay out (the first ${usd(keep)} stays in the account)`);
+ return {F:true,live:true,today,tgt,mll,bal,eq,open,floor,profit:bal,best:Math.max(0,...days.values()),cons:0,consOk:true,need:0,breach,locked:floor>=lk,pass:false,winDays:0,maxPay,canPay:maxPay>=FUND.min,P,
+  prog:{l:'Live bonus',v:`${usd(Math.max(0,bP))} / ${usd(tgt)} · ${Math.min(qd,LIVE.bonusDays)} / ${LIVE.bonusDays} days`,pct:Math.min(Math.max(0,bP)/tgt,qd/LIVE.bonusDays)},
+  why,dll:0,dllScaled:false,todayPnl:(days.get(today)||0)+open,dllHit:false,pays,payDone:false,minis:P.minis,micros:P.micros,eodBal:bal,peakEod:0,
+  bonusReady:bP>=tgt && qd>=LIVE.bonusDays,bonusAmt:LIVE.bonus[k],bonuses,bonusP:bP,bonusDays:qd,liveDue:false,prevClose:bal};
+}
 const minPrice=()=>Math.min(...Object.values(PLANS).filter(p=>!p.direct).map(p=>Math.min(...Object.values(p.price))));
 const planShort=s=>s.name.replace('Lucid','')+' '+s.k+'K';
 function planRules(s){
@@ -4186,15 +4212,16 @@ function planRules(s){
   : L.id==='daily' ? `Any day with net profit, everything above a ${m(s.start+s.mll+EVAL.lock)} buffer`
   : `${m(s.dirGoal[0])} profit goal (later ${m(s.dirGoal[1])}), 5 trading days, up to ${m(s.dirCap[0])}${s.dirCap[1]!==s.dirCap[0]?` (4th and 5th: ${m(s.dirCap[1])})`:''}`;
  r.push(['Payout',pay+(L.maxPays?`. Max ${L.maxPays} payouts`:'')]);
+ r.push(['Lucid Live',(L.maxPays?`After payout ${L.maxPays}`:`After a ${m(LIVE.dailyMax[s.k])} day`)+`: $0 start, ${m(LIVE.dd[s.k])} EOD drawdown, daily payouts, ${m(LIVE.bonus[s.k])} bonus`]);
  return r;
 }
 function lucidCalc(L,F,open,today,P,hwm){
  P=P||planSpec('flex',25); const pl=P.plan, mll=P.mll, lockAt=P.start+EVAL.lock, intra=F&&P.P.intraday, trailBal=P.start+mll+EVAL.lock;
  const cons=F?P.P.fundCons:P.evalCons;
- let bal=P.start, floor=P.start-mll, day=null, breach=false, cyc=new Map(), days=new Map(), pays=0, eodBal=P.start, peak=0, above=false;
+ let bal=P.start, floor=P.start-mll, day=null, breach=false, cyc=new Map(), days=new Map(), pays=0, eodBal=P.start, peak=0, above=false, dayStart=P.start;
  const trail=()=>{ floor=Math.max(floor, Math.min(bal-mll, lockAt)); };
  const eod=()=>{ if(!intra) trail(); eodBal=bal; peak=Math.max(peak,bal-P.start); if(bal>trailBal) above=true; };   // a session close: EOD trail, closing balance, best end-of-day profit
- for(const t of L){ if(day!==null && t.d!==day) eod(); day=t.d; bal+=t.pnl;
+ for(const t of L){ if(day!==null && t.d!==day) eod(); if(t.d!==day) dayStart=bal; day=t.d; bal+=t.pnl;
   if(t.pay){ pays++; cyc=new Map(); if(pl==='flex') floor=Math.max(floor,Math.min(lockAt,bal-1)); continue; }
   days.set(t.d,(days.get(t.d)||0)+t.pnl); cyc.set(t.d,(cyc.get(t.d)||0)+t.pnl); if(bal<=floor) breach=true; if(intra) trail(); }
  if(day!==null && S.bars.length && today!==day) eod();
@@ -4226,14 +4253,19 @@ function lucidCalc(L,F,open,today,P,hwm){
    prog={l:'Withdrawable now',v:usd(Math.max(0,Math.floor(maxPay))),pct:Math.max(0,maxPay)/FUND.min};
    if(cycP<=0) why.push('a net profit since your last payout');
    if(maxPay<FUND.min) why.push(`${usd(FUND.min-Math.max(0,maxPay))} more above the ${usd(mll+100)} buffer`); }
-  if(payDone){ ok=false; why.length=0; why.push(`a new account: all ${P.P.maxPays} payouts on this one are taken`); prog={l:'Payouts taken',v:`${pays} / ${P.P.maxPays}`,pct:1}; }
+  if(payDone){ ok=false; why.length=0; why.push(`the move to Lucid Live: all ${P.P.maxPays} payouts are taken`); prog={l:'Payouts taken',v:`${pays} / ${P.P.maxPays}`,pct:1}; }
  } else prog={l:'Profit target',v:`${usd(profit)} / ${usd(P.tgt)}`,pct:profit/P.tgt};
  maxPay=Math.floor(Math.max(0,maxPay));
  return {F,today,tgt:P.tgt,mll,bal,eq,open,floor,profit,best,cons,consOk,need:(!F&&cons)?best/cons:0,breach,locked:floor>=lockAt,
-  pass:!F&&profit>=P.tgt&&consOk,winDays,maxPay,canPay:F&&ok&&maxPay>=FUND.min,P,prog,why,dll,dllScaled:scaled,todayPnl,dllHit,pays,payDone,minis,micros,eodBal,peakEod:peak};
+  pass:!F&&profit>=P.tgt&&consOk,winDays,maxPay,canPay:F&&ok&&maxPay>=FUND.min,P,prog,why,dll,dllScaled:scaled,todayPnl,dllHit,pays,payDone,minis,micros,eodBal,peakEod:peak,prevClose:dayStart,
+  liveDue:!!(F && (payDone || (pl==='daily' && best>=(LIVE.dailyMax[P.k]||Infinity))))};   // Flex/Pro/Direct after payout 5, Daily after a max-daily-profit day
 }
 
-const acctCalc=a=>lucidCalc(a.ledger,a.stage==='funded',acctOpen(a),chDayId(),SPEC(a),+a.hwm||0);
+function acctCalc(a){ const P=SPEC(a);
+ const c=a.stage==='live' ? liveCalc(a.ledger,acctOpen(a),chDayId(),P) : lucidCalc(a.ledger,a.stage==='funded',acctOpen(a),chDayId(),P,+a.hwm||0);
+ // on-demand payouts during the session only with a daily loss limit; without one Lucid takes the request after the session closes
+ if(c.canPay && a.stage==='funded' && !(P.dll>0) && inEvalSess() && a.on){ c.canPay=false; c.payWait=true; c.why=['the session to close (without a daily loss limit there are no on-demand payouts)']; }
+ return c; }
 function syncEnter(){ if(!CHE()) return []; const A=CAR.accts.filter(a=>a.on), out=A.filter(a=>!acctCalc(a).dllHit); if(out.length<A.length) toast(`<b>${A.filter(a=>!out.includes(a)).map(a=>cesc(a.name)).join(', ')}</b> hit the daily loss limit today and sits out this trade.`,4500); return out.map(a=>a.id); }
 function syncClose(p,pnl,t){
  if(!p.sync||!p.sync.length) return; const d=chDayId(); let n=0;
@@ -4256,12 +4288,13 @@ function evalBlock(q,pv,ids){   // q = the whole position size after this order
 function acctBuy(code){
  const [pl,k,dl,cn]=String(code).includes(':')?String(code).split(':'):['flex',code], L0=PLANS[pl]||PLANS.flex, opt=L0.direct?{dll:true}:{dll:dl!=='0',cons:L0.cons50&&cn==='50'?0.5:0.4}, P=planSpec(pl,+k,opt);
  if(P.P.skill && !skill(P.P.skill)) return;
+ if(liveCool()>0){ toast(`Lucid's cooldown after a blown live account: ${liveCool()} more day${liveCool()===1?'':'s'} before you can buy again.`,4500); return; }
  if(CAR.accts.length>=EVAL.max || CAR.wallet<P.price) return;
  let n=CAR.accts.length+1; const names=new Set(CAR.accts.map(a=>a.name)); while(names.has('Account '+n)) n++;
  CAR.wallet=Math.round((CAR.wallet-P.price)*100)/100; txAdd(`${P.name} ${P.k}K`,-P.price,'eval');
- CAR.accts.push({id:newId(),plan:P.plan,size:P.k,opt,name:'Account '+n,stage:P.P.direct?'funded':'eval',ledger:[],on:syncOwned()||!CAR.accts.some(a=>a.on)});
+ CAR.accts.push({id:newId(),plan:P.plan,size:P.k,opt,cost:P.price,name:'Account '+n,stage:P.P.direct?'funded':'eval',ledger:[],on:syncOwned()||!CAR.accts.some(a=>a.on)});
  carSave(); careerSync(); try{ sfxPlay('buy',true); }catch(e){}
- toast(P.P.direct?`<b>Account ${n} is live.</b> A ${P.name} ${P.k}K funded account. Reach the ${usd(P.dirGoal[0]).replace(/\.00$/,'')} profit goal for your first payout.`
+ toast(P.P.direct?`<b>Account ${n} is funded.</b> A ${P.name} ${P.k}K funded account. Reach the ${usd(P.dirGoal[0]).replace(/\.00$/,'')} profit goal for your first payout.`
   :`<b>Account ${n} is open.</b> A ${P.name} ${P.k}K evaluation. Reach +${usd(P.tgt).replace(/\.00$/,'')} to pass.`,5000);
 }
 function syncerBuy(){
@@ -4271,6 +4304,7 @@ function syncerBuy(){
 }
 function acctToggle(id,on){
  const a=CAR.accts.find(x=>x.id===id); if(!a) return;
+ if(on && a.blown){ toast('This evaluation failed. Reset it or close it.',3500); acctRender(); return; }
  if(!syncOwned()){   // without the trade syncer every evaluation keeps its own session
   if(CHS()&&CHS().daily){ toast('Finish the daily challenge first. It never counts on an account.',3500); acctRender(); return; }
   const cur=CAR.accts.find(x=>x.on);
@@ -4281,12 +4315,50 @@ function acctToggle(id,on){
  }
  a.on=on; carSave(); acctRender(); try{ chBar(); }catch(e){} try{ if($('phone')&&$('phone').classList.contains('on')) phoneRender(); }catch(e){}
 }
+function acctPromote(a){   // Lucid upgrades a passed evaluation by itself (5-30 minutes after the target), no activation fee, fresh funded balance
+ const first=!a.passFx, P=SPEC(a); a.stage='funded'; a.ledger=[]; delete a.hwm; delete a.passFx; a.passAt=Date.now(); CAR.passes++; delete SYNC.prev[a.id];
+ if(first){ CAR.hardOffer=(CAR.hardOffer||0)+1; try{ xpAdd(300); }catch(e){} }
+ try{ sfxPlay('pass',true); }catch(e){}
+ const tip=P.plan==='flex'?'Five winning days unlock its first payout.':P.plan==='pro'?'The cycle profit goal unlocks a payout.':'Any day with net profit above the buffer can be paid out.';
+ toast(`<b>${cesc(a.name)} passed and is now funded.</b> Lucid moves a passed evaluation to a funded ${P.name} account by itself, with no activation fee. It starts fresh at ${usd(P.start)}. ${tip}`,7000);
+ msgAdd({k:'res',from:'Lucid Trading desk',title:`${a.name} is funded`,body:`Congratulations, your ${P.name} ${P.k}K evaluation passed. It is now a funded account with a fresh ${usd(P.start)} balance. There is no activation fee. ${tip}`});
+}
 function acctClaim(id){
- const a=CAR.accts.find(x=>x.id===id); if(!a) return;
- if(S.pos){ const m='Close your position before you move an account to funded.'; msg(m); toast(m,3500); return; }
+ const a=CAR.accts.find(x=>x.id===id); if(!a||a.stage!=='eval'||a.blown) return;
+ if(acctIn(a)){ const m='The evaluation moves to funded as soon as its trade is closed.'; msg(m); toast(m,3500); return; }
  if(!acctCalc(a).pass) return;
- a.stage='funded'; a.ledger=[]; delete a.hwm; CAR.passes++; delete SYNC.prev[a.id]; carSave(); careerSync(); try{ if(!a.passFx) sfxPlay('pass',true); else sfxPlay('buy',true); }catch(e){}
- toast(`<b>${cesc(a.name)} passed.</b> It is now a funded ${SPEC(a).name} account. ${SPEC(a).plan==='flex'?'Five winning days unlock its first payout.':SPEC(a).plan==='pro'?'Three trading days and the cycle goal unlock a payout.':'Any day with net profit above the buffer can be paid out.'}`,5500);
+ acctPromote(a); carSave(); careerSync(); acctRender();
+}
+function acctReset(id){   // Lucid sells a reset for a failed evaluation: back to the starting balance and rules
+ const a=CAR.accts.find(x=>x.id===id); if(!a||!a.blown) return; const pr=resetPrice(a);
+ if(liveCool()>0){ toast(`Lucid's cooldown after a blown live account: ${liveCool()} more day${liveCool()===1?'':'s'}.`,4000); return; }
+ if(CAR.wallet<pr) return;
+ CAR.wallet=Math.round((CAR.wallet-pr)*100)/100; txAdd(`Reset · ${a.name}`,-pr,'eval');
+ a.ledger=[]; delete a.blown; delete a.hwm; delete a.passFx; a.resets=(a.resets||0)+1; delete SYNC.prev[a.id];
+ carSave(); careerSync(); try{ sfxPlay('buy',true); }catch(e){}
+ toast(`<b>${cesc(a.name)} is reset.</b> A fresh ${SPEC(a).name} ${SPEC(a).k}K evaluation at ${usd(SPEC(a).start)}. Switch it on to trade it.`,5000); acctRender();
+}
+function liveCheck(){   // the move to Lucid Live, done after the session like Lucid's evening move
+ const C=new Map(CAR.accts.map(a=>[a,acctCalc(a)]));
+ const trig=CAR.accts.filter(a=>a.stage==='funded' && !a.blown && C.get(a).liveDue); if(!trig.length) return false;
+ const movers=CAR.accts.filter(a=>a.stage==='funded' && !a.blown && (trig.includes(a) || C.get(a).pays>=1)), gone=CAR.accts.filter(a=>a.stage!=='live' && !movers.includes(a));
+ let cap=LIVE.simCap, cash=0, refund=0; const lastDay=(CAR.ch&&CAR.ch.day)||0;
+ for(const a of movers){ const c=C.get(a), P=c.P;
+  if(P.plan==='daily'){ const last=a.ledger.filter(t=>!t.pay).slice(-1)[0], base=(last&&last.d===lastDay)?c.prevClose:c.bal, x=Math.max(0,Math.min(cap,Math.floor(base-(P.start+P.mll+EVAL.lock)))); cap-=x; cash+=x; }   // sim profit above the buffer, prior close, $15,000 cap
+  a.stage='live'; a.ledger=[]; a.simPays=c.pays; a.liveAt=Date.now(); delete a.hwm; delete a.passFx; delete SYNC.prev[a.id]; }
+ for(const a of gone){ const c=C.get(a); if(!a.blown && c.pays===0 && c.bal-c.floor>=LIVE.refund*c.mll) refund+=(+a.cost||SPEC(a).price); }   // zero-payout accounts with half their drawdown left: fee refunded
+ CAR.accts=CAR.accts.filter(a=>!gone.includes(a)); gone.forEach(a=>delete SYNC.prev[a.id]);
+ if(cash>0){ const net=Math.round(cash*FUND.split*100)/100; CAR.wallet=Math.round((CAR.wallet+net)*100)/100; CAR.paid=Math.round((CAR.paid+net)*100)/100; txAdd('LucidDaily profit paid on the move to live',net,'payout'); }
+ if(refund>0){ CAR.wallet=Math.round((CAR.wallet+refund)*100)/100; txAdd('Evaluation fees refunded on the move to live',refund,'refund'); }
+ CAR.lives=(CAR.lives||0)+movers.length;
+ const names=movers.map(a=>a.name).join(', '), why=trig.map(a=>C.get(a).P.plan==='daily'?`${a.name} hit LucidDaily's max daily profit`:`${a.name} took its fifth payout`).join('; ');
+ const body=`${why}. Lucid moves every funded account with at least one payout to Lucid Live together: ${names}. Live accounts start at $0 with an end-of-day drawdown (${movers.map(a=>usd(LIVE.dd[SPEC(a).k]).replace(/\.00$/,'')).join(' / ')}) that locks at $100 once live profit reaches it or at your first payout. No daily loss limit and no consistency rule. Payouts any day, 90/10. A bonus of ${movers.map(a=>usd(LIVE.bonus[SPEC(a).k]).replace(/\.00$/,'')).join(' / ')} after the profit target and 20 live trading days, again and again.`+
+  (gone.length?` Your other sim accounts are closed (${gone.map(a=>a.name).join(', ')})${refund>0?`, and ${usd(refund)} of evaluation fees is refunded for those with no payout and at least half their drawdown left`:''}.`:'')+(cash>0?` LucidDaily profit above the buffer is paid out: ${usd(Math.round(cash*FUND.split*100)/100)} after the split.`:'');
+ msgAdd({k:'res',from:'Lucid Trading desk',title:'Welcome to Lucid Live',body});
+ try{ sfxPlay('pass',true); }catch(e){}
+ toast(`<b>You are going live!</b> ${cesc(names)} ${movers.length===1?'is':'are'} now Lucid Live account${movers.length===1?'':'s'}. Open your phone for the details.`,8000);
+ try{ setTimeout(()=>{ try{ achCheck(); }catch(e){} },50); }catch(e){}
+ return true;
 }
 function acctPayout(id){
  const a=CAR.accts.find(x=>x.id===id); if(!a) return;
@@ -4310,36 +4382,47 @@ function acctUpdate(){
    if(p0 && p0.ok && Math.abs(p0.k-k0)<0.005 && S.eq.length>=p0.n) for(let i=p0.n;i<S.eq.length;i++){ const v=S.eq[i].value+k0; h=Math.max(h,v); if(v<=Math.min(h-c0.mll,lk)) hit=true; }
    h=Math.max(h,c0.eq); if(h>(+a.hwm||0)+0.004) a.hwm=Math.round(h*100)/100;
   }
+  if(a.blown) continue;
   const c=acctCalc(a), ex=acctIn(a), ok=!S.pos||ex, k=c.bal-S.realized, pv=SYNC.prev[a.id];
   let breach=hit||c.breach||c.eq<=c.floor;
   // scan equity points added since the last check so a fast replay cannot skip a touch of the floor
   if(!breach && pv && pv.ok && ok && Math.abs(pv.k-k)<0.005 && S.eq.length>=pv.n){ for(let i=pv.n;i<S.eq.length;i++) if(S.eq[i].value+pv.k<=pv.floor){ breach=true; break; } }
   if(breach){
    if(ex) S.pos.sync=S.pos.sync.filter(x=>x!==a.id);
-   CAR.accts=CAR.accts.filter(x=>x!==a); CAR.blown++; delete SYNC.prev[a.id]; dirty=true;
+   CAR.blown++; delete SYNC.prev[a.id]; dirty=true;
    try{ sfxPlay('blown',true); }catch(e){}
-   toast(`<b>${cesc(a.name)} hit the max loss limit.</b> The ${a.stage==='funded'?'funded account':'evaluation'} is closed. Buy a new evaluation under Prop firms to go again.`,7000);
+   if(a.stage==='eval'){ a.blown=Date.now(); a.on=false;
+    toast(`<b>${cesc(a.name)} hit the max loss limit.</b> The evaluation failed. Reset it for ${usd(resetPrice(a))} under Prop firms, or close it and buy a new one.`,7000); }
+   else { CAR.accts=CAR.accts.filter(x=>x!==a);
+    if(a.stage==='live'){ CAR.liveCool=Date.now()+LIVE.coolDays*864e5; msgAdd({k:'res',from:'Lucid Trading desk',title:`${a.name} live account closed`,body:`The live account hit its max loss limit and is closed. Lucid's standard cooldown applies: ${LIVE.coolDays} days before you can buy a new evaluation.`}); }
+    toast(`<b>${cesc(a.name)} hit the max loss limit.</b> The ${a.stage==='live'?`live account is closed. Lucid's ${LIVE.coolDays}-day cooldown starts before you can buy a new evaluation.`:'funded account is closed. Buy a new evaluation under Prop firms to go again.'}`,7000); }
   } else { SYNC.prev[a.id]={n:S.eq.length,floor:c.floor,k,ok};
    if(c.dllHit && ex){ a.ledger.push({d:c.today,pnl:acctOpen(a)}); S.pos.sync=S.pos.sync.filter(x=>x!==a.id); dirty=true; try{ sfxPlay('sl',true); }catch(e){} toast(`<b>${cesc(a.name)} hit its ${usd(c.dll)} daily loss limit.</b> It is out of this trade and sits out until tomorrow. The account stays open.`,6500); }
-   if(a.stage==='eval' && c.pass && !a.passFx){ a.passFx=1; dirty=true; CAR.hardOffer=(CAR.hardOffer||0)+1; try{ xpAdd(300); }catch(e){} try{ sfxPlay('pass',true); }catch(e){} toast(`<b>You did it! ${cesc(a.name)} passed the evaluation.</b> Open Prop firms to move it to a funded account.`,7000); } }
+   if(a.stage==='eval' && c.pass){
+    if(!ex){ acctPromote(a); dirty=true; }   // flat: upgrade now, as Lucid does
+    else if(!a.passFx){ a.passFx=1; dirty=true; CAR.hardOffer=(CAR.hardOffer||0)+1; try{ xpAdd(300); }catch(e){} try{ sfxPlay('pass',true); }catch(e){} toast(`<b>You did it! ${cesc(a.name)} passed the evaluation.</b> It moves to a funded account by itself as soon as this trade is closed.`,7000); } }
+   if(a.stage==='live' && c.bonusReady && !ex && !(inEvalSess()&&a.on)){ a.ledger.push({d:c.today,pnl:c.bonusAmt,bonus:1}); dirty=true; try{ sfxPlay('payout',true); }catch(e){}
+    toast(`<b>Live bonus on ${cesc(a.name)}: ${usd(c.bonusAmt)}.</b> It is added to the live balance. You keep 90% when you pay it out.`,7000);
+    msgAdd({k:'res',from:'Lucid Trading desk',title:`Live bonus: ${usd(c.bonusAmt)}`,body:`${a.name} reached the live profit target and 20 trading days. ${usd(c.bonusAmt)} is added to the live balance, and the next bonus cycle starts now.`}); } }
  }
  if(S.pos && S.pos.nSync>0 && !S.pos.sync.length){
   stopPlay(); closePos(S.pos.side>0?priceNow():priceNow()+spreadPx(), S.cursor, 'MLL'); S.orders=[]; try{ drawOrders(); }catch(e){}
   msg('Position closed: no account is left in this trade (max loss or daily loss limit).'); setTimeout(refresh,0);
  }
+ if(!inEvalSess() && !S.pos){ try{ if(liveCheck()) dirty=true; }catch(e){} }   // Lucid moves accounts live after the session
  if(dirty){ carSave(); careerSync(); }
  acctRender();
 }
 function evalBuild(){ try{ acctUpdate(); }catch(e){} }
 function evalUpdate(){ acctUpdate(); }
 function acctCard(a,c,full){
- const F=a.stage==='funded', id=a.id;
- return `<div class="ac ${a.on?'on':''} ${a.col?'hascol':''}" style="${a.col?'--acc:'+a.col:''}"><div class="ac-h">${full?`<input class="ac-n" data-nm="${id}" maxlength="16" value="${cesc(a.name)}" title="Rename this account">`:`<b class="ac-t">${cesc(a.name)}</b>`}<span class="badge sz">${planShort(SPEC(a))}</span><span class="badge" data-f="${id}:badge"></span><label class="sw" title="Trade this account"><input type="checkbox" data-on="${id}" ${a.on?'checked':''}><i></i></label></div>
+ const F=a.stage!=='eval', id=a.id, bl=!!a.blown;
+ return `<div class="ac ${a.on?'on':''} ${a.col?'hascol':''} ${a.stage==='live'?'is-live':''} ${bl?'is-blown':''}" style="${a.col?'--acc:'+a.col:''}"><div class="ac-h">${full?`<input class="ac-n" data-nm="${id}" maxlength="16" value="${cesc(a.name)}" title="Rename this account">`:`<b class="ac-t">${cesc(a.name)}</b>`}<span class="badge sz">${planShort(SPEC(a))}</span><span class="badge" data-f="${id}:badge"></span><label class="sw" title="${bl?'Reset this evaluation to trade it':'Trade this account'}"><input type="checkbox" data-on="${id}" ${a.on?'checked':''} ${bl?'disabled':''}><i></i></label></div>
   ${full?`<div class="ac-cols">${ACC_COLS.map(c=>`<button class="ac-col ${a.col===c?'on':''}" data-col="${id}" data-c="${c}" style="background:${c}" title="Colour for this account"></button>`).join('')}</div>`:''}
   <div class="meter"><div class="l"><span data-f="${id}:pl"></span><b data-f="${id}:p"></b></div><div class="m"><i data-f="${id}:pb"></i></div></div>
   <div class="ac-r"><span>Balance <b data-f="${id}:bal"></b></span><span>Room to max loss <b data-f="${id}:room"></b></span></div>
   ${full?`<div class="hint" data-f="${id}:note"></div>`:''}
-  ${F?`<button class="primary ac-btn" data-pay="${id}" ${c.canPay?'':'disabled'}>Request payout${c.canPay?' '+usd(c.maxPay):''}</button>`:c.pass?`<button class="primary ac-btn" data-claim="${id}">Move to funded account</button>`:''}
+  ${bl?`<button class="primary ac-btn" data-reset="${id}" ${CAR.wallet<resetPrice(a)||liveCool()>0?'disabled':''}>Reset for ${usd(resetPrice(a)).replace(/\.00$/,'')}</button>`:F?`<button class="primary ac-btn" data-pay="${id}" ${c.canPay?'':'disabled'}>Request ${a.stage==='live'?'live ':''}payout${c.canPay?' '+usd(c.maxPay):''}</button>`:''}
   ${full?`<button class="ac-x" data-rm="${id}">Close account</button>`:''}</div>`;
 }
 function acctBind(box){
@@ -4350,6 +4433,7 @@ function acctBind(box){
  q('[data-nm]').forEach(e=>e.onchange=()=>{ const a=CAR.accts.find(x=>x.id===e.dataset.nm); if(a){ a.name=e.value.trim()||'Account'; carSave(); acctRender(); } });
  q('[data-rm]').forEach(e=>e.onclick=()=>{ if(!e.dataset.arm){ e.dataset.arm='1'; e.textContent='Click again to close it for good'; e.classList.add('arm'); return; } acctRemove(e.dataset.rm); });
  q('[data-claim]').forEach(e=>e.onclick=()=>acctClaim(e.dataset.claim));
+ q('[data-reset]').forEach(e=>e.onclick=()=>acctReset(e.dataset.reset));
  q('[data-pay]').forEach(e=>e.onclick=()=>acctPayout(e.dataset.pay));
  q('[data-buy]').forEach(e=>e.onclick=()=>{ e.dataset.buy==='syncer'?syncerBuy():acctBuy(e.dataset.buy+(e.dataset.oc?':'+e.dataset.oc:'')); });
  q('[data-plan]').forEach(e=>e.onclick=()=>{ HUB.plan=e.dataset.plan; box.dataset.key=''; acctRender(); });
@@ -4358,7 +4442,7 @@ function acctBind(box){
 }
 function acctRender(){
  const A=CAR.accts, C=A.map(acctCalc), own=syncOwned(), money=v=>usd(v).replace(/\.00$/,'');
- const base=[own,A.length,...A.map((a,i)=>[a.id,a.stage,a.on,C[i].pass,C[i].canPay,C[i].maxPay,a.name].join(':'))].join('|');
+ const base=[own,A.length,liveCool(),...A.map((a,i)=>[a.id,a.stage,a.on,!!a.blown,C[i].pass,C[i].canPay,C[i].maxPay,a.name].join(':'))].join('|');
  const side=$('acctBox');
  if(side && side.dataset.key!==base){
   side.innerHTML=`<div class="ecard"><div class="ehead"><b>Accounts</b><button class="link" data-hub="${A.length?'props':'store'}">${A.length?'Manage':'Eval store'}</button></div>`+
@@ -4374,35 +4458,38 @@ function acctRender(){
    `<div class="sec" id="evStore">Eval store <span>Lucid Trading · one-time fee · list prices</span></div>
    <div class="plan-tabs">${Object.values(PLANS).map(L=>`<button data-plan="${L.id}" class="${(HUB.plan||'flex')===L.id?'act':''}"><b>${L.name}</b><span>${L.tag}${L.skill&&!skill(L.skill)?' · <i class="lk">locked</i>':''}</span></button>`).join('')}</div>
    ${(()=>{ const L=PLANS[HUB.plan||'flex']||PLANS.flex, lock=L.skill&&!skill(L.skill);
-    const o={dll:!HUB.nodll,cons:HUB.c50?0.5:0.4}, oc=`${HUB.nodll?0:1}:${HUB.c50?50:40}`;
+    const o={dll:!HUB.nodll,cons:HUB.c50?0.5:0.4}, oc=`${HUB.nodll?0:1}:${HUB.c50?50:40}`, cool=liveCool();
     return `<p class="plan-blurb">${L.blurb}</p>`+(!L.direct?`<div class="plan-opt"><span>Daily loss limit</span><button data-opt="nodll:0" class="${HUB.nodll?'':'act'}">On</button><button data-opt="nodll:1" class="${HUB.nodll?'act':''}">Off</button>${L.cons50?`<span>Eval consistency</span><button data-opt="c50:0" class="${HUB.c50?'':'act'}">40%</button><button data-opt="c50:1" class="${HUB.c50?'act':''}">50%</button>`:''}<i>Picked at purchase, as at Lucid. No daily loss limit or a 50% consistency rule costs a little more.</i></div>`:'')+(lock?`<div class="plan-lock"><span><b>${L.name} is locked.</b> Unlock "${SK[L.skill].n}" in Skills (${SK[L.skill].c} points).</span><button class="primary" data-hub="skills">Open Skills</button></div>`:'')+
     `<div class="ev-grid">${[25,50,150].map(k=>{ const P=planSpec(L.id,k,L.direct?undefined:o), short=P.price-CAR.wallet;
      return `<div class="card prod ev"><div class="card-h"><b>${L.name} ${k}K</b><span class="price">${money(P.price)}</span></div>
       <div class="rt">${planRules(P).map(([a,b])=>`<span>${a}</span><b>${b}</b>`).join('')}</div>
-      <button class="primary ac-btn" data-buy="${L.id}:${k}"${L.direct?'':` data-oc="${oc}"`} ${lock||full||short>0?'disabled':''}>${lock?'Locked':full?`Limit of ${EVAL.max} accounts reached`:short>0?`Need ${money(short)} more`:(L.direct?'Buy funded account':'Buy evaluation')}</button>${!lock&&!full&&short>0?`<button class="link ac-link" data-hub="job">Earn it at the job</button>`:''}</div>`; }).join('')}</div>`; })()}
+      <button class="primary ac-btn" data-buy="${L.id}:${k}"${L.direct?'':` data-oc="${oc}"`} ${lock||full||cool||short>0?'disabled':''}>${lock?'Locked':cool?`Live cooldown: ${cool} day${cool===1?'':'s'}`:full?`Limit of ${EVAL.max} accounts reached`:short>0?`Need ${money(short)} more`:(L.direct?'Buy funded account':'Buy evaluation')}</button>${!lock&&!full&&short>0?`<button class="link ac-link" data-hub="job">Earn it at the job</button>`:''}</div>`; }).join('')}</div>`; })()}
    <div class="sec">Tools</div><div class="hub-grid2">
     <div class="card prod"><div class="card-h"><b>Trade syncer</b><span class="price">${own?'Owned':money(SYNCER_PRICE)}</span></div>
      <ul class="erules"><li>Trade several accounts at once. Every entry is copied to each account that is switched on.</li><li>Same size, stop and target on each. All accounts trade the same direction.</li><li>Each account keeps its own progress, so they can be at different stages.</li><li>Without it, one account trades at a time.</li></ul>
      ${own?`<div class="hint">Unlocked. Use the switches on your accounts to choose which ones trade.</div>`:!skill('copy')?`<button class="ac-btn" data-hub="skills">Needs the Copy trading licence skill</button>`:`<button class="primary ac-btn" data-buy="syncer" ${sshort>0?'disabled':''}>${sshort>0?`Need ${money(sshort)} more`:'Unlock trade syncer'}</button>`}</div></div>
-   <div class="sec">Good to know</div><div class="card"><ul class="erules" style="margin:0"><li>Max loss trails your end-of-day balance. Once a day closes above start + max loss + $100 it locks at the starting balance + $100. LucidDaily funded accounts trail intraday, open profit included. A Flex payout moves it straight to the lock.</li><li>The daily loss limit is optional on Flex, Pro and Daily (on by default, as at Lucid). It is soft: the account is taken out of trading until the next session but stays open. Funded Pro and Direct accounts switch to LucidScale (60% of the best end-of-day profit) once a day closes above the trail balance.</li><li>Consistency is your best day divided by total profit. Flex and Daily evaluations: 40%, or 50% as an option. Funded Pro: 40% and Direct: 20% of each payout cycle.</li><li>LucidFlex funded accounts follow Lucid's scaling plan: fewer contracts until the account has profit, set at each session close.</li><li>Every payout is split 90/10. The minimum payout is $500. Flex, Pro and Direct allow five payouts per account.</li><li>The daily challenge is practice. It never counts on an account.</li><li>Own as many accounts as you like. To trade the same entry on several at once you need the trade syncer.</li><li>Accounts are saved, so restarting the replay does not reset them.</li></ul></div>`;
+   <div class="sec">Good to know</div><div class="card"><ul class="erules" style="margin:0"><li>Max loss trails your end-of-day balance. Once a day closes above start + max loss + $100 it locks at the starting balance + $100. LucidDaily funded accounts trail intraday, open profit included. A Flex payout moves it straight to the lock.</li><li>The daily loss limit is optional on Flex, Pro and Daily (on by default, as at Lucid). It is soft: the account is taken out of trading until the next session but stays open. Funded Pro and Direct accounts switch to LucidScale (60% of the best end-of-day profit) once a day closes above the trail balance.</li><li>Consistency is your best day divided by total profit. Flex and Daily evaluations: 40%, or 50% as an option. Funded Pro: 40% and Direct: 20% of each payout cycle.</li><li>LucidFlex funded accounts follow Lucid's scaling plan: fewer contracts until the account has profit, set at each session close.</li><li>Every payout is split 90/10. The minimum payout is $500. Flex, Pro and Direct allow five payouts per account.</li><li>A passed evaluation moves to funded by itself (no activation fee) with a fresh starting balance. A failed evaluation can be reset for a fee, or closed.</li><li>Without a daily loss limit, payouts are requested after the session closes. With one, any time you are flat.</li><li><b>Lucid Live:</b> after the fifth payout (Flex, Pro, Direct) or a $6,000 / $8,000 / $12,000 day (Daily), every funded account with a payout moves live together and the other sim accounts close (fees refunded for zero-payout accounts with half their drawdown left). Live starts at $0 with an end-of-day drawdown of $1,000 / $2,000 / $4,500 that locks at $100, no daily loss limit, payouts any day at 90/10, and a repeatable bonus after the profit target and 20 trading days. A blown live account starts a 14-day cooldown on new evaluations.</li><li>The daily challenge is practice. It never counts on an account.</li><li>Own as many accounts as you like. To trade the same entry on several at once you need the trade syncer.</li><li>Accounts are saved, so restarting the replay does not reset them.</li></ul></div>`;
   acctBind(hub); hub.dataset.key=hk;
  }
  const ln=$('acctLine'); if(ln){ const on=A.filter(a=>a.on), t=on.length?`Trading on ${on.map(a=>a.name).join(', ')}`:(A.length?'Practice mode: no account is switched on':'Practice mode: no account yet'); if(ln.dataset.t!==t){ ln.dataset.t=t; ln.innerHTML=`<span>${cesc(t)}</span><button class="link" id="acctLineB">${A.length?'Change':'Get one'}</button>`; $('acctLineB').onclick=()=>{ A.length?sideTab('pStats'):hubOpen('store'); }; } }
  const set=(k,fn)=>document.querySelectorAll(`[data-f="${k}"]`).forEach(fn);
- A.forEach((a,i)=>{ const c=C[i], id=a.id, F=a.stage==='funded';
-  const st=!a.on?['PAUSED','']:F?['FUNDED','ok']:c.pass?['PASSED','ok']:['EVALUATION','run'];
+ A.forEach((a,i)=>{ const c=C[i], id=a.id, F=a.stage!=='eval';
+  const st=a.blown?['FAILED','bad']:a.stage==='live'?[a.on?'LIVE':'LIVE · PAUSED','live']:!a.on?['PAUSED','']:F?['FUNDED','ok']:c.pass?['PASSED','ok']:['EVALUATION','run'];
   set(id+':badge',e=>{ e.textContent=st[0]; e.className='badge '+st[1]; });
   const pt=c.prog.v, pw=Math.max(0,Math.min(100,c.prog.pct*100))+'%';
   set(id+':pl',e=>{ e.textContent=c.prog.l; }); set(id+':p',e=>{ e.textContent=pt; }); set(id+':pb',e=>{ e.style.width=pw; });
   const room=c.eq-c.floor;
   set(id+':bal',e=>{ e.textContent=usd(c.eq); }); set(id+':room',e=>{ e.textContent=usd(Math.max(0,room)); e.className=room<c.mll*0.25?'neg':''; });
-  const note = c.dllHit ? `Daily loss limit (${usd(c.dll)}) reached. This account sits out until tomorrow.` : F ? (c.payDone ? `All ${c.pays} payouts taken. At Lucid this account would now move to a live account.` : c.canPay ? `Payout ready: ${usd(c.maxPay)}. You keep 90%.` : 'Payout needs '+(c.why.length?c.why.join(', '):`at least ${usd(FUND.min)} available`)+'.') :
-   c.pass ? 'Target reached inside the rules. Move it to funded to start earning payouts.' :
+  const note = a.blown ? `Failed: it hit the max loss limit. Lucid sells a reset for a failed evaluation: back to ${usd(c.P.start)} with fresh rules for ${usd(resetPrice(a))}. Or close it.` :
+   c.dllHit ? `Daily loss limit (${usd(c.dll)}) reached. This account sits out until tomorrow.` :
+   a.stage==='live' ? (c.canPay ? `Live payout ready: ${usd(c.maxPay)}. You keep 90%. A payout locks the max loss at $100.` : `Live payout needs ${c.why.join(', ')}. The bar shows the next live bonus: profit target and 20 trading days.`) :
+   F ? (c.liveDue ? 'Moves to Lucid Live after the session.' : c.canPay ? `Payout ready: ${usd(c.maxPay)}. You keep 90%.` : 'Payout needs '+(c.why.length?c.why.join(', '):`at least ${usd(FUND.min)} available`)+'.') :
+   c.pass ? 'Target reached inside the rules. It moves to funded by itself as soon as its trade is closed.' :
    (c.profit>=c.tgt && !c.consOk) ? `Target reached, but the best day is over ${Math.round(c.cons*100)}% of profit. Keep trading to ${usd(c.need)} total profit.` :
    `${usd(Math.max(0,c.tgt-c.profit))} to go. The floor is at ${usd(c.floor)}${c.locked?' (locked)':''}.`;
   set(id+':note',e=>{ e.textContent=note; }); });
 }
-try{ Object.assign(window.__bt,{SYNC,acctUpdate,acctBuy,syncerBuy,acctClaim,acctPayout,acctToggle,acctCalc,lucidCalc,planSpec,planRules,PLANS,SPEC,syncEnter,syncClose,CHE:()=>CHE()}); }catch(e){}
+try{ Object.assign(window.__bt,{SYNC,acctUpdate,acctBuy,syncerBuy,acctClaim,acctPayout,acctToggle,acctCalc,lucidCalc,planSpec,planRules,PLANS,SPEC,syncEnter,syncClose,CHE:()=>CHE(),LIVE,liveCalc,liveCheck,acctReset,acctPromote,liveCool,resetPrice,acctRender,ACH:()=>ACH,achCheck:()=>achCheck()}); }catch(e){}
 
 /* ---- split screen: second chart for the pair symbol ---- */
 const chart2El=$('chart2');
@@ -4783,7 +4870,7 @@ function helpDialog(){
   {name:'Replay',html:'<div class="help">'+P('<b>1. Pick a start.</b> Use Select bar, a date, or the session jump (NY AM open, London, Asia) on the bar under the chart.')+P('<b>2. Press Play.</b> Live mode moves price one tick per second on every timeframe. Candles mode reveals one whole candle per step.')+P('<b>3. Switch timeframe any time.</b> Every timeframe stays at the same moment and keeps playing.')+P('<b>Split screen</b> shows your second symbol (for example ES) next to the main chart. Drag the divider to resize it. You can pan, zoom and draw on it like the main chart. The link button keeps both charts on the same time, and <b>Trade this chart</b> swaps the two symbols.')+'</div>'},
   {name:'Trading',html:'<div class="help">'+P('<b>Market order:</b> Buy or Sell in the Trade tab, the buttons on the chart, or keys B and S.')+P('<b>Pending order:</b> press Buy on chart or Sell on chart, then click the price. Below the market a buy becomes a limit; above it becomes a stop. The reverse applies to sells.')+P('<b>Move things:</b> drag any order, stop loss or take profit line. Press TP or SL on a line to add an exit.')+P('<b>Your open P&amp;L</b> is shown live on the chart and in the Trade tab.')+'</div>'},
   {name:'Indicators',html:'<div class="help">'+P('<b>Quarter boxes</b> draw each quarter on the chart. <b>Quarter timeline</b> is the strip under the chart. They are two separate switches in Settings.')+P('<b>Session highs and lows</b> mark the high and low of Asia, London, NY AM and NY PM in New York time.')+P('<b>True opens</b> and <b>SMT</b> are also in Settings, with themes, accent and chart colours.')+'</div>'},
-  {name:'Prop firms',html:'<div class="help">'+P('<b>Evaluation sessions.</b> Your accounts only trade in sessions the Lucid desk sends to your phone: one random, hidden trading day from 09:30 to 16:00 New York time. The market runs live and cannot be paused, rewound or skipped. Pick a speed from 1 second to 15 minutes of market time per real second. At 16:00 open positions close and the date is revealed. Trades outside sessions are practice.')+P('<b>Four Lucid account types</b> in 25K, 50K and 150K, each with Lucid\'s own rules: <b>LucidFlex</b> and <b>LucidDaily</b> evaluations (40% consistency rule, 50% as an option), <b>LucidPro</b> (no consistency rule while evaluating) and <b>LucidDirect</b> (no evaluation, you start funded; unlock it in Skills). The daily loss limit is optional on Flex, Pro and Daily and picked when you buy.')+P('<b>Max loss</b> trails your end-of-day balance and locks at the starting balance + $100 (LucidDaily funded trails intraday). A soft daily loss limit only benches the account until the next session. LucidFlex funded accounts follow a scaling plan for size.')+P('<b>Payouts:</b> Flex after five winning days; Pro after three trading days and the cycle goal with a 40% consistency rule; Daily on any day with net profit above a buffer; Direct after the cycle profit goal, five trading days and a 20% consistency rule. Flex, Pro and Direct allow five payouts per account. You keep 90%.')+'</div>'},
+  {name:'Prop firms',html:'<div class="help">'+P('<b>Evaluation sessions.</b> Your accounts only trade in sessions the Lucid desk sends to your phone: one random, hidden trading day from 09:30 to 16:00 New York time. The market runs live and cannot be paused, rewound or skipped. Pick a speed from 1 second to 15 minutes of market time per real second. At 16:00 open positions close and the date is revealed. Trades outside sessions are practice.')+P('<b>Four Lucid account types</b> in 25K, 50K and 150K, each with Lucid\'s own rules: <b>LucidFlex</b> and <b>LucidDaily</b> evaluations (40% consistency rule, 50% as an option), <b>LucidPro</b> (no consistency rule while evaluating) and <b>LucidDirect</b> (no evaluation, you start funded; unlock it in Skills). The daily loss limit is optional on Flex, Pro and Daily and picked when you buy.')+P('<b>Max loss</b> trails your end-of-day balance and locks at the starting balance + $100 (LucidDaily funded trails intraday). A soft daily loss limit only benches the account until the next session. LucidFlex funded accounts follow a scaling plan for size.')+P('<b>Payouts:</b> Flex after five winning days; Pro after three trading days and the cycle goal with a 40% consistency rule; Daily on any day with net profit above a buffer; Direct after the cycle profit goal, five trading days and a 20% consistency rule. Flex, Pro and Direct allow five payouts per account. You keep 90%.')+P('<b>Process:</b> a passed evaluation moves to funded by itself, with no activation fee. A failed evaluation can be reset for a fee. <b>Lucid Live</b> follows the fifth payout (Flex, Pro, Direct) or LucidDaily\'s max daily profit: every funded account with a payout moves live together, starting at $0 with an end-of-day drawdown that locks at $100, no daily loss limit, daily payouts and a repeatable bonus. A blown live account starts a 14-day cooldown.')+'</div>'},
   {name:'Sections',html:'<div class="help">'+P('<b>Trading</b> is the chart. <b>Life</b> is your home, character, family and shop. <b>Prop firms</b> holds your accounts and the eval store. <b>Job</b> pays wallet money per ticket. <b>Skills</b> is where you spend skill points.')+P('<b>Levels and skills.</b> Trades, passes, payouts and job tickets earn XP. Every level gives a skill point that unlocks chart colours, live backgrounds, the 3D coin, LucidDirect, the trade syncer, family, luxury items and job boosts.')+P('<b>Fullscreen.</b> Press Shift+F or the fullscreen button for a chart-only view. Esc leaves it.')+P('<b>Saving.</b> Your replay spot, closed trades and settings save in this browser, and online too when you sign in under your profile.')+P('<b>Sounds.</b> Pick a sound for every event (entry, take profit, stop loss, passing, payouts, your dog) in Settings.')+'</div>'}
  ],null,null);
 }
@@ -5783,7 +5870,7 @@ function chSlotSwitch(from,to){   // park the session of one evaluation and brin
 function chTickSlots(){   // every evaluation that is switched off still gets its own session request
  if(syncOwned()) return; const slots=CAR.chSlots=CAR.chSlots||{}, ids=new Set(CAR.accts.map(a=>a.id)); let n=0, dirty=false;
  for(const k of Object.keys(slots)) if(!ids.has(k)){ if(slots[k].req) msgDrop(slots[k].req.id); delete slots[k]; dirty=true; }
- for(const a of CAR.accts){ if(a.on) continue; const s=slots[a.id]||(slots[a.id]={req:null,act:null,next:0,prev:null});
+ for(const a of CAR.accts){ if(a.on||a.blown) continue; const s=slots[a.id]||(slots[a.id]={req:null,act:null,next:0,prev:null});
   if(s.req||s.act||Date.now()<(s.next||0)) continue;
   const r=chMakeReq(); if(!r) continue; r.acct=a.id; s.req=r; n++;
   msgAdd({k:'req',id:r.id,from:'Lucid Trading desk',title:`Session ready for ${a.name}`,body:`A random NQ trading day for ${a.name} (${planShort(SPEC(a))}), 09:30 to 16:00 New York time. Each evaluation gets its own session and its own hidden date. Switch to this account to accept it.`}); }
@@ -6009,7 +6096,7 @@ const ACH=[['eval1','First evaluation','Buy your first evaluation',()=>CAR.accts
  ['r5','Sniper','Win a 5R trade in an evaluation session',()=>(CAR.hofBest||0)>=5,400],['s10','Veteran','Trade 10 evaluation sessions',()=>((CAR.ch&&CAR.ch.day)||0)>=10,300],
  ['home','Homeowner','Own a home',()=>Object.keys(CAR.owned).some(k=>ITEM[k]&&ITEM[k].slot==='home'),100],['villa','Villa life','Own a villa or better',()=>['villa','pent','beach','mansion','skyvilla'].some(k=>CAR.owned[k]),300],
  ['car','Wheels','Own a car',()=>Object.keys(CAR.owned).some(k=>ITEM[k]&&ITEM[k].slot==='car'),100],['wed','Family','Get married',()=>!!(CAR.fam&&CAR.fam.partner),150],
- ['debtfree','Debt free','Pay off a loan',()=>(CAR.loansPaid||0)>=1,100],['hard1','Iron nerves','Finish a hard session in profit',()=>(CAR.hardWins||0)>=1,500],['hard5','Ice cold','Win 5 hard sessions',()=>(CAR.hardWins||0)>=5,1500],['lv10','Level 10','Reach level 10',()=>lvlOf(CAR.xp||0)>=10,0],['three','Fund manager','Have 3 funded accounts at once',()=>CAR.accts.filter(a=>a.stage==='funded').length>=3,600]];
+ ['debtfree','Debt free','Pay off a loan',()=>(CAR.loansPaid||0)>=1,100],['hard1','Iron nerves','Finish a hard session in profit',()=>(CAR.hardWins||0)>=1,500],['hard5','Ice cold','Win 5 hard sessions',()=>(CAR.hardWins||0)>=5,1500],['lv10','Level 10','Reach level 10',()=>lvlOf(CAR.xp||0)>=10,0],['three','Fund manager','Have 3 funded accounts at once',()=>CAR.accts.filter(a=>a.stage==='funded').length>=3,600],['live1','Going live','Get a Lucid Live account',()=>(CAR.lives||0)>=1||CAR.accts.some(a=>a.stage==='live'),1000]];
 function achCheck(){ CAR.ach=CAR.ach||{}; let got=0; for(const [id,n,d,f,x] of ACH){ if(CAR.ach[id]) continue; let ok=false; try{ ok=f(); }catch(e){} if(ok){ CAR.ach[id]=Date.now(); got++; if(x) xpAdd(x*(skill('collector')?1.5:1)); toast(`<b>Achievement unlocked: ${n}.</b> ${d}.`,4500); } } if(got){ carSave(); phoneBadge(); try{ sfxPlay('trophy'); }catch(e){} } }
 setInterval(()=>{ try{ achCheck(); }catch(e){} },20000);
 /* ---- messages ---- */
@@ -6288,17 +6375,17 @@ function careerOpen(tab){ if(tab && ['Clothes','Accessories','Home','Cars','Extr
 const jobMult=()=>(1+(skill('pay1')?0.25:0)+(skill('pay2')?0.5:0)+(skill('network')?0.05:0)+(skill('promo')?0.15:0)+0.03*LF().party.net)*(hungry()?0.5:1);
 const jobRole=()=>{ let r=JOBS[0], i=0; JOBS.forEach((j,k)=>{ if(CAR.job.clicks>=j[0]){ r=j; i=k; } }); return {i,name:r[1],pay:Math.round(r[2]*jobMult()*100)/100,next:JOBS[i+1]||null,from:r[0]}; };
 setInterval(()=>{ if(skill('auto') && typeof hubShown==='function' && hubShown() && HUB.page==='job' && !document.hidden){ HUB.jt=0; jobClick(); } },3000);
-function hubRank(){ const A=CAR.accts; return A.some(a=>a.stage==='funded')?['FUNDED TRADER','ok']:A.length?['IN EVALUATION','run']:['PRACTICE','']; }
+function hubRank(){ const A=CAR.accts; return A.some(a=>a.stage==='live')?['LIVE TRADER','live']:A.some(a=>a.stage==='funded')?['FUNDED TRADER','ok']:A.length?['IN EVALUATION','run']:['PRACTICE','']; }
 function hubNext(){
  const A=CAR.accts, C=A.map(acctCalc);
  if(!A.length) return CAR.wallet>=minPrice() ? ['Buy your first evaluation',`Lucid evaluations come in 25K (${money(LSIZES[25].price)}), 50K (${money(LSIZES[50].price)}) and 150K (${money(LSIZES[150].price)}). Pass one and it becomes a funded account that pays out.`,'Open the eval store','store']
   : ['Earn your first evaluation',`You need ${money(minPrice()-CAR.wallet)} more for a 25K evaluation. Work the order desk to earn it.`,'Go to the job','job'];
- if(C.some(c=>c.pass)) return ['Move your account to funded','An evaluation has reached its target inside the rules.','Open accounts','accounts'];
+ if(C.some(c=>c.pass)) return ['Your evaluation passed','It moves to a funded account by itself as soon as its trade is closed, as at Lucid.','Open accounts','accounts'];
  if(C.some(c=>c.canPay)) return ['Request your payout','A funded account has a payout ready. You keep 90% of it.','Open accounts','accounts'];
  if(!A.some(a=>a.on)) return ['Switch an account on','None of your accounts is trading right now, so trades are practice only.','Open accounts','accounts'];
  if(typeof CHA==='function'&&CHA()) return ['Trade your evaluation session','A session is live. Every trade counts on your active accounts until 16:00 New York time.','Back to the session','chart'];
  if(CAR.ch&&CAR.ch.req) return ['Your evaluation session is ready','The Lucid desk sent you a session. Open your phone and accept it, or keep enjoying life.','Open messages','phone'];
- const f=A.findIndex(a=>a.stage==='funded'&&a.on);
+ const f=A.findIndex(a=>a.stage!=='eval'&&a.on);
  if(f>=0) return ['Work toward your next payout',`${cesc(A[f].name)} (${planShort(SPEC(A[f]))}) needs ${C[f].why.length?C[f].why.join(', '):'a bit more profit'}. Only trades in evaluation sessions count.`,'Practice while you wait','chart'];
  return ['Pass your evaluation','Trades count in evaluation sessions, which the Lucid desk sends to your phone. Reach the target without touching the max loss limit and inside the consistency rule.','Practice while you wait','chart'];
 }
@@ -6331,7 +6418,7 @@ function hubRender(){
     <div id="hubAccts"></div>
     <div class="hub-grid2" hidden>
      <div class="card"><div class="card-h"><b>Accounts</b><button class="link" data-hub="accounts">${A.length?'Manage':'Eval store'}</button></div>
-      ${A.length?`<div class="rows">${A.map((a,i)=>`<div><span>${cesc(a.name)}</span><span class="mut">${a.stage==='funded'?`Funded · ${C[i].canPay?'payout ready':C[i].prog.l.toLowerCase()+' '+C[i].prog.v}`:`Evaluation · ${money(Math.round(C[i].profit))} of ${money(C[i].tgt)}`}</span></div>`).join('')}</div>`:`<div class="hint">No account yet. Accounts lost so far: ${CAR.blown}.</div>`}</div>
+      ${A.length?`<div class="rows">${A.map((a,i)=>`<div><span>${cesc(a.name)}</span><span class="mut">${a.stage!=='eval'?`${a.stage==='live'?'Live':'Funded'} · ${C[i].canPay?'payout ready':C[i].prog.l.toLowerCase()+' '+C[i].prog.v}`:`Evaluation · ${money(Math.round(C[i].profit))} of ${money(C[i].tgt)}`}</span></div>`).join('')}</div>`:`<div class="hint">No account yet. Accounts lost so far: ${CAR.blown}.</div>`}</div>
     </div></div></div>`;
  } else if(P==='skills'){
   B.innerHTML=skillsHTML(); B.querySelectorAll('[data-sk]').forEach(b=>b.onclick=()=>skBuy(b.dataset.sk));
@@ -6480,6 +6567,21 @@ try{ Object.assign(window.__bt,{rebuildSeries,pnlWUpdate}); }catch(e){}
  setTimeout(check,20000); setInterval(check,120000); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) check(); });
 })();
 
+/* ---- self-update: picks up a new version of the site without Ctrl+F5 ---- */
+(()=>{ const meta=document.querySelector('meta[name="ke-build"]'), mine=meta&&meta.content; if(!mine||location.protocol==='file:') return;
+ let ready=null;
+ const safe=()=>{ try{ return !CHA() && !S.pos && !CH.busy; }catch(e){ return false; } };
+ const go=()=>{ try{ carSave(); }catch(e){} try{ sessSave(true); }catch(e){} const u=new URL(location.href); u.searchParams.set('v',ready); location.replace(u.toString()); };
+ async function check(){
+  if(document.hidden && !ready) return;
+  try{ const t=await (await fetch(location.pathname+'?kecheck='+Date.now(),{cache:'no-store'})).text(); const m=t.match(/<meta name="ke-build" content="([^"]+)">/); if(m && m[1]!==mine) ready=m[1]; }catch(e){}
+  if(!ready) return;
+  if(safe()){ toast('<b>KETRADING updated.</b> Loading the new version...',2500); setTimeout(()=>{ if(safe()) go(); },2500); }
+  else if(!check.told){ check.told=true; toast('<b>A new version is ready.</b> It loads by itself after your session or position is closed.',6000); }
+ }
+ setTimeout(check,20000); setInterval(check,120000); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) check(); });
+})();
+
 try{ Object.assign(window.__bt,{chSpd,dailyStart,dailyReq,dailyKey,partnerNote}); }catch(e){}
 try{ Object.assign(window.__bt,{chSlotSwitch,chTickSlots,chSlotOf,chParked,chTick,chAccept,CHA,CHS}); }catch(e){}
 
@@ -6549,7 +6651,7 @@ function cloudPush(){
  CLOUD.timer=setTimeout(async()=>{
   const uid=CLOUD.user&&CLOUD.user.id; if(!uid) return; CAR.uid=uid; carSaveLocal();
   const name=CAR.look.name||'You';
-  const p={id:uid,name,stage:CAR.accts.some(a=>a.stage==='funded')?'funded':'eval',wallet:CAR.wallet,passes:CAR.passes,payouts:CAR.payouts,paid:CAR.paid,blown:CAR.blown,owned:CAR.owned,eq:CAR.eq,look:CAR.look,ledger:[],sync:{v:2,accts:CAR.accts,job:CAR.job,sess:SAVE.cur||sessGet(),cfg,ext:carExt()},updated_at:new Date(CAR.ts||Date.now()).toISOString()};
+  const p={id:uid,name,stage:CAR.accts.some(a=>a.stage!=='eval')?'funded':'eval',wallet:CAR.wallet,passes:CAR.passes,payouts:CAR.payouts,paid:CAR.paid,blown:CAR.blown,owned:CAR.owned,eq:CAR.eq,look:CAR.look,ledger:[],sync:{v:2,accts:CAR.accts,job:CAR.job,sess:SAVE.cur||sessGet(),cfg,ext:carExt()},updated_at:new Date(CAR.ts||Date.now()).toISOString()};
   const a=await CLOUD.sb.from('profiles').upsert(p);
   const b=await CLOUD.sb.from('leaderboard').upsert({id:uid,name,paid:CAR.paid,passes:CAR.passes});
   CLOUD.err=(a.error||b.error)?(a.error||b.error).message:''; CLOUD.state=CLOUD.err?'':'saved'; HUB.lbAt=0; cloudStat();
@@ -6723,7 +6825,7 @@ function chatShared(){ const me=chatMe(); return me?(chatLS.get('ke_chat_shared_
 function chatMoments(){
  if(CHA()||(CAR.ch&&CAR.ch.req)) return []; const me=chatMe(); if(!me) return [];
  const done=new Set(chatShared()), wk=Date.now()-7*864e5, M=[];
- (CAR.accts||[]).forEach(a=>{ if(a&&a.stage==='funded'&&chatHas(PLANS,a.plan||'')&&!PLANS[a.plan].direct&&[25,50,150].includes(+a.size)) M.push({key:'pass:'+a.id,t:+a.passAt||0,p:{t:'pass',plan:a.plan,size:+a.size}}); });
+ (CAR.accts||[]).forEach(a=>{ if(a&&a.stage!=='eval'&&chatHas(PLANS,a.plan||'')&&!PLANS[a.plan].direct&&[25,50,150].includes(+a.size)) M.push({key:'pass:'+a.id,t:+a.passAt||0,p:{t:'pass',plan:a.plan,size:+a.size}}); });
  (CAR.tx||[]).forEach(x=>{ if(!x||!(x.t>=wk)) return;
   if(x.k==='payout'&&x.a>0){ const amt=Math.min(1e7,Math.round(x.a*100)/100); M.push({key:'payout:'+x.t,t:x.t,p:{t:'payout',amt}}); return; }
   const d=String(x.d||''), nm=x.k==='shop'?d:d.indexOf('Down payment · ')===0?d.slice(15):null; if(nm==null) return;
