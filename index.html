@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261117165807">
+<meta name="ke-build" content="20261117170447">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -7483,12 +7483,12 @@ function hubRender(){
     return `<div class="shop-it ${on?'on':''}" data-it="${i.id}"><i class="dot thumb">${itemThumb(i)}</i><div class="nm"><b>${i.name}</b><span>${i.price?money(i.price):'Free'}${own&&i.price?' · owned':''}</span></div>
      <div class="acts">${debtActs(i,own,on,lux,can)}</div></div>`; }).join('')}</div></div>`).join('')}
     <div class="hint" style="margin-top:12px">Hover an item to preview it on your character.</div>`;
-  B.innerHTML=`<div class="hub-two"><div class="hub-side">${stageHTML()}<div class="who"><b>${name}${CAR.prestige?` <i class="pres">${'★'.repeat(CAR.prestige)}</i>`:''}</b><span class="mut">Lv ${lvlOf(CAR.xp||0)} · ${levelTitle(lvlOf(CAR.xp||0))}</span><button class="link" id="myCard">Profile card</button></div>${lifeGoalHTML()}</div>
+  B.innerHTML=`<div class="hub-two"><div class="hub-side">${stageHTML()}<div class="who"><b>${name}${CAR.prestige?` <i class="pres">${'★'.repeat(CAR.prestige)}</i>`:''}</b><span class="mut">Lv ${lvlOf(CAR.xp||0)} · ${levelTitle(lvlOf(CAR.xp||0))}</span><button class="link" id="myCard">Profile card</button></div>${lifeGoalHTML()}<button id="lifeReset" class="danger" style="width:100%;margin-top:12px;color:#f87171;border-color:#7f1d1d">Start over from zero</button></div>
    <div class="hub-main"><h2>Life</h2><p class="sub">Your home, your character and everything you own. Wallet money comes from payouts and the job.${CAR.eq.pet?' Click your dog to pet it.':''}</p>
     <div class="stats4">${[['Wallet',usd(CAR.wallet)],['Savings',usd((CAR.sav&&CAR.sav.bal)||0)],['Living costs',fmt$(dailyCost())+' / day'],['Net worth',usd(netWorth())]].map(([l,v])=>`<div><span>${l}</span><b>${v}</b></div>`).join('')}</div>
     <div class="card house"><div class="card-h"><b>Household</b><button class="link" data-phone="bank">Open bank</button></div>${costLines().length?`<div class="rows">${costLines().map(([a,b])=>`<div><span>${cesc(a)}</span><span class="mut">${fmt$(b)} / day</span></div>`).join('')}</div>`:'<div class="hint">No running costs yet. Homes, cars, family and pets cost a little every day you own them.</div>'}${skill('frugal')?'<div class="hint">Frugal living: −30% applied.</div>':''}</div>
     ${needsHTML()}<div class="pills">${tabs.map(t=>`<button data-st="${t}" class="${t===HUB.shop?'act':''}">${gfxIco(t)}${t}</button>`).join('')}</div>${body}</div></div>`;
-  stageBind(); famBind(B); lifeBind(B); { const mc=$('myCard'); if(mc) mc.onclick=myProfCard; } B.querySelectorAll('[data-phone]').forEach(b=>b.onclick=()=>{ hubOpen('chart'); phoneOpen(b.dataset.phone); });
+  stageBind(); famBind(B); lifeBind(B); { const mc=$('myCard'); if(mc) mc.onclick=myProfCard; } { const lr=$('lifeReset'); if(lr) lr.onclick=()=>{ if(CHA()){ toast('Finish your evaluation session first.',3000); return; } if(lr.dataset.arm){ lr.disabled=true; lr.textContent='Resetting...'; carStartOver(); } else { lr.dataset.arm='1'; lr.textContent='Click again to erase all progress'; } }; } B.querySelectorAll('[data-phone]').forEach(b=>b.onclick=()=>{ hubOpen('chart'); phoneOpen(b.dataset.phone); });
   B.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{ HUB.shop=b.dataset.st; HUB.try=null; hubRender(); });
   B.querySelectorAll('[data-lk]').forEach(b=>b.onclick=()=>{ CAR.look[b.dataset.lk]=b.dataset.v; carSave(); hubRender(); });
   B.querySelectorAll('.shop-it').forEach(el=>{ el.onmouseenter=()=>{ HUB.try=el.dataset.it; careerScene(); }; el.onmouseleave=()=>{ HUB.try=null; careerScene(); }; });
