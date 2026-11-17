@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261117095111">
+<meta name="ke-build" content="20261117110342">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -2982,6 +2982,7 @@ const TOOLS={
 };
 const TOOLDEF={}; Object.values(TOOLS).forEach(g=>g.items.forEach(([id,name,icon,n,key])=>TOOLDEF[id]={id,name,icon,n,key}));
 const DEFCOL={hilite:'rgba(255,214,0,0.45)',arrowup:'#089981',arrowdown:'#f23645',avwap:'#ff9800',vprofile:'#2962ff',flag:'#f23645'};
+function magNow(){ return DR.ctrl ? 'strong' : DR.magnet; }   // holding Ctrl turns the strong magnet on until it is released
 const DR={list:[],tool:null,sel:null,drag:null,creating:null,magnet:false,lock:false,hide:false,smtHover:null,smtPin:null};
 window.__bt={DR,S,oscChart,chart};
 try{ Object.assign(window.__bt,{openPos,closePos,placeLimit,fillOrder,addToPos,evalBlock,priceNow}); }catch(e){}
@@ -3001,8 +3002,9 @@ function indValuesAt(i){ const keys=Object.keys(S.ser); if(!keys.length) return 
 function ptFromXY(x,y,noSnap){
  const lg=chart.timeScale().coordinateToLogical(x); let p=candles.coordinateToPrice(y); if(lg==null||p==null) return null;
  const i=Math.round(lg);
- if((DR.magnet==='weak'||DR.magnet==='strong') && !noSnap && i>=0 && i<=S.cursor){ const b=displayBar(i); let best=null;
-  const lim=DR.magnet==='strong'?Infinity:18, cands=[b.open,b.high,b.low,b.close];
+ const mg=magNow();
+ if((mg==='weak'||mg==='strong') && !noSnap && i>=0 && i<=S.cursor){ const b=displayBar(i); let best=null;
+  const lim=mg==='strong'?Infinity:18, cands=[b.open,b.high,b.low,b.close];
   if(DR.snapInd){ const R=indValuesAt(i); cands.push(...R); }
   for(const v of cands){ const yy=Yp(v); if(yy==null) continue; const dy=Math.abs(yy-y); if(dy<lim && (!best||dy<best.dy)) best={v,dy}; } if(best) p=best.v; }
  return {t:idxToTime(i), p};
@@ -3027,7 +3029,7 @@ function buildToolbar(){
   Object.entries(TOOLS).map(([k,g])=>`<button data-group="${k}" title="${g.name}">${g.icon}</button>`).join('')+
   `<div class="tb-sep"></div>
   <button id="tbMeasure" title="Measure (date and price range)">${IC.measure}</button>
-  <button id="tbMagnet" title="Magnet: snap to candle open/high/low/close">${IC.magnet}</button>
+  <button id="tbMagnet" title="Magnet: snap to candle open/high/low/close. Hold Ctrl to use the strong magnet while drawing.">${IC.magnet}</button>
   <button id="tbLock" title="Lock all drawings">${IC.unlock}</button>
   <button id="tbHide" title="Hide all drawings">${IC.eye}</button>
   <div class="tb-sep"></div>
@@ -3142,7 +3144,9 @@ function renderDrawing(d,w,h){
    const x=Math.min(x1,x2), bw=Math.max(Math.abs(x2-x1),20);
    dctx.fillStyle=rgba(d.tcol||C('posT'),0.22); dctx.fillRect(x,Math.min(ye,yt),bw,Math.abs(yt-ye));
    dctx.fillStyle=rgba(d.scol||C('posS'),0.22); dctx.fillRect(x,Math.min(ye,ys),bw,Math.abs(ys-ye));
-   dctx.strokeStyle='#787b86'; dctx.lineWidth=1; dctx.beginPath(); dctx.moveTo(x,ye); dctx.lineTo(x+bw,ye); dctx.stroke();
+   { const ds=d.lstyle||'dashed', lwp=d.lw||1, dash=ds==='dashed'?[5,4]:ds==='dotted'?[1.5,3]:[];   // thin dashed lines at entry, stop and target (style and width in Settings)
+     const ln=(y,c)=>{ const yy=Math.round(y)+(lwp%2?0.5:0); dctx.strokeStyle=c; dctx.lineWidth=lwp; dctx.setLineDash(dash); dctx.beginPath(); dctx.moveTo(x,yy); dctx.lineTo(x+bw,yy); dctx.stroke(); };
+     ln(ye,'#787b86'); ln(yt,d.tcol||C('posT')); ln(ys,d.scol||C('posS')); dctx.setLineDash([]); }
    const st=posStats(d), cx=x+bw/2, out=posOutcome(d);
    const center=(s,y)=>{ dctx.font='12px '+FONT; return cx; };
    tag(`Target: ${fmtP(st.rew)} pts · ${Math.round(st.rew/st.tick)} ticks · $${st.rewUsd.toFixed(0)}`, center(0), yt+(yt<ye?-12:12), '#089981');
@@ -3184,7 +3188,10 @@ function renderDrawing(d,w,h){
    if(d.bgOn!==false){ const bg=d.bg||col; dctx.fillStyle=rgba(bg.length===7?bg:'#787b86', d.bgA??0.15); dctx.fillRect(x0,y0,x1-x0,bh); }
    hp.rect(x0,y0,x1-x0,bh); dctx.lineWidth=d.width||1; dctx.stroke(hp);
    if(d.mid){ dctx.save(); dctx.setLineDash([4,4]); dctx.beginPath(); dctx.moveTo(x0,y0+bh/2); dctx.lineTo(x1,y0+bh/2); dctx.stroke(); dctx.restore(); }
-   fp=new Path2D(); fp.rect(x0,y0,x1-x0,bh); d._h=[a,b]; break; }
+   fp=new Path2D(); fp.rect(x0,y0,x1-x0,bh);
+   { const iL=a.x<=b.x?0:1, iR=1-iL, iT=a.y<=b.y?0:1, iB=1-iT, xm=(xl+xr)/2, ym=y0+bh/2, y1=y0+bh;
+     d._h=[a,b,{x:xr,y:y0,m:'rc'+iR+iT},{x:xl,y:y1,m:'rc'+iL+iB},{x:xm,y:y0,m:'ry'+iT},{x:xm,y:y1,m:'ry'+iB},{x:xl,y:ym,m:'rx'+iL},{x:xr,y:ym,m:'rx'+iR}]; }
+   break; }
   case 'circle': { const r=Math.hypot(b.x-a.x,b.y-a.y); hp.arc(a.x,a.y,r,0,Math.PI*2); if(d.bgOn!==false){ const bg=d.bg||col; dctx.fillStyle=rgba(bg.length===7?bg:'#2962ff',d.bgA??0.12); dctx.fill(hp); } dctx.lineWidth=1.5; dctx.stroke(hp); fp=hp; d._h=[a,b]; break; }
   case 'ellipse': { hp.ellipse((a.x+b.x)/2,(a.y+b.y)/2,Math.abs(b.x-a.x)/2||1,Math.abs(b.y-a.y)/2||1,0,0,Math.PI*2); if(d.bgOn!==false){ const bg=d.bg||col; dctx.fillStyle=rgba(bg.length===7?bg:'#2962ff',d.bgA??0.12); dctx.fill(hp); } dctx.lineWidth=1.5; dctx.stroke(hp); fp=hp; d._h=[a,b]; break; }
   case 'triangle': { hp.moveTo(a.x,a.y); hp.lineTo(b.x,b.y); if(c){ hp.lineTo(c.x,c.y); hp.closePath(); if(d.bgOn!==false){ const bg=d.bg||col; dctx.fillStyle=rgba(bg.length===7?bg:'#2962ff',d.bgA??0.12); dctx.fill(hp); } fp=hp; } dctx.lineWidth=1.5; dctx.stroke(hp); d._h=P; break; }
@@ -3376,12 +3383,17 @@ function hitTest(x,y){
 
 /* ----- selection, mini toolbar, position panel ----- */
 function select(d){ DR.sel=d; showPosInfo(); showDrawBar(); }
+function ctrlMag(on){ on=!!on; if(DR.ctrl===on) return; DR.ctrl=on; const b=$('tbMagnet'); if(b) b.classList.toggle('act',on||(DR.magnet&&DR.magnet!=='off')); }
+window.addEventListener('keydown',e=>{ if(e.key==='Control') ctrlMag(true); },true);
+window.addEventListener('keyup',e=>{ if(e.key==='Control') ctrlMag(false); },true);
+window.addEventListener('blur',()=>ctrlMag(false));
+window.addEventListener('mousemove',e=>{ if(DR.ctrl!==e.ctrlKey) ctrlMag(e.ctrlKey); },true);   // also catches a Ctrl released outside the window
 function showDrawBar(){
  const bar=$('drawBar'), d=DR.sel; if(!d){ bar.hidden=true; return; }
  const isText=['text','note','callout','arrowup','arrowdown'].includes(d.tool), noCol=['long','short','image'].includes(d.tool);
  const col=d.color||DEFCOL[d.tool]||'#2962ff';
  bar.innerHTML=`<span class="db-name">${TOOLDEF[d.tool].name}</span>`+
-  (noCol?'':`<input type="color" id="dbCol" value="${col.startsWith('#')?col:'#2962ff'}" title="Color"><select id="dbW" title="Line width">${[1,2,3,4].map(v=>`<option ${ (d.width||2)==v?'selected':''}>${v}</option>`).join('')}</select>`)+
+  (noCol?'':`<input type="color" id="dbCol" value="${col.startsWith('#')?col:'#2962ff'}" title="Color"><select id="dbW" title="Line width">${[0.5,0.75,1,1.5,2,3,4].map(v=>`<option value="${v}" ${ (d.width||2)==v?'selected':''}>${v}px</option>`).join('')}</select>`)+
   (isText?`<button id="dbText">${IC.pencil}Text</button>`:'')+
   `<button id="dbSet" class="icon" title="Settings">${IC.set}</button><button id="dbDel" class="icon" title="Delete (Del)">${IC.trash}</button>`;
  bar.hidden=false;
@@ -3465,6 +3477,7 @@ window.addEventListener('mousemove',e=>{
   else d.pts[d.pts.length-1]=pt; return; }
  const {d,mode}=DR.drag, o=DR.drag.orig;
  if(typeof mode==='number'){ d.pts[mode]=pt; if(d.tool==='vline') d.pts[mode].p=o.pts[mode].p; }
+ else if(typeof mode==='string'&&/^r[xyc]/.test(mode)){ const k=mode[1]; if(k==='x') d.pts[+mode[2]].t=pt.t; else if(k==='y') d.pts[+mode[2]].p=pt.p; else { d.pts[+mode[2]].t=pt.t; d.pts[+mode[3]].p=pt.p; } }
  else if(mode==='entry'){ d.stop=pt.p+(o.stop-o.entry); d.target=pt.p+(o.target-o.entry); d.entry=pt.p; d.t1=pt.t; }
  else if(mode==='stop') d.stop=pt.p; else if(mode==='target') d.target=pt.p; else if(mode==='right') d.t2=pt.t;
  else if(mode==='move'){ const s=DR.drag.start; if(!s) return; const di=timeToIdx(pt.t)-timeToIdx(s.t), dp=pt.p-s.p;
@@ -3709,14 +3722,15 @@ function drawingSettings(d){
   style+=`<label class="dl-row"><input type="checkbox" id="s_tl" ${d.trendLine?'checked':''}> Trend line</label><div class="fibgrid">`+
    d.levels.map((l,i)=>`<label><input type="checkbox" data-lon="${i}" ${l.on?'checked':''}><input type="number" step="0.001" data-lv="${i}" value="${l.v}"><input type="color" data-lc="${i}" value="${c7(l.c)}"></label>`).join('')+`</div>`; }
  if(TEXT_TOOLS.includes(T)) style+=`<div class="dl-row"><span>Color</span><input type="color" id="s_col" value="${c7(col)}"><span>Size</span>${sel('s_fs','<option>10</option><option>12</option><option>14</option><option>16</option><option>20</option><option>24</option>',d.fs||14)}</div>`;
- if(T==='long'||T==='short') style+=`<div class="dl-row"><span>Target</span><input type="color" id="s_tc" value="${c7(d.tcol||'#089981')}"><span>Stop</span><input type="color" id="s_sc" value="${c7(d.scol||'#f23645')}"></div>`;
+ if(T==='long'||T==='short') style+=`<div class="dl-row"><span>Target</span><input type="color" id="s_tc" value="${c7(d.tcol||'#089981')}"><span>Stop</span><input type="color" id="s_sc" value="${c7(d.scol||'#f23645')}"></div>
+  <div class="dl-row"><span>Lines</span><select id="s_pls">${[['dashed','Dashed'],['dotted','Dotted'],['solid','Solid']].map(([v,l])=>`<option value="${v}" ${(d.lstyle||'dashed')===v?'selected':''}>${l}</option>`).join('')}</select><select id="s_plw">${[0.5,0.75,1,1.5,2].map(v=>`<option value="${v}" ${(d.lw||1)==v?'selected':''}>${v}px</option>`).join('')}</select></div>`;
  if(T==='image') style+=`<div class="dl-row"><span>Transparency</span><input type="range" id="s_op" min="0.1" max="1" step="0.05" value="${d.opacity??1}"></div><div class="dl-row"><button id="s_img">Replace image…</button></div>`;
  if(T==='brush'||T==='hilite') style+='';
  tabs.push({name:'Style',html:style||'<div class="hint">No style options.</div>',bind:m=>{
   const on=(id,f)=>{ const el=m.querySelector('#'+id); if(el) el.addEventListener('input',()=>f(el)); };
   on('s_col',el=>d.color=el.value); on('s_w',el=>d.width=+el.value); on('s_dash',el=>d.dash=el.value); on('s_ext',el=>d.extend=el.value);
   on('s_pl',el=>d.priceLabel=el.checked); on('s_mid',el=>d.mid=el.checked); on('s_bgOn',el=>d.bgOn=el.checked); on('s_bg',el=>d.bg=el.value); on('s_bgA',el=>d.bgA=+el.value);
-  on('s_tl',el=>d.trendLine=el.checked); on('s_fs',el=>d.fs=+el.value); on('s_tc',el=>d.tcol=el.value); on('s_sc',el=>d.scol=el.value); on('s_op',el=>d.opacity=+el.value);
+  on('s_tl',el=>d.trendLine=el.checked); on('s_fs',el=>d.fs=+el.value); on('s_tc',el=>d.tcol=el.value); on('s_sc',el=>d.scol=el.value); on('s_pls',el=>d.lstyle=el.value); on('s_plw',el=>d.lw=+el.value); on('s_op',el=>d.opacity=+el.value);
   m.querySelectorAll('[data-lon]').forEach(el=>el.addEventListener('input',()=>d.levels[+el.dataset.lon].on=el.checked));
   m.querySelectorAll('[data-lv]').forEach(el=>el.addEventListener('input',()=>d.levels[+el.dataset.lv].v=+el.value));
   m.querySelectorAll('[data-lc]').forEach(el=>el.addEventListener('input',()=>d.levels[+el.dataset.lc].c=el.value));
@@ -5219,7 +5233,8 @@ function d2Bar2(i){ if(i<0||i>P2.idx) return null; return i<P2.idx ? S.pairBars[
 function d2Pt(x,y,noSnap){
  const lg=c2.timeScale().coordinateToLogical(x); let p=candles2.coordinateToPrice(y); if(lg==null||p==null) return null;
  const i=Math.round(lg);
- if((DR.magnet==='weak'||DR.magnet==='strong') && !noSnap){ const b=d2Bar2(i); if(b){ let best=null; const lim=DR.magnet==='strong'?Infinity:18;
+ const mg=magNow();
+ if((mg==='weak'||mg==='strong') && !noSnap){ const b=d2Bar2(i); if(b){ let best=null; const lim=mg==='strong'?Infinity:18;
   for(const v of [b.open,b.high,b.low,b.close]){ const yy=candles2.priceToCoordinate(v); if(yy==null) continue; const dy=Math.abs(yy-y); if(dy<lim && (!best||dy<best.dy)) best={v,dy}; } if(best) p=best.v; } }
  return {t:CX2.i2t(i), p};
 }
@@ -5251,7 +5266,7 @@ function d2Select(d){ D2.sel=d; if(d && DR.sel) select(null); d2Bar(); }
 function d2Bar(){
  const bar=$('d2Bar'), d=D2.sel; if(!d){ bar.hidden=true; return; }
  const col=d.color||DEFCOL[d.tool]||'#2962ff';
- bar.innerHTML=`<span class="db-name">${TOOLDEF[d.tool].name}</span><input type="color" id="d2Col" value="${col.startsWith('#')&&col.length===7?col:'#2962ff'}" title="Color"><select id="d2W" title="Line width">${[1,2,3,4].map(v=>`<option ${(d.width||2)==v?'selected':''}>${v}</option>`).join('')}</select><button id="d2Del" class="icon" title="Delete (Del)">${IC.trash}</button>`;
+ bar.innerHTML=`<span class="db-name">${TOOLDEF[d.tool].name}</span><input type="color" id="d2Col" value="${col.startsWith('#')&&col.length===7?col:'#2962ff'}" title="Color"><select id="d2W" title="Line width">${[0.5,0.75,1,1.5,2,3,4].map(v=>`<option value="${v}" ${(d.width||2)==v?'selected':''}>${v}px</option>`).join('')}</select><button id="d2Del" class="icon" title="Delete (Del)">${IC.trash}</button>`;
  bar.hidden=false;
  $('d2Col').oninput=e=>{ d.color=e.target.value; d2Save(); }; $('d2W').onchange=e=>{ d.width=+e.target.value; d2Save(); };
  $('d2Del').onclick=e=>{ e.stopPropagation(); d2Remove(d); };
@@ -5317,6 +5332,7 @@ window.addEventListener('mousemove',e=>{
   else d.pts[d.pts.length-1]=pt; return; }
  const {d,mode}=D2.drag, o=D2.drag.orig;
  if(typeof mode==='number'){ d.pts[mode]=pt; if(d.tool==='vline') d.pts[mode].p=o.pts[mode].p; }
+ else if(typeof mode==='string'&&/^r[xyc]/.test(mode)){ const k=mode[1]; if(k==='x') d.pts[+mode[2]].t=pt.t; else if(k==='y') d.pts[+mode[2]].p=pt.p; else { d.pts[+mode[2]].t=pt.t; d.pts[+mode[3]].p=pt.p; } }
  else if(mode==='move'){ const s=D2.drag.start; if(!s||!o.pts) return; const di=CX2.t2i(pt.t)-CX2.t2i(s.t), dp=pt.p-s.p;
   d.pts=o.pts.map(q=>({t:CX2.i2t(CX2.t2i(q.t)+di), p:q.p+dp})); }
 },true);
@@ -6962,7 +6978,7 @@ async function rvClose(quiet){
  try{ if(back && await sessApply(back,true)) return; }catch(e){}
  try{ $('symSel').value=cfg.last||$('symSel').value; fillYears(); await openSymbol(); }catch(e){}
 }
-try{ Object.assign(window.__bt,{rvOpen,rvClose,rvRender,refresh,armDraft,confirmDraft,disarmDraft,minStopTicks}); }catch(e){}
+try{ Object.assign(window.__bt,{rvOpen,rvClose,rvRender,refresh,armDraft,confirmDraft,disarmDraft,minStopTicks,DR,setTool,ptFromXY,magNow,select}); }catch(e){}
 function chBar(){
  let b=$('chBar'); if(!b){ b=document.createElement('div'); b.id='chBar'; const c=$('chart'); if(!c) return; c.appendChild(b); }
  const a=CHS();
