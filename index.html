@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261117084444">
+<meta name="ke-build" content="20261117090904">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -3771,6 +3771,7 @@ chartEl.addEventListener('mousedown',e=>{
  const {x,y}=localXY(e), u=posHit(x,y); if(!u) return;
  e.stopPropagation(); e.preventDefault();
  const p=S.pos;
+ if(u.kind==='btn' && ['go','dropDraft','onTP','onSL'].includes(u.act)){ S.posDrag={which:'dref',sy:y,moved:false,create:true,click:u.act}; return; }
  if(u.kind==='btn'){
   if(u.act==='close') manualClose();
   else if(u.act==='rmTP' && u.id!=null){ const o=S.orders.find(o=>o.id===u.id); if(o){ o.tp=0; msg('Take profit removed from the order.'); } }
@@ -3788,7 +3789,7 @@ chartEl.addEventListener('mousedown',e=>{
   else if(u.act==='dropDraft'){ disarmDraft(); msg('Entry cancelled. Nothing was bought or sold.'); }
   refresh(); return;
  }
- S.posDrag={which:u.which,id:u.id};
+ S.posDrag={which:u.which,id:u.id,sy:y,moved:false,create:u.which==='dref'};
 },true);
 window.addEventListener('mousemove',e=>{
  const {x,y}=localXY(e);
@@ -3816,6 +3817,12 @@ window.addEventListener('mousemove',e=>{
 window.addEventListener('mouseup',e=>{
  if(!S.posDrag) return; e.stopPropagation();
  const d=S.posDrag, p=S.pos; S.posDrag=null;
+ if(d.which==='dref' && !d.moved){ const a=d.click;
+  if(a==='go'){ confirmDraft(); return; }
+  if(a==='dropDraft'){ disarmDraft(); msg('Entry cancelled. Nothing was bought or sold.'); return; }
+  if(a==='onTP'){ OP.tpOn=true; opUpdate(true); msg('Take profit added. Drag its line to place it.'); }
+  if(a==='onSL'){ OP.slOn=true; opUpdate(true); msg('Stop loss added. Drag its line to place it.'); }
+  refresh(); return; }
  if(d.which==='dref'){ msg(`Entry set at ${fmtP(S.draftRef)}. CONFIRM places a limit order there.`); refresh(); return; }
  if(d.which==='dtp'||d.which==='dsl'){
   if(d.bad) msg(d.which==='dtp'?'Take profit has to be on the profit side of the price, so it keeps its last valid place.':`Stop loss must be at least ${minStopTicks()} ticks from the price, or it would be hit the moment you enter. It keeps its last valid place.`);
