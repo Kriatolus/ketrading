@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261117082745">
+<meta name="ke-build" content="20261117084444">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -3526,7 +3526,7 @@ const spreadPx=()=>(cfg.spreadTicks??1)*tickSz();
 const bidPx=()=>priceNow(), askPx=()=>priceNow()+spreadPx();
 const fmtUSD=v=>(v>=0?'+':'-')+Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' USD';
 const contractName=()=>({20:'NQ',2:'MNQ',50:'ES',5:'MES',100:'GC',10:'MGC',1000:'CL',1:'Custom'})[$('contract').value]||'';
-function opRef(){ return OP.type==='market' ? (OP.side>0?askPx():bidPx()) : (+$('opPx').value||priceNow()); }
+function opRef(){ return OP.type==='market' ? draftRef() : (+$('opPx').value||priceNow()); }
 function roundTick(p){ const t=tickSz(); return Math.round(p/t)*t; }
 function opBuild(){
  const p=$('op'); p.innerHTML=`
@@ -3605,7 +3605,7 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !$('op').hidden 
 function toggleOP(show,side){
  const p=$('op'); p.hidden = show===undefined ? !p.hidden : !show;
  if(side) OP.side=side;
- $('btnOP').classList.toggle('on',!p.hidden); if(p.hidden){ S.draftOn=false; try{ refresh(); }catch(e){} }
+ $('btnOP').classList.toggle('on',!p.hidden); if(p.hidden){ S.draftOn=false; S.draftRef=null; S.draftRefDragged=false; try{ refresh(); }catch(e){} }
  if(!p.hidden){ opBuild(); }
 }
 /* quick Sell | Buy buttons on the chart */
@@ -3734,7 +3734,7 @@ function posRender(w,h){
   lineRow(p.entry,col,bt.concat([{t:(p.side>0?'LONG ':'SHORT ')+q,solid:col},{t:fmtUSD(u).replace(' USD',''),fg:u>=0?TAGC.tp:TAGC.sl},{t:ex(now-p.entry),fg:sub},{t:'×',act:'close',fg:sub}]),'entry');
  }
  if(!p && OP.type==='market' && (S.draftOn || ($('op')&&!$('op').hidden))){   // the draft (entry, stop, target) only shows after Buy or Sell is pressed
-  const side=OP.side, ref=side>0?askPx():bidPx(), tk=tickSz(), pvq=(+$('contract').value||1)*(+$('qty').value||1), usdD=k=>k*tk*pvq;
+  const side=OP.side, ref=draftRef(), tk=tickSz(), pvq=(+$('contract').value||1)*(+$('qty').value||1), usdD=k=>k*tk*pvq;
   const dcol=side>0?TAGC.long:TAGC.short, dl=(side>0?'BUY ':'SELL ')+(+$('qty').value||1);
   const bts=[{t:'✕',act:'dropDraft',fg:sub}];
   if(!OP.tpOn) bts.push({t:'+TP',act:'onTP',fg:TAGC.tp});
@@ -3755,7 +3755,7 @@ function posRender(w,h){
  }
  const d=S.posDrag;
  if(d && d.py!=null && (d.moved||!d.create)){
-  const nm={tp:'TP',sl:'SL',order:'ORDER',entry:'MOVE'}[d.which]||'', txt=`${nm}  ${fmtP(d.px)}${d.dt!=null?'   '+sg(d.dt)+d.dt+' ticks':''}`;
+  const nm={tp:'TP',sl:'SL',order:'ORDER',entry:'MOVE',dref:'ENTRY'}[d.which]||'', txt=`${nm}  ${fmtP(d.px)}${d.dt!=null?'   '+sg(d.dt)+d.dt+' ticks':''}`;
   dctx.font='700 11px '+FONT; const tw=dctx.measureText(txt).width+22, x0=16, y0=Math.round(d.py-12)+.5;
   dctx.save(); dctx.shadowColor='rgba(0,0,0,.4)'; dctx.shadowBlur=12; const g=dctx.createLinearGradient(x0,0,x0+tw,0); g.addColorStop(0,'#2f80ff'); g.addColorStop(1,'#7b5cff'); dctx.fillStyle=g; rr(x0,y0,tw,24,12); dctx.fill(); dctx.restore();
   dctx.fillStyle='#fff'; dctx.textAlign='left'; dctx.textBaseline='middle'; dctx.fillText(txt,x0+11,d.py+.5);
@@ -3763,7 +3763,7 @@ function posRender(w,h){
 }
 function posHit(x,y){
  for(const u of (S.posUI||[])) if(u.kind==='btn' && x>=u.x && x<=u.x+u.w && y>=u.y && y<=u.y+u.h) return u;
- for(const u of (S.posUI||[])) if(u.kind==='line' && u.which!=='dref' && Math.abs(y-u.y)<=8) return u;
+ for(const u of (S.posUI||[])) if(u.kind==='line' && Math.abs(y-u.y)<=8) return u;
  return null;
 }
 chartEl.addEventListener('mousedown',e=>{
@@ -3789,7 +3789,6 @@ chartEl.addEventListener('mousedown',e=>{
   refresh(); return;
  }
  S.posDrag={which:u.which,id:u.id};
- if(u.which==='dref'){ S.posDrag=null; return; }
 },true);
 window.addEventListener('mousemove',e=>{
  const {x,y}=localXY(e);
@@ -3800,8 +3799,9 @@ window.addEventListener('mousemove',e=>{
  if(Math.abs(y-(d.sy??y))>3) d.moved=true;
  if(d.create && !d.moved) return;
  const t=tickSz();
+ if(d.which==='dref'){ S.draftRef=pr; S.draftRefDragged=true; opUpdate(true); return; }
  if(d.which==='dtp'||d.which==='dsl'){
-  const side=OP.side, ref=side>0?askPx():bidPx(), k=Math.round(((d.which==='dtp')?(pr-ref)*side:(ref-pr)*side)/t);
+  const side=OP.side, ref=draftRef(), k=Math.round(((d.which==='dtp')?(pr-ref)*side:(ref-pr)*side)/t);
   d.bad = k < (d.which==='dsl' ? minStopTicks() : 1);
   if(!d.bad){ if(d.which==='dtp') OP.tpT=k; else OP.slT=k; }
   opUpdate(true); return;
@@ -3816,6 +3816,7 @@ window.addEventListener('mousemove',e=>{
 window.addEventListener('mouseup',e=>{
  if(!S.posDrag) return; e.stopPropagation();
  const d=S.posDrag, p=S.pos; S.posDrag=null;
+ if(d.which==='dref'){ msg(`Entry set at ${fmtP(S.draftRef)}. CONFIRM places a limit order there.`); refresh(); return; }
  if(d.which==='dtp'||d.which==='dsl'){
   if(d.bad) msg(d.which==='dtp'?'Take profit has to be on the profit side of the price, so it keeps its last valid place.':`Stop loss must be at least ${minStopTicks()} ticks from the price, or it would be hit the moment you enter. It keeps its last valid place.`);
   else msg(`${d.which==='dtp'?'Take profit':'Stop loss'} set to ${d.which==='dtp'?OP.tpT:OP.slT} ticks. It is placed when you press Buy or Sell.`);
@@ -4248,20 +4249,32 @@ function armDraft(side){
  if(!S.bars.length) return;
  if(S.pos){ openPos(side); return; }   // already in a trade: adds or reverses as before
  if(S.draftOn){ OP.side=side; opUpdate(true); refresh(); msg(`${side>0?'Buy':'Sell'} armed. Press CONFIRM on the chart to enter, or ✕ to cancel.`); return; }
- S.draftOn=true; OP.side=side; OP.type='market';
+ S.draftOn=true; OP.side=side; OP.type='market'; S.draftRef=null; S.draftRefDragged=false; draftRef();
  const t=tickSz(), sl=+$('slPts').value||0, tp=+$('tpPts').value||0;
  OP.slOn=sl>0; if(sl>0) OP.slT=Math.max(1,Math.round(sl/t));
  OP.tpOn=tp>0; if(tp>0) OP.tpT=Math.max(1,Math.round(tp/t));
  opUpdate(true); refresh();
  msg(`${side>0?'Buy':'Sell'} armed. Set your stop and target on the chart if you want them, then press CONFIRM on the chart. Esc cancels.`);
 }
-function disarmDraft(){ S.draftOn=false; refresh(); }
+function draftRef(){   // the draft's reference price: frozen when armed so its lines do not follow the market; reset when the side changes
+ const side=OP.side;
+ if(S.draftRef==null || S.draftRefSide!==side){ S.draftRef=side>0?askPx():bidPx(); S.draftRefSide=side; S.draftRefDragged=false; }
+ return S.draftRef;
+}
+function disarmDraft(){ S.draftOn=false; S.draftRef=null; S.draftRefDragged=false; refresh(); }
 function confirmDraft(){
  if(!S.draftOn) return;
  if(S.pos){ disarmDraft(); msg('A trade is already open. Manage it with its own lines.'); return; }
  const side=OP.side, t=tickSz(), q=Math.max(1,+$('qty').value||1), minT=minStopTicks();
  if(OP.slOn && OP.slT<minT){ msg(`Stop is ${OP.slT} tick${OP.slT===1?'':'s'} from the price, inside the spread. It would be hit at once. Move it to at least ${minT} ticks.`); return; }
  const slP=OP.slOn?OP.slT*t:0, tpP=OP.tpOn?OP.tpT*t:0, before=S.pos;
+ const ref=draftRef(), mkt=side>0?askPx():bidPx();
+ if(S.draftRefDragged && Math.abs(ref-mkt)>=t/2){   // entry was dragged off the market: place it as a limit at that price
+  S.draftOn=false; S.draftRef=null; S.draftRefDragged=false;
+  const px=roundTick(ref), isLimit = side>0 ? px<mkt : px>mkt;   // buy below / sell above the market = limit; otherwise a stop
+  if(isLimit) placeLimit(side, px, slP, tpP, q); else placeOrder(side, px, 'stop', slP, tpP, q);
+  opUpdate(); refresh(); return;
+ }
  S.draftOn=false;
  openPos(side, undefined, slP, tpP, undefined, q);
  if(S.pos && S.pos!==before) msg(`${side>0?'Bought':'Sold'} ${q} at ${fmtP(S.pos.entry)}${slP?`, stop ${OP.slT} ticks`:''}${tpP?`, target ${OP.tpT} ticks`:''}.`);
