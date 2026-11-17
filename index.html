@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261117110342">
+<meta name="ke-build" content="20261117110635">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -790,7 +790,7 @@ body.has-bgfx #equity,body.has-bgfx #osc{border-top-color:#16213a}
 body.cfs .mode-pill{top:14px}
 /* locked while an evaluation session runs */
 body.challenge #btnGo,body.challenge #gotoDate,body.challenge #btnRandom,body.challenge #btnSelect,body.challenge #btnSessPrev,body.challenge #btnReset,body.challenge #btnEnd,
-body.challenge #yFrom,body.challenge #yTo,body.challenge #pairSel,body.challenge #btnData,body.challenge #dataPanel,body.challenge #btnSplit{display:none!important}
+body.challenge #yFrom,body.challenge #yTo,body.challenge #btnData,body.challenge #dataPanel{display:none!important}
 body.challenge #symSel{pointer-events:none;opacity:.55}
 body.challenge #yFrom~*{}
 /* session result */
@@ -2829,9 +2829,10 @@ async function openSymbol(){
  loadRaw(raw, symLabel(name));
  if(S.pairRaw.length) msg(`Loaded ${symLabel(name)} ${y0}–${y1} with SMT vs ${$('pairSel').value}.`);
 }
-async function changePair(){ if(CHA()) return;
+async function changePair(){
  cfg.pair=$('pairSel').value; saveCfg();
  if(!S.bars.length) return;
+ if(CHA()){ const a=CHS(); S.pairRaw=a?await chPairData(a):[]; if(!S.pairRaw.length && cfg.split) setSplit(false); rebuildPair(); renderAll(); drawLines(); if(cfg.split){ P2.key=''; P2.idx=-2; try{ splitUpdate(); splitSync(); }catch(e){} } msg(cfg.pair?`SMT vs ${symLabel(cfg.pair)} for this session.`:'SMT pair off.'); return; }
  if(!cfg.pair || S.symKey==='__demo' || !S.symKey){ S.pairRaw=[]; rebuildPair(); renderAll(); msg(cfg.pair?'SMT pair needs a saved symbol as the main chart.':'SMT pair off.'); return; }
  let y0=+$('yFrom').value, y1=+$('yTo').value; if(y0>y1){ [y0,y1]=[y1,y0]; }
  S.pairRaw=await loadSymbol(cfg.pair, y0, y1);
@@ -3920,15 +3921,19 @@ function pnlWBuild(){
 }
 function pnlWSync(){ pnlWBuild(); const w=$('pnlW'); if(!w) return; w.hidden=cfg.pnlW===false; document.body.classList.toggle('pnlw-on',cfg.pnlW!==false); const b=$('qtbPnl'); if(b) b.classList.toggle('on',cfg.pnlW!==false); const c=$('i_pnlw'); if(c) c.checked=cfg.pnlW!==false; dragApply('pnl'); pnlWUpdate(); }
 const usd2=v=>(v<0?'−$':'$')+Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const PNL_UNITS=['usd','ticks','pts'];
+function pnlUnit(){ return PNL_UNITS.includes(cfg.pnlUnit)?cfg.pnlUnit:'usd'; }
+function pnlUnitNext(){ cfg.pnlUnit=PNL_UNITS[(PNL_UNITS.indexOf(pnlUnit())+1)%3]; saveCfg(); try{ pnlWUpdate(); }catch(e){} refresh(); msg('Open trade shown in '+({usd:'dollars',ticks:'ticks',pts:'points'})[cfg.pnlUnit]+'. Click the number again to switch.'); }
+function pnlFmt(pts,usdV){ const u=pnlUnit(), sg=v=>v>0?'+':v<0?'−':''; if(u==='ticks'){ const k=Math.round(pts/tickSz()); return sg(k)+Math.abs(k)+' ticks'; } if(u==='pts') return sg(pts)+Math.abs(pts).toFixed(2)+' pts'; return null; }
 function pnlWUpdate(){
  const w=$('pnlW'); if(!w||w.hidden||!S.bars.length) return;
  const p=S.pos; let open=0, rTxt='–', sub='Flat';
  if(p){ const now=p.side>0?bidPx():askPx(), pts=(now-p.entry)*p.side; open=pts*p.pv*p.qty-2*p.comm*p.qty;
   const rk=p.risk||(p.sl!=null?Math.abs(p.entry-p.sl):null); if(rk) rTxt=(pts/rk>=0?'+':'')+(pts/rk).toFixed(2)+'R';
-  sub=`${p.side>0?'Long':'Short'} ${p.qty} @ ${fmtP(p.entry)} · ${pts>=0?'+':''}${Math.round(pts/tickSz())} ticks`; }
+  sub=`${p.side>0?'Long':'Short'} ${p.qty} @ ${fmtP(p.entry)} · ${pnlUnit()==='usd'?(pts>=0?'+':'')+Math.round(pts/tickSz())+' ticks':(open>=0?'+':'')+usd2(open)}`; }
  const dk=ms=>{ const d=new Date(ms); return d.getFullYear()*10000+d.getMonth()*100+d.getDate(); }, nowK=dk(Date.now());
  const today=(S.trades||[]).reduce((a,x)=>a+((x.at&&dk(x.at)===nowK)?x.pnl:0),0);
- const big=$('pwBig'), v=p?open:today; big.textContent=(v>0?'+':'')+usd2(v);
+ const big=$('pwBig'), v=p?open:today; let ptsNow=0; if(p){ ptsNow=((p.side>0?bidPx():askPx())-p.entry)*p.side; } const alt=p?pnlFmt(ptsNow,open):null; big.textContent=alt||((v>0?'+':'')+usd2(v)); big.title='Click to show dollars, ticks or points'; big.style.cursor='pointer'; big.onclick=e=>{ e.stopPropagation(); pnlUnitNext(); };
  big.className='pw-big '+(v>0.004?'pos':v<-0.004?'neg':''); if(w.dataset.last!==big.textContent){ if(w.dataset.last!=null){ big.classList.add('flash'); setTimeout(()=>big.classList.remove('flash'),260); } w.dataset.last=big.textContent; }
  $('pwSub').textContent=p?sub:'Flat · realized today';
  $('pwR').textContent=rTxt; $('pwR').className=rTxt==='–'?'':(rTxt[0]==='+'?'pos':'neg');
@@ -3993,7 +3998,8 @@ function posRender(w,h){
   if(p.tp==null) bt.push({t:'+TP',act:'addTP',fg:TAGC.tp});
   if(p.sl==null) bt.push({t:'+SL',act:'addSL',fg:TAGC.sl});
   const u=usd(now-p.entry);
-  lineRow(p.entry,col,bt.concat([{t:(p.side>0?'LONG ':'SHORT ')+q,solid:col},{t:fmtUSD(u).replace(' USD',''),fg:u>=0?TAGC.tp:TAGC.sl},{t:ex(now-p.entry),fg:sub},{t:'×',act:'close',fg:sub}]),'entry');
+  const alt=pnlFmt(pts(now-p.entry),u), uTxt=fmtUSD(u).replace(' USD','');
+  lineRow(p.entry,col,bt.concat([{t:(p.side>0?'LONG ':'SHORT ')+q,solid:col},{t:alt||uTxt,fg:u>=0?TAGC.tp:TAGC.sl,act:'unit'},{t:alt?uTxt:ex(now-p.entry),fg:sub},{t:'×',act:'close',fg:sub}]),'entry');
  }
  if(!p && OP.type==='market' && (S.draftOn || ($('op')&&!$('op').hidden))){   // the draft (entry, stop, target) only shows after Buy or Sell is pressed
   const side=OP.side, ref=draftRef(), tk=tickSz(), pvq=(+$('contract').value||1)*(+$('qty').value||1), usdD=k=>k*tk*pvq;
@@ -4041,6 +4047,7 @@ chartEl.addEventListener('mousedown',e=>{
   else if(u.act==='rmTP' && p){ p.tp=null; msg('Take profit removed.'); }
   else if(u.act==='rmSL' && p){ p.sl=null; msg('Stop loss removed.'); }
   else if(u.act==='addTP'||u.act==='addSL'){ S.posDrag={which:u.act==='addTP'?'tp':'sl', id:u.id, create:true, sy:y, moved:false}; msg('Drag up or down to place it, or just release for the default distance.'); return; }
+  else if(u.act==='unit'){ pnlUnitNext(); return; }
   else if(u.act==='rev' && p){ const q=p.qty; openPos(-p.side, undefined, 0, 0, 'REV', q); msg('Position reversed.'); }
   else if(u.act==='cancel'){ cancelOrder(u.id); msg('Order cancelled.'); }
   else if(u.act==='onTP'){ OP.tpOn=true; opUpdate(true); msg('Take profit set. Drag its line to place it, then press CONFIRM on the chart.'); }
@@ -5089,7 +5096,7 @@ const P2={key:'',idx:-2};
 try{ new ResizeObserver(()=>{ const b=$('c2Body'); if(b.clientWidth>0) c2.resize(b.clientWidth,b.clientHeight); }).observe($('c2Body')); }catch(e){}
 function themeSplit(){
  const o=chart.options(), tk=t=>{ const d=new Date((t+tzOff(t))*1000); return pad2(d.getUTCHours())+':'+pad2(d.getUTCMinutes()); };
- c2.applyOptions({layout:o.layout, grid:o.grid, crosshair:{vertLine:o.crosshair.vertLine,horzLine:o.crosshair.horzLine}, timeScale:{borderColor:o.timeScale.borderColor, tickMarkFormatter:(t,type)=>{ const d=new Date((t+tzOff(t))*1000); return type<=2 ? `${d.getUTCDate()} ${MON[d.getUTCMonth()]}` : tk(t); }},
+ c2.applyOptions({layout:o.layout, grid:o.grid, crosshair:{vertLine:o.crosshair.vertLine,horzLine:o.crosshair.horzLine}, timeScale:{borderColor:o.timeScale.borderColor, tickMarkFormatter:(t,type)=>{ const d=new Date((t+tzOff(t))*1000); if(typeof CHA==='function'&&CHA()) return type<=2 ? '' : tk(t); return type<=2 ? `${d.getUTCDate()} ${MON[d.getUTCMonth()]}` : tk(t); }},
   rightPriceScale:{borderColor:o.rightPriceScale.borderColor, minimumWidth:70}, localization:{timeFormatter:t=>fmtLocal(t)}});
  candles2.applyOptions({upColor:cfg.up, downColor:cfg.down, borderVisible:true, borderUpColor:cfg.border||cfg.up, borderDownColor:cfg.border||cfg.down, wickUpColor:cfg.wick||cfg.up, wickDownColor:cfg.wick||cfg.down});
 }
@@ -6738,17 +6745,27 @@ async function chAccept2(r,tf,hard){
  CAR.ch.req=null; msgDrop(r.id); carSave();
  await chLoad(raw); toast(`<b>Evaluation session ${CHS().day} started.</b> Trades now count on your active accounts. The session runs 09:30 to 16:00 New York time.`,6000);
 }
+async function chPairData(a){   // second symbol for an evaluation session: same time window, shifted like the main chart so the real date stays hidden
+ if(!cfg.pair || cfg.pair===a.sym) return [];
+ let r2=[]; try{ r2=await loadSymbol(cfg.pair,a.y0,a.y1); }catch(e){ return []; }
+ const lo=a.t0-CH_HIST*86400, w=r2.filter(b=>b.time>=lo && b.time<a.tEnd); if(!w.length) return [];
+ let ref=null; try{ const m=await loadSymbol(a.sym,a.y0,a.y1); const k=lowerBound(m,a.t0); ref=m[Math.min(k,m.length-1)]; }catch(e){}
+ const k2=lowerBound(w,a.t0), r=w[Math.min(k2,w.length-1)];
+ const ratio=ref&&ref.close? r.close/ref.close : 1, o=Math.round((a.off||0)*ratio*4)/4;
+ return w.map(b=>({time:b.time,open:b.open+o,high:b.high+o,low:b.low+o,close:b.close+o,volume:b.volume}));
+}
 async function chLoad(raw){
  const a=CHS(); if(!a) return;
  if(!raw){ CH.loading=true; try{ raw=await loadSymbol(a.sym,a.y0,a.y1); } finally{ CH.loading=false; } }
  if(!CHS()||CHS().id!==a.id) return;
+ const pairSh=await chPairData(a); if(!CHS()||CHS().id!==a.id) return;
  const o=a.off, lo=a.t0-CH_HIST*86400, sh=[]; for(const b of raw){ if(b.time<lo||b.time>=a.tEnd) continue; sh.push({time:b.time,open:b.open+o,high:b.high+o,low:b.low+o,close:b.close+o,volume:b.volume}); }
  document.body.classList.add('challenge'); stopPlay(); chClockStop(); chLiveMode();
  const seen=chSeenGet(a.id);
  CH.allow=true;
  a.tf=chTfNorm(a.tf); if(CH_NOTF.includes(String(a.tf))) a.tf='300';
- try{ if([...$('tf').options].some(x=>x.value===String(a.tf))) $('tf').value=a.tf; S.symKey=a.sym; S.pairRaw=[]; if(cfg.split) setSplit(false);
-  loadRaw(sh,'Evaluation session'); msg('Evaluation session ready. Trades count on your active accounts.'); }
+ try{ if([...$('tf').options].some(x=>x.value===String(a.tf))) $('tf').value=a.tf; S.symKey=a.sym; S.pairRaw=pairSh; const wantSplit=!!cfg.split&&pairSh.length; if(cfg.split&&!pairSh.length) setSplit(false);
+  loadRaw(sh,'Evaluation session'); if(wantSplit){ cfg.split=false; setSplit(true); } msg('Evaluation session ready. Trades count on your active accounts.'); }
  finally{ CH.allow=false; }
  CH.loadedId=a.id;
  try{ DR.list=[]; select(null); }catch(e){}
