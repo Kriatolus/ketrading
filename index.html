@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261117170447">
+<meta name="ke-build" content="20261117170713">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -7706,7 +7706,7 @@ function carStartOver(){
  Object.keys(CAR).forEach(k=>delete CAR[k]);
  Object.assign(CAR, carDefault(), {uid:keep.uid, look:keep.look});
  if(keep.tamper) CAR.tamper=keep.tamper;
- try{ localStorage.removeItem('ke_sess_v1'); }catch(e){} SAVE.cur=null;
+ try{ reset(); sessSave(true); }catch(e){}   // the practice replay starts clean too (its trades and today's P&L)
  SYNC.prev={}; carSaveLocal();
  if(CLOUD.user&&CLOUD.sb){ carSave(); setTimeout(()=>location.reload(),2500); } else location.reload();
 }
