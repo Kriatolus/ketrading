@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261116214557">
+<meta name="ke-build" content="20261117082745">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -2100,6 +2100,7 @@ function smtProcess(full){
  S.smt.done=Math.max(S.smt.done,comp);
 }
 function allMarkers(){
+ if(RV&&RV.on) return rvMarkers();
  return S.markers;
  const m=S.smt.list.slice(-300).map(it=>({time:S.bars[it.k].time, position:it.bear?'aboveBar':'belowBar', color:it.bear?SIG.down:SIG.up, shape:it.bear?'arrowDown':'arrowUp', text:'SMT'}));
  return S.markers.concat(m).sort((a,b)=>a.time-b.time);
@@ -2193,7 +2194,7 @@ function loadRaw(raw, name){
 /* ---------- replay core ---------- */
 function reset(startIdx){
  if(CHA()&&!CH.allow){ msg('Locked during an evaluation session.'); return; }
- stopPlay();
+ stopPlay(); S.draftOn=false;
  S.pos=null; S.trades=[]; S.realized=0; S.markers=[]; S.dayPnl={}; S.partial=null; S.ticks=null; S.orders=[]; S.alerts=[]; S.evalFail=null; S.evalPrev=null; try{ syncReset(); }catch(e){} if(typeof drawOrders==='function'){ drawOrders(); drawAlerts(); }
  clearLines();
  if(!S.bars.length) return;
@@ -3590,6 +3591,8 @@ function submitOP(){
  if(!S.bars.length) return;
  const q=Math.max(1,+$('opQty').value||1), t=tickSz(); $('qty').value=q;
  const slP=OP.slOn?OP.slT*t:0, tpP=OP.tpOn?OP.tpT*t:0, side=OP.side;
+ if(OP.type==='market' && OP.slOn && OP.slT<minStopTicks()){ msg(`Stop must be at least ${minStopTicks()} ticks from the price, or it would be hit the moment you enter.`); return; }
+ S.draftOn=false;
  if(OP.type==='market'){ openPos(side, undefined, slP, tpP, undefined, q); msg(`${side>0?'Bought':'Sold'} ${q} at ${fmtP(S.pos?S.pos.entry:priceNow())}.`); }
  else { const px=roundTick(+$('opPx').value||0); if(!(px>0)){ msg('Enter a price.'); return; }
   const before=S.orders.length;
@@ -3602,7 +3605,7 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !$('op').hidden 
 function toggleOP(show,side){
  const p=$('op'); p.hidden = show===undefined ? !p.hidden : !show;
  if(side) OP.side=side;
- $('btnOP').classList.toggle('on',!p.hidden);
+ $('btnOP').classList.toggle('on',!p.hidden); if(p.hidden){ S.draftOn=false; try{ refresh(); }catch(e){} }
  if(!p.hidden){ opBuild(); }
 }
 /* quick Sell | Buy buttons on the chart */
@@ -3612,7 +3615,7 @@ function qtbUpdate(){
 }
 function quickTrade(side){
  if(OP.oneClick){ openPos(side, undefined, OP.slOn?OP.slT*tickSz():0, OP.tpOn?OP.tpT*tickSz():0, undefined, +$('qty').value||1); refresh(); return; }
- toggleOP(true, side); OP.type='market'; opUpdate(true);
+ armDraft(side);
 }
 
 /* ----- position / order lines drawn on the chart ----- */
@@ -3730,12 +3733,13 @@ function posRender(w,h){
   const u=usd(now-p.entry);
   lineRow(p.entry,col,bt.concat([{t:(p.side>0?'LONG ':'SHORT ')+q,solid:col},{t:fmtUSD(u).replace(' USD',''),fg:u>=0?TAGC.tp:TAGC.sl},{t:ex(now-p.entry),fg:sub},{t:'×',act:'close',fg:sub}]),'entry');
  }
- if(!p && OP.type==='market'){
+ if(!p && OP.type==='market' && (S.draftOn || ($('op')&&!$('op').hidden))){   // the draft (entry, stop, target) only shows after Buy or Sell is pressed
   const side=OP.side, ref=side>0?askPx():bidPx(), tk=tickSz(), pvq=(+$('contract').value||1)*(+$('qty').value||1), usdD=k=>k*tk*pvq;
   const dcol=side>0?TAGC.long:TAGC.short, dl=(side>0?'BUY ':'SELL ')+(+$('qty').value||1);
-  const bts=[{t:'DRAFT '+dl,solid:dcol}];
+  const bts=[{t:'✕',act:'dropDraft',fg:sub}];
   if(!OP.tpOn) bts.push({t:'+TP',act:'onTP',fg:TAGC.tp});
   if(!OP.slOn) bts.push({t:'+SL',act:'onSL',fg:TAGC.sl});
+  bts.push({t:'CONFIRM '+dl,solid:dcol,act:'go'});
   bts.push({t:fmtP(ref),fg:ink});
   lineRow(ref,dcol,bts,'dref');
   if(OP.tpOn) lineRow(ref+side*OP.tpT*tk,TAGC.tp,[{t:'TP',solid:TAGC.tp},{t:'DRAFT',fg:sub},{t:fmtUSD(usdD(OP.tpT)).replace(' USD',''),fg:TAGC.tp},{t:'+'+OP.tpT+'t',fg:sub},{t:'×',act:'offTP',fg:sub}],'dtp');
@@ -3776,10 +3780,12 @@ chartEl.addEventListener('mousedown',e=>{
   else if(u.act==='addTP'||u.act==='addSL'){ S.posDrag={which:u.act==='addTP'?'tp':'sl', id:u.id, create:true, sy:y, moved:false}; msg('Drag up or down to place it, or just release for the default distance.'); return; }
   else if(u.act==='rev' && p){ const q=p.qty; openPos(-p.side, undefined, 0, 0, 'REV', q); msg('Position reversed.'); }
   else if(u.act==='cancel'){ cancelOrder(u.id); msg('Order cancelled.'); }
-  else if(u.act==='onTP'){ OP.tpOn=true; opUpdate(true); msg('Take profit set. Drag its line to place it before you press Buy.'); }
-  else if(u.act==='onSL'){ OP.slOn=true; opUpdate(true); msg('Stop loss set. Drag its line to place it before you press Buy.'); }
+  else if(u.act==='onTP'){ OP.tpOn=true; opUpdate(true); msg('Take profit set. Drag its line to place it, then press CONFIRM on the chart.'); }
+  else if(u.act==='onSL'){ OP.slOn=true; opUpdate(true); msg('Stop loss set. Drag its line to place it, then press CONFIRM on the chart.'); }
   else if(u.act==='offTP'){ OP.tpOn=false; opUpdate(true); msg('Take profit removed from the draft.'); }
   else if(u.act==='offSL'){ OP.slOn=false; opUpdate(true); msg('Stop loss removed from the draft.'); }
+  else if(u.act==='go'){ confirmDraft(); return; }
+  else if(u.act==='dropDraft'){ disarmDraft(); msg('Entry cancelled. Nothing was bought or sold.'); }
   refresh(); return;
  }
  S.posDrag={which:u.which,id:u.id};
@@ -3796,7 +3802,7 @@ window.addEventListener('mousemove',e=>{
  const t=tickSz();
  if(d.which==='dtp'||d.which==='dsl'){
   const side=OP.side, ref=side>0?askPx():bidPx(), k=Math.round(((d.which==='dtp')?(pr-ref)*side:(ref-pr)*side)/t);
-  d.bad = k<1;
+  d.bad = k < (d.which==='dsl' ? minStopTicks() : 1);
   if(!d.bad){ if(d.which==='dtp') OP.tpT=k; else OP.slT=k; }
   opUpdate(true); return;
  }
@@ -3811,7 +3817,7 @@ window.addEventListener('mouseup',e=>{
  if(!S.posDrag) return; e.stopPropagation();
  const d=S.posDrag, p=S.pos; S.posDrag=null;
  if(d.which==='dtp'||d.which==='dsl'){
-  if(d.bad) msg(d.which==='dtp'?'Take profit has to be on the profit side of the price, so it keeps its last valid place.':'Stop loss has to be on the loss side of the price, so it keeps its last valid place.');
+  if(d.bad) msg(d.which==='dtp'?'Take profit has to be on the profit side of the price, so it keeps its last valid place.':`Stop loss must be at least ${minStopTicks()} ticks from the price, or it would be hit the moment you enter. It keeps its last valid place.`);
   else msg(`${d.which==='dtp'?'Take profit':'Stop loss'} set to ${d.which==='dtp'?OP.tpT:OP.slT} ticks. It is placed when you press Buy or Sell.`);
   refresh(); return;
  }
@@ -3952,6 +3958,7 @@ function refresh(){
  if(typeof qtbUpdate==='function'){ qtbUpdate(); opUpdate(); }
  if(typeof DR!=='undefined' && DR.sel) showPosInfo();
  liveUI();
+ if(RV&&RV.on) try{ rvRender(); }catch(e){}
 }
 function exportCSV(){
  if(!S.trades.length){ msg('No trades to export.'); return; }
@@ -4097,8 +4104,9 @@ $('pfile').addEventListener('change',async e=>{
  }catch(err){ msg('Pair CSV error: '+err.message); }
  e.target.value='';
 });
-on('btnBuy',()=>openPos(1));
-on('btnSell',()=>openPos(-1));
+on('btnBuy',()=>armDraft(1));
+on('btnSell',()=>armDraft(-1));
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && S.draftOn){ disarmDraft(); msg('Entry cancelled. Nothing was bought or sold.'); } });
 on('btnClose',manualClose);
 on('btnBE',breakeven);
 on('btnReset',()=>{ reset(S.cursor>START?START:undefined); msg('Replay reset.'); });
@@ -4135,8 +4143,8 @@ document.addEventListener('keydown',e=>{
  const k=e.key.toLowerCase();
  if(e.code==='ArrowRight'){ e.preventDefault(); manualStep(); }
  else if(e.code==='Space'){ e.preventDefault(); togglePlay(); }
- else if(k==='b') openPos(1);
- else if(k==='s') openPos(-1);
+ else if(k==='b'&&!e.ctrlKey&&!e.metaKey) armDraft(1);
+ else if(k==='s'&&!e.ctrlKey&&!e.metaKey) armDraft(-1);
  else if(k==='c') manualClose();
  else if(k==='e') breakeven();
  else if(k==='h') setTool('hline');
@@ -4234,6 +4242,31 @@ function sessRender(w,h){
 }
 
 /* ---- place an order by clicking the chart ---- */
+/* ---- armed entry: Buy or Sell shows a draft (entry, stop, target) on the chart. Nothing is entered until you press CONFIRM on the chart. ---- */
+function minStopTicks(){ return Math.ceil(spreadPx()/tickSz())+1; }   // a stop closer than the spread is hit the moment you enter
+function armDraft(side){
+ if(!S.bars.length) return;
+ if(S.pos){ openPos(side); return; }   // already in a trade: adds or reverses as before
+ if(S.draftOn){ OP.side=side; opUpdate(true); refresh(); msg(`${side>0?'Buy':'Sell'} armed. Press CONFIRM on the chart to enter, or ✕ to cancel.`); return; }
+ S.draftOn=true; OP.side=side; OP.type='market';
+ const t=tickSz(), sl=+$('slPts').value||0, tp=+$('tpPts').value||0;
+ OP.slOn=sl>0; if(sl>0) OP.slT=Math.max(1,Math.round(sl/t));
+ OP.tpOn=tp>0; if(tp>0) OP.tpT=Math.max(1,Math.round(tp/t));
+ opUpdate(true); refresh();
+ msg(`${side>0?'Buy':'Sell'} armed. Set your stop and target on the chart if you want them, then press CONFIRM on the chart. Esc cancels.`);
+}
+function disarmDraft(){ S.draftOn=false; refresh(); }
+function confirmDraft(){
+ if(!S.draftOn) return;
+ if(S.pos){ disarmDraft(); msg('A trade is already open. Manage it with its own lines.'); return; }
+ const side=OP.side, t=tickSz(), q=Math.max(1,+$('qty').value||1), minT=minStopTicks();
+ if(OP.slOn && OP.slT<minT){ msg(`Stop is ${OP.slT} tick${OP.slT===1?'':'s'} from the price, inside the spread. It would be hit at once. Move it to at least ${minT} ticks.`); return; }
+ const slP=OP.slOn?OP.slT*t:0, tpP=OP.tpOn?OP.tpT*t:0, before=S.pos;
+ S.draftOn=false;
+ openPos(side, undefined, slP, tpP, undefined, q);
+ if(S.pos && S.pos!==before) msg(`${side>0?'Bought':'Sold'} ${q} at ${fmtP(S.pos.entry)}${slP?`, stop ${OP.slT} ticks`:''}${tpP?`, target ${OP.tpT} ticks`:''}.`);
+ opUpdate(); refresh();
+}
 function ordMode(side){
  S.ordMode = side ? {side,y:null} : null;
  $('btnBuyChart').classList.toggle('on',side>0); $('btnSellChart').classList.toggle('on',side<0);
@@ -4713,7 +4746,7 @@ function acctBind(box){
 }
 function acctRender(){
  const A=CAR.accts, C=A.map(acctCalc), own=syncOwned(), money=v=>usd(v).replace(/\.00$/,'');
- const base=[own,A.length,liveCool(),(CAR.pend||[]).map(p=>p.id).join(','),...A.map((a,i)=>[a.id,a.stage,a.on,!!a.blown,!!a.offer,a.step||1,C[i].pass,C[i].canPay,C[i].maxPay,a.name].join(':'))].join('|');
+ const base=[own,A.length,liveCool(),(CAR.pend||[]).map(p=>p.id).join(','),((CAR.ch&&CAR.ch.reviews)||[]).length,...A.map((a,i)=>[a.id,a.stage,a.on,!!a.blown,!!a.offer,a.step||1,C[i].pass,C[i].canPay,C[i].maxPay,a.name].join(':'))].join('|');
  const side=$('acctBox');
  if(side && side.dataset.key!==base){
   side.innerHTML=`<div class="ecard"><div class="ehead"><b>Accounts</b><button class="link" data-hub="${A.length?'props':'store'}">${A.length?'Manage':'Eval store'}</button></div>`+
@@ -4721,12 +4754,12 @@ function acctRender(){
     : `<div class="hint">Practice mode. Your trades are not scored against an account yet. Lucid evaluations start at ${money(minPrice())} under Prop firms.</div><button class="primary ac-btn" data-hub="store">Open the eval store</button>`)+`</div>`;
   acctBind(side); side.dataset.key=base;
  }
- const hub=$('hubAccts'), hk=base+'|'+CAR.wallet.toFixed(2)+'|'+(CAR.maxxOk?1:0)+maxxCool()+'|'+(HUB.plan||'flex')+'|'+JSON.stringify(HUB.copt||{})+'|'+Object.keys(CAR.skills||{}).join(',');
+ const hub=$('hubAccts'), hk=base+'|'+CAR.wallet.toFixed(2)+'|'+(CAR.maxxOk?1:0)+maxxCool()+'|'+(HUB.plan||'flex')+'|'+JSON.stringify(HUB.copt||{})+'|'+Object.keys(CAR.skills||{}).join(',')+'|rv'+((CAR.ch&&CAR.ch.reviews)||[]).length;
  if(hub && hub.dataset.key!==hk){
   const full=A.length>=EVAL.max, sshort=SYNCER_PRICE-CAR.wallet;
   hub.innerHTML=`<div class="sec">Your accounts <span>${A.length} ${A.length===1?'account':'accounts'} · ${A.filter(a=>a.on).length} trading</span></div>`+
    (A.length?`<div class="ac-grid">${A.map((a,i)=>acctCard(a,C[i],true)).join('')}</div>`:`<div class="card empty">You have no account yet. Pick an evaluation below, pass it, and it becomes a funded account that pays out.</div>`)+
-   `<div class="sec" id="evStore">Eval store <span>Lucid Trading · one-time fee · coupon prices (30% off, as Lucid's store shows) · resets at full price</span></div>
+   rvListHTML()+`<div class="sec" id="evStore">Eval store <span>Lucid Trading · one-time fee · coupon prices (30% off, as Lucid's store shows) · resets at full price</span></div>
    <div class="plan-tabs">${Object.values(PLANS).map(L=>`<button data-plan="${L.id}" class="${(HUB.plan||'flex')===L.id?'act':''}"><b>${L.name}</b><span>${L.tag}${(L.skill&&!skill(L.skill))||(L.maxx&&!CAR.maxxOk)?' · <i class="lk">locked</i>':''}</span></button>`).join('')}</div>
    ${(()=>{ const L=PLANS[HUB.plan||'flex']||PLANS.flex, mxw=L.maxx?maxxWhyNot():liveHeld()?'trading Lucid Live':'', lock=(L.skill&&!skill(L.skill))||(L.maxx&&!CAR.maxxOk), cool=liveCool();
     return `<p class="plan-blurb">${L.blurb}</p>`+(!L.maxx&&liveHeld()?`<div class="plan-lock"><span><b>You're trading Lucid Live.</b> New evaluations open after a live account is blown or cashed out. Practice trading and any LucidMaxx accounts you already own stay open.</span></div>`:'')+(lock&&L.maxx?`<div class="plan-lock"><span><b>LucidMaxx is invite only.</b> Lucid's risk team awards it to top performers. Here you earn it when an account first becomes due for Lucid Live.</span></div>`:lock?`<div class="plan-lock"><span><b>${L.name} is locked.</b> Unlock "${SK[L.skill].n}" in Skills (${SK[L.skill].c} points).</span><button class="primary" data-hub="skills">Open Skills</button></div>`:'')+
@@ -6552,12 +6585,15 @@ function chEnd(early){
  const T=S.trades, n=T.length, wins=T.filter(t=>t.pnl>0).length, pnl=S.realized, rs=T.filter(t=>t.r!=null).map(t=>t.r), bestR=rs.length?Math.max(...rs):null;
  const real=new Date(a.D*864e5), dateTxt=`${DOW[real.getUTCDay()]} ${real.getUTCDate()} ${MON[real.getUTCMonth()]} ${real.getUTCFullYear()}`;
  CAR.ch.day=Math.max(CAR.ch.day||0,a.day); (CAR.ch.hist=CAR.ch.hist||[]).unshift({day:a.day,pnl,n,wins,bestR,date:dateTxt,early:!!early,at:Date.now(),acct:CAR.accts.filter(x=>x.on).map(x=>x.name).join(', ')}); CAR.ch.hist.length=Math.min(CAR.ch.hist.length,60);
+ (CAR.ch.reviews=CAR.ch.reviews||[]).unshift({id:a.id,day:a.day,sym:a.sym,y0:a.y0,y1:a.y1,D:a.D,t0:a.t0,tEnd:a.tEnd,off:a.off,tf:String(a.tf),date:dateTxt,pnl:+pnl||0,hard:!!a.hard,
+  trades:S.trades.slice(-150).map(t=>({n:t.n,side:t.side,entryTime:t.entryTime,exitTime:t.exitTime,entry:t.entry,exit:t.exit,points:t.points,pnl:t.pnl,reason:t.reason,r:t.r,qty:t.qty,bars:t.bars}))});
+ CAR.ch.reviews.length=Math.min(CAR.ch.reviews.length,8);
  try{ foodUse(22); }catch(e){} CAR.ch.act=null; CAR.ch.next=Date.now()+90000; document.body.classList.remove('challenge');
  xpAdd((30+(pnl>0?40:0))*(a.hard?3:1)); if(a.hard){ CAR.hardDone=(CAR.hardDone||0)+1; if(pnl>0) CAR.hardWins=(CAR.hardWins||0)+1; } misBump('session',1); if(pnl>0) misBump('green',1);
  msgAdd({k:'res',from:'Lucid Trading desk',title:`Session ${a.day} results: ${pnl>=0?'+':''}${fmt$(Math.round(pnl))}`,body:`${n} trade${n===1?'':'s'}, ${wins} winner${wins===1?'':'s'}${bestR!=null?`, best ${bestR.toFixed(1)}R`:''}. The day you traded was ${dateTxt}.${early?' You ended the session early.':''}`});
  carSave(); acctUpdate(); achCheck();
  try{ partnerNote(pnl,n); }catch(e){}
- chResult({pnl,n,wins,bestR,dateTxt,day:a.day,early:!!early});
+ chResult({pnl,n,wins,bestR,dateTxt,day:a.day,early:!!early,id:a.id});
  const back=CAR.ch.prev; CAR.ch.prev=null; S.pos=null; S.symKey='__session_done';
  (async()=>{ try{ if(back && await sessApply(back,true)) return; }catch(e){} try{ $('symSel').value=cfg.last||$('symSel').value; fillYears(); await openSymbol(); }catch(e){} })();
  chBar();
@@ -6565,13 +6601,96 @@ function chEnd(early){
 function chResult(r){
  const d=document.createElement('div'); d.className='ch-res'; d.innerHTML=`<div class="ch-card"><div class="ch-badge"><i></i>${r.early?'Ended early':'Closed at 16:00 New York'}</div><span class="eyebrow">Evaluation session ${r.day}</span><div class="ch-big ${r.pnl>0?'pos':r.pnl<0?'neg':''}">${r.pnl>0?'+':r.pnl<0?'−':''}${fmt$(Math.abs(Math.round(r.pnl)))}</div>
   <div class="ch-row"><div><span>Trades</span><b>${r.n}</b></div><div><span>Win rate</span><b>${r.n?Math.round(r.wins/r.n*100):0}%</b></div><div><span>Best R</span><b>${r.bestR!=null?r.bestR.toFixed(2)+'R':'–'}</b></div></div>
-  <div class="ch-date">The hidden date was <b>${r.dateTxt}</b></div><button class="primary">Back to practice</button></div>`;
+  <div class="ch-date">The hidden date was <b>${r.dateTxt}</b></div><div class="ch-rv-btns"><button class="primary">Back to practice</button><button data-rv="${r.id}">Watch this session</button></div></div>`;
  document.body.appendChild(d); const close=()=>d.remove(); d.querySelector('button').onclick=close; d.addEventListener('click',e=>{ if(e.target===d) close(); });
 }
+/* ---- session review: watch a finished evaluation session again, with a verdict on each trade (display only, no trading logic) ---- */
+var RV=null;
+(function(){ const s=document.createElement('style'); s.textContent='.rv-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid rgba(128,128,128,.25)}.rv-row>div:first-child{flex:1}.rv-row span{opacity:.7;font-size:12px}.ch-rv-btns{display:flex;gap:8px;justify-content:center;margin-top:8px}body.rv-watch #btnBuy,body.rv-watch #btnSell,body.rv-watch #btnBuyChart,body.rv-watch #btnSellChart,body.rv-watch #btnBuyLmt,body.rv-watch #btnSellLmt,body.rv-watch #btnClose,body.rv-watch #btnBE{pointer-events:none;opacity:.35}'; document.head.appendChild(s); })();
+document.addEventListener('keydown',e=>{ if(!(RV&&RV.on)) return; if(/^(INPUT|TEXTAREA|SELECT)$/.test((e.target||{}).tagName||'')) return; if(/^[sbceSBCE]$/.test(e.key)){ e.stopPropagation(); e.preventDefault(); msg('Review mode is watch only. Nothing you do here is traded.'); } },true);
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-rv]'); if(!b) return; e.preventDefault(); rvOpen(b.dataset.rv); });
+const RV_COL={good:'#089981',bad:'#f23645',ok:'#8a93a3'};
+function rvGrade(t){
+ const R=t.r, p=t.pnl;
+ if(R!=null && R>=2) return {g:'good',txt:`Closed at ${R.toFixed(1)}R. A strong winner that paid off.`};
+ if(t.reason==='TP') return {g:'good',txt:'Took the target. The plan worked as intended.'};
+ if(t.reason==='SL'){ if(R!=null && R<=-1.5) return {g:'bad',txt:`Stopped out at ${R.toFixed(1)}R, a bigger loss than a normal stop. Check the stop distance and the position size.`}; return {g:'ok',txt:'Stopped out near a normal loss. Taking the stop is part of the plan.'}; }
+ if(t.reason==='MANUAL') return p>=0?{g:'ok',txt:'Closed by hand in profit. Could you have held for the target?'}:{g:'bad',txt:'Closed by hand at a loss. Were you cutting early, or getting out of fear?'};
+ if(t.reason==='EOD'||t.reason==='END') return p<0?{g:'bad',txt:'Still open at the close and losing. Was there an exit planned before the session ended?'}:{g:'ok',txt:'Closed at the session end in profit.'};
+ if(t.reason==='MLL') return {g:'bad',txt:'The account loss limit was hit. Look at what led up to it.'};
+ if(t.reason==='FLIP') return {g:'ok',txt:'Reversed the position. Check whether the new direction had a clear reason.'};
+ return {g:'ok',txt:'Closed.'};
+}
+function rvListHTML(){
+ const R=(CAR.ch&&CAR.ch.reviews)||[]; if(!R.length) return '';
+ return `<div class="sec">Session review <span>Watch a past evaluation session again and see what you did well and badly</span></div><div class="rv-list">${R.map(r=>{ const n=r.trades.length, w=r.trades.filter(t=>t.pnl>0).length; return `<div class="rv-row"><div><b>Session ${r.day}</b> <span>${r.date} · ${n} trade${n===1?'':'s'} · ${w} winner${w===1?'':'s'}</span></div><div class="${r.pnl>=0?'pos':'neg'}">${r.pnl>=0?'+':'−'}${fmt$(Math.abs(Math.round(r.pnl)))}</div><button class="primary" data-rv="${r.id}">Watch</button></div>`; }).join('')}</div>`;
+}
+function rvMarkers(){
+ const nowT=S.bars.length?S.bars[S.cursor].time:0, out=[];
+ const snap=t=>{ let k=lowerBound(S.bars,t); if(k>=S.bars.length) k=S.bars.length-1; if(k>0 && S.bars[k].time>t) k--; return S.bars[k].time; };
+ RV.trades.forEach(t=>{
+  const L=t.side==='LONG';
+  if(t.entryTime<=nowT) out.push({time:snap(t.entryTime),position:L?'belowBar':'aboveBar',color:L?SIG.up:SIG.down,shape:L?'arrowUp':'arrowDown',size:0.8,text:'#'+t.n});
+  if(t.exitTime<=nowT) out.push({time:snap(t.exitTime),position:L?'aboveBar':'belowBar',color:t.pnl>=0?SIG.up:SIG.down,shape:'circle',size:0.6,text:''});
+ });
+ return out.sort((a,b)=>a.time-b.time);
+}
+function rvRender(){
+ let P=document.getElementById('rvPanel');
+ if(!P){ P=document.createElement('div'); P.id='rvPanel'; P.style.cssText='position:fixed;right:12px;top:90px;width:300px;max-height:calc(100vh - 130px);overflow:auto;z-index:50;background:#141821;color:#e6e9ef;border:1px solid #2a313c;border-radius:8px;padding:12px;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.4)'; document.body.appendChild(P); }
+ const rec=RV.rec, nowT=S.bars.length?S.bars[S.cursor].time:0;
+ const grades=RV.trades.filter(t=>t.exitTime<=nowT).map(t=>({t,...rvGrade(t)}));
+ const net=grades.reduce((s,x)=>s+x.t.pnl,0), nGood=grades.filter(x=>x.g==='good').length, nBad=grades.filter(x=>x.g==='bad').length;
+ const done=nowT>=rec.tEnd || S.cursor>=S.bars.length-1;
+ const all=RV.trades.map(t=>({t,...rvGrade(t)}));
+ const worst=all.filter(x=>x.g==='bad').sort((a,b)=>a.t.pnl-b.t.pnl)[0];
+ const best=all.filter(x=>x.g==='good').sort((a,b)=>b.t.pnl-a.t.pnl)[0];
+ const list=grades.map(x=>`<div style="border-top:1px solid #2a313c;padding:6px 0"><b>#${x.t.n} ${x.t.side}</b> <span style="opacity:.7">${x.t.reason} · ${sg(x.t.pnl)}${x.t.r!=null?` · ${sg(x.t.r)}R`:''}</span><div style="color:${RV_COL[x.g]}">${x.txt}</div></div>`).join('')||'<div style="opacity:.7">No closed trades yet. Press play to move through the session.</div>';
+ const summary=done?`<div style="margin-top:8px;border-top:2px solid #2a313c;padding-top:8px"><b>Overall</b><div>${all.length} trade${all.length===1?'':'s'}: ${all.filter(x=>x.g==='good').length} good, ${all.filter(x=>x.g==='bad').length} to learn from.</div>${best?`<div style="color:${RV_COL.good}">Best: #${best.t.n}. ${best.txt}</div>`:''}${worst?`<div style="color:${RV_COL.bad}">Biggest mistake: #${worst.t.n}. ${worst.txt}</div>`:''}</div>`:'';
+ P.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>Session review ${rec.day}</b><button id="rvClose">Close review</button></div>
+  <div style="opacity:.75;margin:4px 0 6px">${rec.date} · as of ${new Date(nowT*1000).toISOString().slice(11,16)} UTC · ${nGood} good · ${grades.length-nGood-nBad} okay · ${nBad} bad · net ${sg(net)}</div>${list}${summary}`;
+ P.querySelector('#rvClose').onclick=rvClose;
+ document.body.classList.add('rv-watch');
+ const cb=document.getElementById('chBar'); if(cb){ cb.className='mode-pill prac'; cb.innerHTML='<i></i><b>Session review</b><span>Watch only. Nothing here counts.</span>'; }
+}
+async function rvOpen(id){
+ const rec=((CAR.ch&&CAR.ch.reviews)||[]).find(r=>r.id===id); if(!rec) return;
+ if(CHA()){ toast('Finish your evaluation session first.',3000); return; }
+ if(S.pos){ toast('Close your practice position first.',3500); return; }
+ if(RV&&RV.on) rvClose(true);
+ document.querySelectorAll('.ch-res').forEach(x=>x.remove());
+ msg('Loading the session review...');
+ const back=sessGet();
+ const raw=await loadSymbol(rec.sym,rec.y0,rec.y1);
+ const lo=rec.t0-CH_HIST*86400, sh=[];
+ for(const b of raw){ if(b.time<lo||b.time>=rec.tEnd) continue; sh.push({time:b.time,open:b.open+rec.off,high:b.high+rec.off,low:b.low+rec.off,close:b.close+rec.off,volume:b.volume}); }
+ if(!sh.length){ msg('This session data is no longer on this device.'); return; }
+ hubOpen('chart');
+ stopPlay();
+ RV={on:true,rec,back,trades:rec.trades.slice().sort((x,y)=>x.entryTime-y.entryTime)};
+ const tfv=String(rec.tf); if([...$('tf').options].some(o=>o.value===tfv)) $('tf').value=tfv;
+ if(cfg.split) setSplit(false);
+ S.symKey=rec.sym; S.pairRaw=[];
+ loadRaw(sh,'Session review '+rec.day);
+ try{ DR.list=[]; select(null); }catch(e){}
+ reset(Math.min(lowerBound(S.bars,rec.t0), Math.max(0,S.bars.length-1)));
+ rvRender(); msg('Session review ready. Press play or step forward to watch it again.');
+}
+async function rvClose(quiet){
+ if(!RV||!RV.on) return;
+ const back=RV.back; RV.on=false; RV=null; stopPlay();
+ document.body.classList.remove('rv-watch');
+ const P=document.getElementById('rvPanel'); if(P) P.remove();
+ S.symKey='__session_done';
+ try{ if(back && await sessApply(back,true)) return; }catch(e){}
+ try{ $('symSel').value=cfg.last||$('symSel').value; fillYears(); await openSymbol(); }catch(e){}
+}
+try{ Object.assign(window.__bt,{rvOpen,rvClose,rvRender,refresh,armDraft,confirmDraft,disarmDraft,minStopTicks}); }catch(e){}
 function chBar(){
  let b=$('chBar'); if(!b){ b=document.createElement('div'); b.id='chBar'; const c=$('chart'); if(!c) return; c.appendChild(b); }
  const a=CHS();
- if(!a){ b.dataset.k=''; const on=CAR.accts.filter(x=>x.on); b.className='mode-pill prac'; b.innerHTML=`<i></i><b>Practice</b><span>${on.length?'Accounts only trade in evaluation sessions':'Trades here do not count'}</span>${CAR.ch&&CAR.ch.req?'<button id="chOpen">Session waiting</button>':''}${dailyBtn()}${(()=>{ const P=chParked(); return P.live?`<button id="chPark">${P.live} parked session${P.live>1?'s':''}</button>`:''; })()}`; const o=$('chOpen'); if(o) o.onclick=()=>phoneOpen('messages'); const dc=$('chDaily'); if(dc) dc.onclick=()=>dailyStart();
+ if(!a){ b.dataset.k=''; const on=CAR.accts.filter(x=>x.on); b.className='mode-pill prac'; b.innerHTML=`<i></i><b>Practice</b><span>${on.length?'Accounts only trade in evaluation sessions':'Trades here do not count'}</span>${CAR.ch&&CAR.ch.req?'<button id="chOpen">Session waiting</button>':''}${(CAR.ch&&CAR.ch.reviews||[]).length?'<button id="chReplay">Session replays</button>':''}${dailyBtn()}${(()=>{ const P=chParked(); return P.live?`<button id="chPark">${P.live} parked session${P.live>1?'s':''}</button>`:''; })()}`; const o=$('chOpen'); if(o) o.onclick=()=>phoneOpen('messages');
+  const rp=$('chReplay'); if(rp) rp.onclick=()=>{ hubOpen('props'); setTimeout(()=>{ const l=document.querySelector('.rv-list'); if(l) l.scrollIntoView({behavior:'smooth',block:'start'}); },250); }; const dc=$('chDaily'); if(dc) dc.onclick=()=>dailyStart();
  const pk=$('chPark'); if(pk) pk.onclick=()=>{ try{ hubOpen('props'); }catch(e){} toast('Switch on the account whose session you want to continue.',3500); }; return; }
  const now=S.bars.length?chNow():a.t0, left=Math.max(0,a.tEnd-now), h=Math.floor(left/3600), m=Math.floor(left%3600/60);
  const on=CAR.accts.filter(x=>x.on);
@@ -7102,6 +7221,7 @@ let sessBootDone; SAVE.ready=new Promise(r=>sessBootDone=r);
 function sessLocal(){ try{ return JSON.parse(localStorage.getItem('ke_sess_v1')||'null'); }catch(e){ return null; } }
 function sessGet(){
  if(typeof CHA==='function'&&CHA()) return null;
+ if(typeof RV!=='undefined'&&RV&&RV.on) return null;   // a session review must never overwrite the saved practice replay
  if(!S.bars.length||!S.symKey||S.symKey==='__demo') return null;
  return {v:1,uid:CAR.uid||null,sym:S.symKey,tf:String($('tf').value),years:(cfg.years||{})[S.symKey]||null,t:S.bars[S.cursor].time,
   trades:S.trades.slice(-1500),realized:S.realized,dayPnl:S.dayPnl,markers:S.markers.slice(-3000),ts:Date.now()};
