@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261117164953">
+<meta name="ke-build" content="20261117165127">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -2659,7 +2659,7 @@ function closePos(price, i, reason, qtyPart){
  S.trades.push({n:S.trades.length+1, side:p.side>0?'LONG':'SHORT', entryTime:p.time, exitTime:t, at:Date.now(), entry:p.entry, exit:price,
   points:pts, pnl, reason, qty:p.qty, part:part||undefined, bars:i-p.idx, r:(p.risk&&!p.noR)?pts/Math.max(p.risk,p.maxRisk||0):null});
  S.markers.push({time:t, position:p.side>0?'aboveBar':'belowBar', color:pnl>=0?SIG.up:SIG.down, shape:'circle', size:0.6, text:''});
- try{ syncClose(p,pnl,t); }catch(e){}
+ try{ syncClose(p,pnl,t,!part); }catch(e){}
  if(part){ p0.qty=Math.round((p0.qty-qtyPart)*1e6)/1e6; try{ drawLines(); }catch(e){} } else { S.pos=null; clearLines(); }
  try{ tradeFx(reason,pnl,t); }catch(e){}
  try{ sessSave(true); }catch(e){}
@@ -4766,7 +4766,7 @@ function acctCashout(id){   // instead of going live: Lucid's cashout, 90/10
  msgAdd({k:'res',from:'Lucid Trading desk',title:`Cashout requested: ${usd(net)}`,body:`${a.name} took the cashout instead of going live: ${usd(g)}, ${usd(net)} after the 90/10 split. It is processing and arrives at ${payTxt(p.due)}. The account is closed.${P.P.maxx?` A ${MAXX.coolDays}-day cooldown applies before you can buy a new LucidMaxx.`:''}`});
  carSave(); careerSync(); acctRender();
 }
-function liveOffer(a,cash){ a.stage='live'; a.ledger=[]; a.on=false; a.offer={until:Date.now()+OFFER_MS,cash}; delete a.hwm; delete a.passFx; delete a.step; delete SYNC.prev[a.id]; }
+function liveOffer(a,cash){ a.stage='live'; a.ledger=[]; a.tn=0; a.tw=0; a.on=false; a.offer={until:Date.now()+OFFER_MS,cash}; delete a.hwm; delete a.passFx; delete a.step; delete SYNC.prev[a.id]; }
 const maxxCool=()=>Math.max(0,Math.ceil(((+CAR.maxxCool||0)-Date.now())/864e5));
 const liveHeld=()=>CAR.accts.some(a=>a.stage==='live'&&a.plan!=='maxx');   // Lucid: while you trade live you may not trade (or buy) simulated accounts
 const LIVE_HELD_TXT="You're trading Lucid Live. New evaluations open after a live account is blown or cashed out.";
@@ -4852,12 +4852,14 @@ function acctCalc(a){ const P=SPEC(a);
  if(c.canPay && a.stage==='funded' && !P.od && P.plan==='daily' && a.ledger.some(t=>t.pay&&t.d===c.today)){ c.canPay=false; c.why=['the next session (without On Demand Payouts LucidDaily pays once a day)']; }
  return c; }
 function syncEnter(){ if(!CHE()) return []; const A=CAR.accts.filter(a=>a.on), out=A.filter(a=>!acctCalc(a).dllHit); if(out.length<A.length) toast(`<b>${A.filter(a=>!out.includes(a)).map(a=>cesc(a.name)).join(', ')}</b> hit the daily loss limit today and sits out this trade.`,4500); return out.map(a=>a.id); }
-function syncClose(p,pnl,t){
+function syncClose(p,pnl,t,full){   // full: the whole position closed (partial closes do not count as trades)
  if(!p.sync||!p.sync.length) return; const d=chDayId(); let n=0;
- for(const a of CAR.accts) if(p.sync.includes(a.id)){ a.ledger.push({d,pnl}); n++; }
+ for(const a of CAR.accts) if(p.sync.includes(a.id)){ a.ledger.push({d,pnl}); n++; if(full){ a.tn=(a.tn||0)+1; if(pnl>0) a.tw=(a.tw||0)+1; } }
  if(n){ SYNC.last={n,pnl}; carSave(); }
 }
 function syncReset(){ SYNC.prev={}; SYNC.last=null; }
+/* Win rate of an account's full trade closes in its current window (since bought, last pass or last payout) */
+function wrLine(a,win){ const n=a.tn||0, w=a.tw||0; return n?`Win rate ${win}: ${Math.round(w/n*100)}% (${w} of ${n} trades).`:`No trades closed ${win} yet.`; }
 function careerTrade(t,pnl){ const tr=S.trades[S.trades.length-1]||{}, live=CHA();
  try{ xpAdd((live?(pnl>0?15:6):(pnl>0?3:1))*(skill('scale')?1.5:1)); }catch(e){}
  try{ if(tr.r!=null) misBump('stop3',1); if(live){ if(tr.r!=null&&tr.r>=2&&pnl>0) misBump('r2',1); misBump('nolose',pnl>0?1:-1); hofAdd(tr); } }catch(e){} }
@@ -4908,19 +4910,19 @@ function acctToggle(id,on){
  a.on=on; carSave(); acctRender(); try{ chBar(); }catch(e){} try{ if($('phone')&&$('phone').classList.contains('on')) phoneRender(); }catch(e){}
 }
 function acctPromote(a){   // Lucid upgrades a passed evaluation by itself (5-30 minutes after the target), no activation fee, fresh funded balance
- const first=!a.passFx, P=SPEC(a);
+ const first=!a.passFx, P=SPEC(a), wr=wrLine(a,'in this evaluation');
  if(P.P.maxx){ CAR.passes+=a.step===2?0:1; if(first){ CAR.hardOffer=(CAR.hardOffer||0)+1; try{ xpAdd(300); }catch(e){} } try{ sfxPlay('pass',true); }catch(e){}
-  if(a.step!==2){ a.step=2; a.ledger=[]; delete a.hwm; delete a.passFx; delete SYNC.prev[a.id];
+  if(a.step!==2){ a.step=2; a.ledger=[]; a.tn=0; a.tw=0; delete a.hwm; delete a.passFx; delete SYNC.prev[a.id];
    toast(`<b>${cesc(a.name)} passed step 1.</b> Now the LucidMaxx pre-live step: ${usd(MAXX.pre[P.k])} target, no consistency rule, live scaling plan.`,7000);
-   msgAdd({k:'res',from:'Lucid Trading desk',title:`${a.name}: LucidMaxx pre-live`,body:`Step 1 passed. ${a.name} starts the pre-live step at ${usd(P.start)}: reach ${usd(MAXX.pre[P.k])} with no consistency rule, under the live scaling plan. A breach here has no cooldown.`}); return; }
+   msgAdd({k:'res',from:'Lucid Trading desk',title:`${a.name}: LucidMaxx pre-live`,body:`Step 1 passed. ${wr} ${a.name} starts the pre-live step at ${usd(P.start)}: reach ${usd(MAXX.pre[P.k])} with no consistency rule, under the live scaling plan. A breach here has no cooldown.`}); return; }
   liveOffer(a,MAXX.start[P.k]); const g=MAXX.start[P.k], net=Math.round(g*FUND.split*100)/100;
   toast(`<b>${cesc(a.name)} passed LucidMaxx.</b> Choose within 24 hours: go live with ${usd(g)}, or cash it all out (${usd(net)} after the split).`,8000);
-  msgAdd({k:'res',from:'Lucid Trading desk',title:`${a.name}: live or cash out?`,body:`LucidMaxx passed. Choose on the account card within 24 hours (by ${dueTxt(a.offer.until)}): go live with a ${usd(g)} balance you can withdraw from day one and a static $100 max loss, or cash out the whole ${usd(g)}: ${usd(net)} after the 90/10 split. With no choice, the account goes live.`}); return; } a.stage='funded'; a.ledger=[]; delete a.hwm; delete a.passFx; a.passAt=Date.now(); CAR.passes++; delete SYNC.prev[a.id];
+  msgAdd({k:'res',from:'Lucid Trading desk',title:`${a.name}: live or cash out?`,body:`LucidMaxx passed. ${wr} Choose on the account card within 24 hours (by ${dueTxt(a.offer.until)}): go live with a ${usd(g)} balance you can withdraw from day one and a static $100 max loss, or cash out the whole ${usd(g)}: ${usd(net)} after the 90/10 split. With no choice, the account goes live.`}); return; } a.stage='funded'; a.ledger=[]; a.tn=0; a.tw=0; delete a.hwm; delete a.passFx; a.passAt=Date.now(); CAR.passes++; delete SYNC.prev[a.id];
  if(first){ CAR.hardOffer=(CAR.hardOffer||0)+1; try{ xpAdd(300); }catch(e){} }
  try{ sfxPlay('pass',true); }catch(e){}
  const tip=P.plan==='flex'?'Five winning days unlock its first payout.':P.plan==='pro'?'The cycle profit goal unlocks a payout.':'Any day with net profit above the buffer can be paid out.';
- toast(`<b>${cesc(a.name)} passed and is now funded.</b> Lucid moves a passed evaluation to a funded ${P.name} account by itself, with no activation fee. It starts fresh at ${usd(P.start)}. ${tip}`,7000);
- msgAdd({k:'res',from:'Lucid Trading desk',title:`${a.name} is funded`,body:`Congratulations, your ${P.name} ${P.k}K evaluation passed. It is now a funded account with a fresh ${usd(P.start)} balance. There is no activation fee. ${tip}`});
+ toast(`<b>${cesc(a.name)} passed and is now funded.</b> Lucid moves a passed evaluation to a funded ${P.name} account by itself, with no activation fee. It starts fresh at ${usd(P.start)}. ${tip} ${wr}`,7000);
+ msgAdd({k:'res',from:'Lucid Trading desk',title:`${a.name} is funded`,body:`Congratulations, your ${P.name} ${P.k}K evaluation passed. ${wr} It is now a funded account with a fresh ${usd(P.start)} balance. There is no activation fee. ${tip}`});
 }
 function acctClaim(id){
  const a=CAR.accts.find(x=>x.id===id); if(!a||a.stage!=='eval'||a.blown) return;
@@ -4933,7 +4935,7 @@ function acctReset(id){   // Lucid sells a reset for a failed evaluation: back t
  if(liveCool()>0){ toast(`Lucid's cooldown after a blown live account: ${liveCool()} more day${liveCool()===1?'':'s'}.`,4000); return; }
  if(CAR.wallet<pr) return;
  CAR.wallet=Math.round((CAR.wallet-pr)*100)/100; txAdd(`Reset · ${a.name}`,-pr,'eval');
- a.ledger=[]; delete a.blown; delete a.hwm; delete a.passFx; delete a.step; a.resets=(a.resets||0)+1; delete SYNC.prev[a.id];
+ a.ledger=[]; a.tn=0; a.tw=0; delete a.blown; delete a.hwm; delete a.passFx; delete a.step; a.resets=(a.resets||0)+1; delete SYNC.prev[a.id];
  carSave(); careerSync(); try{ sfxPlay('buy',true); }catch(e){}
  toast(`<b>${cesc(a.name)} is reset.</b> A fresh ${SPEC(a).name} ${SPEC(a).k}K evaluation at ${usd(SPEC(a).start)}. Switch it on to trade it.`,5000); acctRender();
 }
@@ -4963,12 +4965,13 @@ function acctPayout(id){
  if(S.pos){ const m='Close your position before you request a payout.'; msg(m); toast(m,3500); return; }
  const c=acctCalc(a); if(!c.canPay) return;
  const amt=c.maxPay, net=Math.round(amt*FUND.split*(skill('legacy')?1.1:1)*100)/100; try{ xpAdd(200); }catch(e){}
+ const wr=wrLine(a,'since your last payout');
  a.ledger.push({d:c.today,pnl:-amt,pay:1});   // deducted from the account at the request, as at Lucid
  const lines=[[`Payout · ${a.name}`,net,'payout']]; if(skill('bonus')) lines.push([`Performance bonus · ${a.name}`,Math.round(net*0.03*100)/100,'payout']); if(CAR.prestige) lines.push([`Prestige bonus · ${a.name}`,Math.round(net*0.05*CAR.prestige*100)/100,'refund']);
  const p=payQueue({aid:a.id,name:a.name,gross:amt,net,lines,kind:a.stage==='live'?'live':'payout'});
- setTimeout(()=>{ try{ partyCheck(); }catch(e){} },1500); CAR.payouts++; delete SYNC.prev[a.id]; carSave(); careerSync(); try{ sfxPlay('cash',true); }catch(e){}
- msgAdd({k:'res',from:'Lucid Trading desk',title:`Payout approved: ${usd(net)}`,body:`${usd(amt)} was taken from ${a.name} now. ${usd(net)} (90%${skill('legacy')?' + 10% legacy':''}) is processing and arrives at ${payTxt(p.due)}, 2 to 5 minutes after the request.`});
- toast(`<b>Payout approved on ${cesc(a.name)}.</b> ${usd(amt)} is taken from the account now. ${usd(net)} (90%${skill('legacy')?' + 10% legacy':''}) is processing and arrives at ${payTxt(p.due)}.`,6500);
+ setTimeout(()=>{ try{ partyCheck(); }catch(e){} },1500); CAR.payouts++; delete SYNC.prev[a.id]; a.tn=0; a.tw=0; carSave(); careerSync(); try{ sfxPlay('cash',true); }catch(e){}
+ msgAdd({k:'res',from:'Lucid Trading desk',title:`Payout approved: ${usd(net)}`,body:`${usd(amt)} was taken from ${a.name} now. ${wr} ${usd(net)} (90%${skill('legacy')?' + 10% legacy':''}) is processing and arrives at ${payTxt(p.due)}, 2 to 5 minutes after the request.`});
+ toast(`<b>Payout approved on ${cesc(a.name)}.</b> ${usd(amt)} is taken from the account now. ${usd(net)} (90%${skill('legacy')?' + 10% legacy':''}) is processing and arrives at ${payTxt(p.due)}. ${wr}`,6500);
 }
 function acctRemove(id){
  if(S.pos){ const m='Close your position before you close an account.'; msg(m); toast(m,3500); return; }
@@ -7708,7 +7711,7 @@ function carStartOver(){
  SYNC.prev={}; carSaveLocal();
  if(CLOUD.user&&CLOUD.sb){ carSave(); setTimeout(()=>location.reload(),2500); } else location.reload();
 }
-window.__bt=Object.assign(window.__bt||{},{carStartOver});
+window.__bt=Object.assign(window.__bt||{},{carStartOver,wrLine,syncClose,acctPromote,CAR});
 function cloudAccountUI(){
  const b=$('cloudBox'); if(!b) return;
  if(!cloudOn()||!CLOUD.sb){ b.innerHTML='<div class="hint">Online accounts could not load (no connection to the sign-in service). Your career still saves in this browser.</div>'; return; }
