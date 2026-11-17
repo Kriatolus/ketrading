@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261117094203">
+<meta name="ke-build" content="20261117094603">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1618,6 +1618,21 @@ body:not(:has(#hub:not([hidden]))) #toast{right:auto!important;left:64px!importa
 .stk i{border:0!important;background:#1e293b!important}
 .stk i.on{background:transparent!important;box-shadow:inset 0 0 0 1.5px #f59e0b}.stk i.on em{color:#f59e0b!important}
 .stk i.on:not(:has(~ i.on)){background:linear-gradient(180deg,#f59e0b,#d97706)!important}
+
+/* ===== polish round 4 ===== */
+.ph-home::before{display:none!important}
+.ph-screen{-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 52px),transparent calc(100% - 18px));mask-image:linear-gradient(to bottom,#000 calc(100% - 52px),transparent calc(100% - 18px))}
+@media(max-width:600px){ #phone .ph-screen{-webkit-mask-image:none;mask-image:none;padding-top:calc(max(16px,env(safe-area-inset-top)) + 16px)!important} #phone .ph-close{top:calc(max(16px,env(safe-area-inset-top)) + 12px)} }
+.stk i.on:not(:has(~ i.on)) em{color:#1a1206!important;font-weight:800}
+.stk i.on:not(:has(~ i.on))::after{content:'';position:absolute}
+.sk-node button[disabled]{padding:0 12px;white-space:normal;line-height:1.2}
+.ev .card-h .price::after{margin-left:6px}
+.ev .card-h{margin-bottom:6px}
+.t-tro{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:color-mix(in srgb,#f59e0b 18%,transparent);color:#f59e0b;margin-right:8px;vertical-align:-6px}.t-tro svg{width:14px;height:14px}
+#toast:has(.t-tro){border-left:3px solid #f59e0b!important}
+#hubTitle{display:none}
+@media(max-width:600px){ #hubTitle{display:block;font-size:15px;margin-left:4px} .hub-top .brand{border-right:0!important;padding-right:0!important} }
+#hub .jb-tray i::before{opacity:.16!important}
 /* mobile tab bar */
 #mTabs{display:none}
 @media(max-width:600px){
@@ -4474,7 +4489,7 @@ function armDraft(side){
  OP.slOn=sl>0; if(sl>0) OP.slT=Math.max(1,Math.round(sl/t));
  OP.tpOn=tp>0; if(tp>0) OP.tpT=Math.max(1,Math.round(tp/t));
  opUpdate(true); refresh();
- msg(`${side>0?'Buy':'Sell'} armed. Set your stop and target on the chart if you want them, then press CONFIRM on the chart. Esc cancels.`);
+ msg(`${side>0?'Buy':'Sell'} armed. Set your stop and target on the chart if you want them, then press CONFIRM on the chart. Esc cancels.`); toast(`<b>${side>0?'Buy':'Sell'} armed.</b> Drag the lines to set your stop and target, then press <b>CONFIRM</b> on the chart. Esc cancels.`,5000);
 }
 function draftRef(){   // the draft's reference price: frozen when armed so its lines do not follow the market; reset when the side changes
  const side=OP.side;
@@ -4952,8 +4967,8 @@ function acctCard(a,c,full){
  const F=a.stage!=='eval', id=a.id, bl=!!a.blown;
  return `<div class="ac ${a.on?'on':''} ${a.col?'hascol':''} ${a.stage==='live'?'is-live':''} ${bl?'is-blown':''}" style="${a.col?'--acc:'+a.col:''}"><div class="ac-h">${full?`<input class="ac-n" data-nm="${id}" maxlength="16" value="${cesc(a.name)}" title="Rename this account">`:`<b class="ac-t">${cesc(a.name)}</b>`}<span class="badge sz">${planShort(SPEC(a))}</span><span class="badge" data-f="${id}:badge"></span>${full?'<span class="sw-l">Trading</span>':''}<label class="sw" title="${bl?'Reset this evaluation to trade it':'Trade this account'}"><input type="checkbox" data-on="${id}" ${a.on?'checked':''} ${bl?'disabled':''}><i></i></label></div>${optChips(a)}
   ${full?'<div class="ac-body"><div class="ac-left">':''}${full?`<div class="ac-cols"><span class="ac-cl">Colour</span>${ACC_COLS.map(c=>`<button class="ac-col ${a.col===c?'on':''}" data-col="${id}" data-c="${c}" style="background:${c}" title="Colour for this account"></button>`).join('')}</div>`:''}
-  ${full?`<div class="hint ac-note" data-f="${id}:note"></div></div><div class="ac-right">`:''}<div class="meter"><div class="l"><span data-f="${id}:pl"></span><b data-f="${id}:p"></b></div><div class="m"><i data-f="${id}:pb"></i></div></div>
-  <div class="ac-r"><span>Balance <b data-f="${id}:bal"></b></span><span>Room to max loss <b data-f="${id}:room"></b></span></div>
+  ${full?`</div><div class="ac-right">`:''}<div class="meter"><div class="l"><span data-f="${id}:pl"></span><b data-f="${id}:p"></b></div><div class="m"><i data-f="${id}:pb"></i></div></div>
+  <div class="ac-r"><span>Balance <b data-f="${id}:bal"></b></span><span>Room to max loss <b data-f="${id}:room"></b></span></div>${full?`<div class="hint ac-note" data-f="${id}:note"></div>`:''}
   ${full?`</div></div>`:''}
   ${pendFor(id).length?`<div class="ac-proc"><b>Processing</b> ${pendFor(id).map(p=>`${usd(p.net)} · arrives ${payTxt(p.due)}`).join('<br>')}</div>`:''}
   ${a.offer?`<div class="ac-choice"><button class="primary ac-btn" data-golive="${id}">Go live</button><button class="ac-btn" data-cashout="${id}">Cash out ${usd(Math.round(a.offer.cash*FUND.split*100)/100)}</button></div>`:
@@ -6236,7 +6251,7 @@ function skillsHTML(){
   <div class="sk-tree" style="--tiers:${tiers}"><div class="sk-lane sk-hdr"><div></div>${TN.slice(0,tiers).map(n=>`<div class="sk-th">${n}</div>`).join('')}</div>${br.map(B=>`<div class="sk-lane"><div class="sk-bh">${B}</div>${Array.from({length:tiers},(_,t)=>`<div class="sk-cell">${SKILLS.filter(s=>s.b===B&&skTier(s)===t).map(s=>{
    const o=skill(s.id), reqOk=s.r.every(skill), can=!o&&reqOk&&pts>=s.c, st=o?'own':reqOk?'open':'lock';
    return `<div class="sk-node ${st}" data-node="${s.id}"><span class="sk-tcap">${TN[t]}</span><div class="sk-top"><b>${s.n}</b><span class="sk-cost">${o?'Unlocked':s.c+' pt'+(s.c>1?'s':'')}</span></div><p>${s.d}</p>
-    ${o?'':`<button class="${can?(skRec?'sk-ok':(skRec=true,'primary sk-rec')):''}" data-sk="${s.id}" ${can?'':`disabled data-why="${cesc(!reqOk?'Needs '+s.r.filter(r=>!skill(r)).map(r=>SK[r].n).join(' + '):`Needs ${s.c-pts} more skill point${s.c-pts>1?'s':''}`)}"`}>${!reqOk?'Needs '+s.r.filter(r=>!skill(r)).map(r=>SK[r].n).join(' + '):pts<s.c?`Need ${s.c} point${s.c>1?'s':''}`:`Unlock · ${s.c} pt${s.c>1?'s':''}`}</button>`}</div>`; }).join('')}</div>`).join('')}</div>`).join('')}</div>
+    ${o?'':`<button class="${can?(skRec?'sk-ok':(skRec=true,'primary sk-rec')):''}" data-sk="${s.id}" ${can?'':`disabled data-why="${cesc(!reqOk?'Needs '+s.r.filter(r=>!skill(r)).map(r=>SK[r].n).join(' + '):`Needs ${s.c-pts} more skill point${s.c-pts>1?'s':''}`)}"`}>${!reqOk?(()=>{ const m=s.r.filter(r=>!skill(r)); return m.length>1?`Needs ${m.length} skills`:'Needs '+SK[m[0]].n; })():pts<s.c?`Need ${s.c} point${s.c>1?'s':''}`:`Unlock · ${s.c} pt${s.c>1?'s':''}`}</button>`}</div>`; }).join('')}</div>`).join('')}</div>`).join('')}</div>
   <div class="sec">Prestige</div><div class="card pres-card"><div><b>${(CAR.prestige||0)>=PRES_MAX?'Maximum prestige reached':'Start over, stronger'}</b><p class="hint">After 10 payouts or $25,000 paid out you can prestige: your wallet, accounts, items, skills and XP reset, and you keep your look, family, trophies and Hall of Fame. Each prestige adds +10% XP and +5% on every payout, up to ${PRES_MAX} stars.</p>
    <div class="mut">Progress: ${CAR.payouts||0}/10 payouts · ${fmt$(CAR.paid||0)}/$25,000 paid out · prestige ${CAR.prestige||0}/${PRES_MAX}</div></div>${(()=>{ const why=(CAR.prestige||0)>=PRES_MAX?'Maximum prestige reached':!presOk()?'Needs 10 payouts or $25,000 paid out':CHA()?'Finish your evaluation session first':(CAR.loans||[]).length?'Pay off your loans first':''; return `<button id="presBtn" class="${why?'':'primary'}" ${why?`disabled data-why="${cesc(why)}"`:''}>${why?'Locked':'Prestige now'}</button>`; })()}</div>
   <div class="sec">How to earn XP</div><div class="card"><div class="rows"><div><span>Close a trade in an evaluation session</span><span class="mut">6 XP, 15 XP if it wins</span></div><div><span>Close a practice trade</span><span class="mut">1 XP, 3 XP if it wins</span></div><div><span>Finish an evaluation session</span><span class="mut">30 XP, 70 XP in profit</span></div><div><span>Pass an evaluation</span><span class="mut">300 XP</span></div><div><span>Take a payout</span><span class="mut">200 XP</span></div><div><span>Daily login reward</span><span class="mut">10–70 XP</span></div><div><span>Missions and trophies</span><span class="mut">shown on the phone</span></div><div><span>Process a job ticket</span><span class="mut">0.25 XP</span></div></div></div></div>`;
@@ -6965,7 +6980,7 @@ const ACH=[['eval1','First evaluation','Buy your first evaluation',()=>CAR.accts
  ['home','Homeowner','Own a home',()=>Object.keys(CAR.owned).some(k=>ITEM[k]&&ITEM[k].slot==='home'),100],['villa','Villa life','Own a villa or better',()=>['villa','pent','beach','mansion','skyvilla'].some(k=>CAR.owned[k]),300],
  ['car','Wheels','Own a car',()=>Object.keys(CAR.owned).some(k=>ITEM[k]&&ITEM[k].slot==='car'),100],['wed','Family','Get married',()=>!!(CAR.fam&&CAR.fam.partner),150],
  ['debtfree','Debt free','Pay off a loan',()=>(CAR.loansPaid||0)>=1,100],['hard1','Iron nerves','Finish a hard session in profit',()=>(CAR.hardWins||0)>=1,500],['hard5','Ice cold','Win 5 hard sessions',()=>(CAR.hardWins||0)>=5,1500],['lv10','Level 10','Reach level 10',()=>lvlOf(CAR.xp||0)>=10,0],['three','Fund manager','Have 3 funded accounts at once',()=>CAR.accts.filter(a=>a.stage==='funded').length>=3,600],['live1','Going live','Get a Lucid Live account',()=>(CAR.lives||0)>=1||CAR.accts.some(a=>a.stage==='live'&&!a.offer),1000]];
-function achCheck(){ CAR.ach=CAR.ach||{}; let got=0; for(const [id,n,d,f,x] of ACH){ if(CAR.ach[id]) continue; let ok=false; try{ ok=f(); }catch(e){} if(ok){ CAR.ach[id]=Date.now(); got++; if(x) xpAdd(x*(skill('collector')?1.5:1)); toast(`<b>Achievement unlocked: ${n}.</b> ${d}.`,4500); } } if(got){ carSave(); phoneBadge(); try{ sfxPlay('trophy'); }catch(e){} try{ if(hubShown()&&HUB.page==='profile') hubRender(); }catch(e){} } }
+function achCheck(){ CAR.ach=CAR.ach||{}; let got=0; for(const [id,n,d,f,x] of ACH){ if(CAR.ach[id]) continue; let ok=false; try{ ok=f(); }catch(e){} if(ok){ CAR.ach[id]=Date.now(); got++; if(x) xpAdd(x*(skill('collector')?1.5:1)); toast(`<span class="t-tro">${troIco(id)}</span><b>Trophy unlocked: ${n}</b>`,4500); } } if(got){ carSave(); phoneBadge(); try{ sfxPlay('trophy'); }catch(e){} try{ if(hubShown()&&HUB.page==='profile') hubRender(); }catch(e){} } }
 setInterval(()=>{ try{ achCheck(); }catch(e){} },20000);
 try{ if(payCap()) carSaveLocal(); }catch(e){}
 setInterval(()=>{ try{ payTick(); }catch(e){} },5000); setTimeout(()=>{ try{ payTick(); }catch(e){} },3000);   // payouts arrive after Lucid's processing time, also after a reload
@@ -7056,7 +7071,7 @@ const LOOK_DEF={face:'oval',beard:'none',eye:'#2a1f18'};
 const lk=(L,k)=>(L&&L[k])||LOOK_DEF[k];
 /* --- avatar extras (GFX): empty garage bay, portraits, item thumbnails, small icons --- */
 function garageEmpty(){ return `<g fill="none" stroke="#5a6888" stroke-width="1.1" stroke-dasharray="3 4" opacity=".55"><path d="M84 92h-6q-4 0-4-5v-9q0-6 6-8l26-6 24-16q7-5 16-5h56q10 0 17 6l22 15 28 6q6 2 6 8v9q0 5-4 5h-6"/><path d="M146 92h96"/><circle cx="114" cy="92" r="13"/><circle cx="270" cy="92" r="13"/></g>
- <path d="M200 102v-5M200 90v-5M200 78v-5" stroke="#c9a45a" stroke-width="1.6" opacity=".5"/><rect x="134" y="96" width="132" height="15" rx="7.5" fill="#0b1120" opacity=".92"/><text x="200" y="106.5" text-anchor="middle" fill="#93a3bf" font-size="10" letter-spacing=".3" font-family="Geist,Segoe UI,sans-serif">Your first car parks here</text>`; }
+ <path d="M200 102v-5M200 90v-5M200 78v-5" stroke="#c9a45a" stroke-width="1.6" opacity=".5"/><rect x="134" y="62" width="132" height="15" rx="7.5" fill="#0b1120" opacity=".92"/><text x="200" y="72.5" text-anchor="middle" fill="#93a3bf" font-size="10" letter-spacing=".3" font-family="Geist,Segoe UI,sans-serif">Your first car parks here</text>`; }
 /* head and shoulders portrait of a character, for the profile page and cards */
 function avPortrait(eq,L,size){ const P=gfxId('p'), z=size||96;
  return `<svg class="gfx-portrait" viewBox="-46 -258 92 100" width="${z}" height="${z*100/92}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>${lgrad(P+'bg',[[0,'#2a3a63'],[1,'#121a2e']],0,0,0,1)}</defs><rect x="-46" y="-258" width="92" height="100" fill="url(#${P}bg)"/><circle cx="22" cy="-246" r="40" fill="#4c8dff" opacity=".12"/>${avMe(eq,L,{P:P+'a'})}</svg>`; }
@@ -7196,6 +7211,11 @@ function skRespec(){ const n=Object.keys(CAR.skills||{}).length, cost=respecCost
 /* --- tier layout + connectors for the skill tree --- */
 function skTier(s,seen){ seen=seen||{}; if(!s.r.length) return 0; if(seen[s.id]) return 0; seen[s.id]=1; return 1+Math.max(...s.r.map(r=>skTier(SK[r],seen))); }
 function skLinks(){ const T=document.querySelector('.sk-tree'); if(!T) return; let sv=T.querySelector('svg.sk-svg'); if(!sv){ sv=document.createElementNS('http://www.w3.org/2000/svg','svg'); sv.setAttribute('class','sk-svg'); T.prepend(sv); }
+ T.querySelectorAll('.sk-node').forEach(n=>n.style.removeProperty('margin-top'));
+ if(innerWidth>900) T.querySelectorAll('.sk-cell').forEach(cell=>{ cell.querySelectorAll('.sk-node').forEach(n=>{ const sd=SK[n.dataset.node]; if(!sd||!sd.r.length) return;
+   const ps=sd.r.map(r=>T.querySelector(`[data-node="${r}"]`)).filter(Boolean); if(!ps.length) return;
+   const want=ps.reduce((a,p)=>a+p.getBoundingClientRect().top,0)/ps.length, cur=n.getBoundingClientRect().top;
+   if(want>cur+1) n.style.setProperty('margin-top',Math.round(want-cur)+'px','important'); }); });
  const R=T.getBoundingClientRect(); sv.setAttribute('width',R.width); sv.setAttribute('height',R.height); let h='';
  // orthogonal routing: out of the source, along its own lane in the gutter, into the target; parallel lines are spaced apart so none overlap
  const L=[]; SKILLS.forEach(s=>s.r.forEach(r=>{ const a=T.querySelector(`[data-node="${r}"]`), b=T.querySelector(`[data-node="${s.id}"]`); if(a&&b) L.push({r,id:s.id,A:a.getBoundingClientRect(),B:b.getBoundingClientRect()}); }));
@@ -7329,7 +7349,7 @@ function hubRender(){
  if(!$('hub')) return;
  $('hubNav').innerHTML=HUB_PAGES.map(([k,l])=>`<button data-p="${k}" class="${k===HUB.page?'act':''}">${l}</button>`).join('');
  $('hubNav').querySelectorAll('button').forEach(b=>b.onclick=()=>hubOpen(b.dataset.p));
- $('hubWal').textContent=usd(CAR.wallet); { const hl=$('hubLv'); if(hl) hl.textContent='Lv '+lvlOf(CAR.xp||0); }
+ $('hubWal').textContent=usd(CAR.wallet); { const hl=$('hubLv'); let t=$('hubTitle'); if(!t){ t=document.createElement('b'); t.id='hubTitle'; const nv=$('hubNav'); nv.parentNode.insertBefore(t,nv); } t.textContent=({life:'Life',props:'Prop firms',job:'Job',skills:'Skills',leaderboard:'Leaderboard',profile:'Profile'})[HUB_ALIAS[HUB.page]||HUB.page]||''; } { const hl=$('hubLv'); if(hl) hl.textContent='Lv '+lvlOf(CAR.xp||0); }
  const ub=$('hubUser'); ub.textContent=CLOUD.user?(CLOUD.user.email||'Signed in'):'Sign in'; ub.title=CLOUD.user?'Your online account':'Sign in to save your career online';
  if(HUB_ALIAS[HUB.page]) HUB.page=HUB_ALIAS[HUB.page];
  const B=$('hubBody'), P=HUB.page, name=cesc(CAR.look.name||'You');
