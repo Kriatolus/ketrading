@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261117112942">
+<meta name="ke-build" content="20261117153352">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -4228,7 +4228,7 @@ function updateAnalytics(){
 }
 function updateStatus(){
  const b=displayBar(S.cursor), p=S.pos;
- $('status').textContent=`${S.sym} | TF ${tfLabel()} | ${CHA()?'09:30 to 16:00 NY':`bar ${S.cursor+1}/${S.bars.length}`} | ${fmtLocal(S.partial&&S.raw.length? replayNow() : b.time)} ${tzName()} | C ${b.close.toFixed(2)} | `+
+ $('status').textContent=`${S.sym} | TF ${tfLabel()} | ${CHA()?'09:25 to 16:00 NY':`bar ${S.cursor+1}/${S.bars.length}`} | ${fmtLocal(S.partial&&S.raw.length? replayNow() : b.time)} ${tzName()} | C ${b.close.toFixed(2)} | `+
   (p ? `${p.side>0?'LONG':'SHORT'} ${p.qty} @ ${p.entry.toFixed(2)}${p.sl!=null?' SL '+p.sl.toFixed(2):''}${p.tp!=null?' TP '+p.tp.toFixed(2):''}` : 'flat');
  if(S.partial && S.ticks){
   const last=Math.max(1,S.ticks.length-1);
@@ -5482,7 +5482,7 @@ function helpDialog(){
   {name:'Replay',html:'<div class="help">'+P('<b>1. Pick a start.</b> Use Select bar, a date, or the session jump (NY AM open, London, Asia) on the bar under the chart.')+P('<b>2. Press Play.</b> Live mode moves price one tick per second on every timeframe. Candles mode reveals one whole candle per step.')+P('<b>3. Switch timeframe any time.</b> Every timeframe stays at the same moment and keeps playing.')+P('<b>Split screen</b> shows your second symbol (for example ES) next to the main chart. Drag the divider to resize it. You can pan, zoom and draw on it like the main chart. The link button keeps both charts on the same time, and <b>Trade this chart</b> swaps the two symbols.')+'</div>'},
   {name:'Trading',html:'<div class="help">'+P('<b>Market order:</b> Buy or Sell in the Trade tab, the buttons on the chart, or keys B and S.')+P('<b>Pending order:</b> press Buy on chart or Sell on chart, then click the price. Below the market a buy becomes a limit; above it becomes a stop. The reverse applies to sells.')+P('<b>Move things:</b> drag any order, stop loss or take profit line. Press TP or SL on a line to add an exit.')+P('<b>Your open P&amp;L</b> is shown live on the chart and in the Trade tab.')+'</div>'},
   {name:'Indicators',html:'<div class="help">'+P('<b>Quarter boxes</b> draw each quarter on the chart. <b>Quarter timeline</b> is the strip under the chart. They are two separate switches in Settings.')+P('<b>Session highs and lows</b> mark the high and low of Asia, London, NY AM and NY PM in New York time.')+P('<b>True opens</b> and <b>SMT</b> are also in Settings, with themes, accent and chart colours.')+'</div>'},
-  {name:'Prop firms',html:'<div class="help">'+P('<b>Evaluation sessions.</b> Your accounts only trade in sessions the Lucid desk sends to your phone: one random, hidden trading day from 09:30 to 16:00 New York time. The market runs live and cannot be paused, rewound or skipped. Pick a speed from 1 second to 15 minutes of market time per real second. At 16:00 open positions close and the date is revealed. Trades outside sessions are practice.')+P('<b>Four Lucid account types</b> in 25K, 50K, 100K and 150K, each with Lucid\'s own rules: <b>LucidFlex</b> and <b>LucidDaily</b> evaluations (40% consistency rule; 50% as an option; Daily with the end-of-day drawdown also 30%), <b>LucidPro</b> (no consistency rule while evaluating) and <b>LucidDirect</b> (no evaluation, you start funded; unlock it in Skills). Each store card has its own options, as at Lucid: daily loss limit, On Demand Payouts, consistency and (Daily) the evaluation and funded drawdowns. Prices are the store\'s coupon prices; resets are at full price.')+P('<b>Max loss</b> trails your end-of-day balance and locks at the starting balance + $100 (LucidDaily funded trails intraday). A soft daily loss limit only benches the account until the next session. A LucidDaily evaluation bought with the intraday drawdown trails intraday too; a LucidDaily bought with Drawdown In Funded: EOD trails end of day when funded. LucidFlex funded accounts follow a scaling plan for size.')+P('<b>Payouts:</b> Flex after five winning days; Pro after three trading days and the cycle goal with a 40% consistency rule; Daily on any day with net profit above a buffer; Direct after the cycle profit goal, five trading days and a 20% consistency rule. Flex, Pro and Direct allow five payouts per account. You keep 90%.')+P('<b>Process:</b> a passed evaluation moves to funded by itself, with no activation fee. A failed evaluation can be reset for a fee. <b>Lucid Live</b> follows the fifth payout (Flex, Pro, Direct) or LucidDaily\'s max daily profit: every funded account with a payout moves live together, starting at $0 with an end-of-day drawdown that locks at $100, no daily loss limit, daily payouts and a repeatable bonus paid out to you (90/10). While you hold a live account you cannot buy new evaluations or Direct accounts (practice and LucidMaxx accounts you own stay open). A blown live account starts a 2-day cooldown. When an account is due for live you have 24 hours to go live or cash out 50% of the live starting balance (LucidDaily: the profit above the buffer at the prior day\'s close, max $15,000, paid either way); with no choice it goes live. Live size follows the live scaling plan.')+P('<b>Payout processing:</b> a payout is taken from the account at once and arrives in your bank 2 to 5 minutes later. It shows as Processing on the account and in the Bank app.')+P('<b>LucidMaxx</b> is invite only (you earn it when an account first becomes due for live): an evaluation with 40% consistency, a pre-live step under the live scaling plan, then live capital of $1,000 / $2,000 / $3,000 / $4,500 you can withdraw from day one with a static $100 max loss, or a full cashout. It also earns the repeatable live bonus, paid out to you. Up to 5 accounts, none new while you hold a live account.')+'</div>'},
+  {name:'Prop firms',html:'<div class="help">'+P('<b>Evaluation sessions.</b> Your accounts only trade in sessions the Lucid desk sends to your phone: one random, hidden trading day from 09:25 to 16:00 New York time. The market runs live and cannot be paused, rewound or skipped. Pick a speed from 1 second to 15 minutes of market time per real second. At 16:00 open positions close and the date is revealed. Trades outside sessions are practice.')+P('<b>Four Lucid account types</b> in 25K, 50K, 100K and 150K, each with Lucid\'s own rules: <b>LucidFlex</b> and <b>LucidDaily</b> evaluations (40% consistency rule; 50% as an option; Daily with the end-of-day drawdown also 30%), <b>LucidPro</b> (no consistency rule while evaluating) and <b>LucidDirect</b> (no evaluation, you start funded; unlock it in Skills). Each store card has its own options, as at Lucid: daily loss limit, On Demand Payouts, consistency and (Daily) the evaluation and funded drawdowns. Prices are the store\'s coupon prices; resets are at full price.')+P('<b>Max loss</b> trails your end-of-day balance and locks at the starting balance + $100 (LucidDaily funded trails intraday). A soft daily loss limit only benches the account until the next session. A LucidDaily evaluation bought with the intraday drawdown trails intraday too; a LucidDaily bought with Drawdown In Funded: EOD trails end of day when funded. LucidFlex funded accounts follow a scaling plan for size.')+P('<b>Payouts:</b> Flex after five winning days; Pro after three trading days and the cycle goal with a 40% consistency rule; Daily on any day with net profit above a buffer; Direct after the cycle profit goal, five trading days and a 20% consistency rule. Flex, Pro and Direct allow five payouts per account. You keep 90%.')+P('<b>Process:</b> a passed evaluation moves to funded by itself, with no activation fee. A failed evaluation can be reset for a fee. <b>Lucid Live</b> follows the fifth payout (Flex, Pro, Direct) or LucidDaily\'s max daily profit: every funded account with a payout moves live together, starting at $0 with an end-of-day drawdown that locks at $100, no daily loss limit, daily payouts and a repeatable bonus paid out to you (90/10). While you hold a live account you cannot buy new evaluations or Direct accounts (practice and LucidMaxx accounts you own stay open). A blown live account starts a 2-day cooldown. When an account is due for live you have 24 hours to go live or cash out 50% of the live starting balance (LucidDaily: the profit above the buffer at the prior day\'s close, max $15,000, paid either way); with no choice it goes live. Live size follows the live scaling plan.')+P('<b>Payout processing:</b> a payout is taken from the account at once and arrives in your bank 2 to 5 minutes later. It shows as Processing on the account and in the Bank app.')+P('<b>LucidMaxx</b> is invite only (you earn it when an account first becomes due for live): an evaluation with 40% consistency, a pre-live step under the live scaling plan, then live capital of $1,000 / $2,000 / $3,000 / $4,500 you can withdraw from day one with a static $100 max loss, or a full cashout. It also earns the repeatable live bonus, paid out to you. Up to 5 accounts, none new while you hold a live account.')+'</div>'},
   {name:'Sections',html:'<div class="help">'+P('<b>Trading</b> is the chart. <b>Life</b> is your home, character, family and shop. <b>Prop firms</b> holds your accounts and the eval store. <b>Job</b> pays wallet money per ticket. <b>Skills</b> is where you spend skill points.')+P('<b>Levels and skills.</b> Trades, passes, payouts and job tickets earn XP. Every level gives a skill point that unlocks chart colours, live backgrounds, the 3D coin, LucidDirect, the trade syncer, family, luxury items and job boosts.')+P('<b>Fullscreen.</b> Press Shift+F or the fullscreen button for a chart-only view. Esc leaves it.')+P('<b>Saving.</b> Your replay spot, closed trades and settings save in this browser, and online too when you sign in under your profile.')+P('<b>Sounds.</b> Pick a sound for every event (entry, take profit, stop loss, passing, payouts, your dog) in Settings.')+'</div>'}
  ],null,null);
 }
@@ -6632,11 +6632,24 @@ const CHS=()=>CAR.ch&&CAR.ch.act; const CHA=()=>!!CHS(); const CHE=()=>CHA()&&!C
 const chDayId=()=>CHA()?CHS().day:((CAR.ch&&CAR.ch.day)||0)+0.5;
 function nyAt(D,h,m){ const Ls=D*86400+h*3600+m*60, u=Ls+5*3600; return Ls-nyOffset(u); }
 function chSym(){ const M=window.BT_MANIFEST||{}; return M.NQ_USATECH?'NQ_USATECH':Object.keys(M)[0]||null; }
+function chRand(n){ try{ const u=new Uint32Array(1); crypto.getRandomValues(u); return u[0]%n; }catch(e){ return Math.floor(Math.random()*n); } }
+function chUsedDays(){   // every day already played or waiting, so a session never repeats one
+ const u=new Set((CAR.ch&&CAR.ch.used)||[]);
+ if(CAR.ch){ if(CAR.ch.req) u.add(CAR.ch.req.D); if(CAR.ch.act) u.add(CAR.ch.act.D); }
+ Object.values(CAR.chSlots||{}).forEach(x=>{ if(x&&x.req) u.add(x.req.D); if(x&&x.act) u.add(x.act.D); });
+ return u;
+}
 function chMakeReq(){
  const sym=chSym(); if(!sym) return null; const ys=(window.BT_MANIFEST[sym]||[]).slice(); if(!ys.length) return null;
- const y=ys[Math.floor(Math.random()*ys.length)], now=new Date(), maxT=Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate())-7*864e5;
- let D=null; for(let k=0;k<60&&D==null;k++){ const t=Date.UTC(y,0,1)+Math.floor(Math.random()*365)*864e5; if(t>maxT) continue; if(!ys.includes(y-1) && t<Date.UTC(y,0,1)+CH_HIST*864e5) continue; const wd=new Date(t).getUTCDay(); if(wd>=1&&wd<=5) D=Math.floor(t/864e5); }
- if(D==null) return null;
+ const now=new Date(), maxD=Math.floor((Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate())-7*864e5)/864e5);
+ const used=chUsedDays(), recent=((CAR.ch&&CAR.ch.used)||[]).slice(-15);
+ const pool=[];
+ for(const y of ys){ const d0=Math.floor(Date.UTC(y,0,1)/864e5), d1=Math.floor(Date.UTC(y+1,0,1)/864e5);
+  for(let D=d0; D<d1 && D<=maxD; D++){ const wd=new Date(D*864e5).getUTCDay(); if(wd<1||wd>5) continue;
+   if(!ys.includes(y-1) && D<d0+CH_HIST) continue; if(used.has(D)) continue; pool.push(D); } }
+ let pick=pool.filter(D=>!recent.some(r=>Math.abs(r-D)<=7));   // keep away from the last few days you played
+ if(!pick.length) pick=pool; if(!pick.length) return null;
+ const D=pick[chRand(pick.length)], y=new Date(D*864e5).getUTCFullYear();
  return {id:newId(),sym,y,D,at:Date.now(),n:((CAR.ch&&CAR.ch.day)||0)+1};
 }
 function chTick(){
@@ -6645,7 +6658,7 @@ function chTick(){
  if(!CAR.accts.some(a=>a.on)) return;
  if(Date.now()<(CAR.ch.next||0)) return;
  const r=chMakeReq(); if(!r) return; CAR.ch.req=r;
- msgAdd({k:'req',id:r.id,from:'Lucid Trading desk',title:`Evaluation session ${r.n} is ready`,body:'One random trading day on NQ, 09:30 to 16:00 New York time. The date stays hidden until the session ends. The market runs live and cannot be paused; you can speed it up from 1 second to 15 minutes per second. Accept to trade it on your active accounts, or ignore it and enjoy life.'});
+ msgAdd({k:'req',id:r.id,from:'Lucid Trading desk',title:`Evaluation session ${r.n} is ready`,body:'One random trading day on NQ, 09:25 to 16:00 New York time. The date stays hidden until the session ends. The market runs live and cannot be paused; you can speed it up from 1 second to 15 minutes per second. Accept to trade it on your active accounts, or ignore it and enjoy life.'});
  carSave(); try{ sfxPlay('alert',true); }catch(e){}
  toast(`<b>New evaluation session.</b> Open your phone to accept it.`,5000);
 }
@@ -6727,7 +6740,7 @@ function chTickSlots(){   // every evaluation that is switched off still gets it
  for(const a of CAR.accts){ if(a.on||a.blown||a.offer) continue; const s=slots[a.id]||(slots[a.id]={req:null,act:null,next:0,prev:null});
   if(s.req||s.act||Date.now()<(s.next||0)) continue;
   const r=chMakeReq(); if(!r) continue; r.acct=a.id; s.req=r; n++;
-  msgAdd({k:'req',id:r.id,from:'Lucid Trading desk',title:`Session ready for ${a.name}`,body:`A random NQ trading day for ${a.name} (${planShort(SPEC(a))}), 09:30 to 16:00 New York time. Each evaluation gets its own session and its own hidden date. Switch to this account to accept it.`}); }
+  msgAdd({k:'req',id:r.id,from:'Lucid Trading desk',title:`Session ready for ${a.name}`,body:`A random NQ trading day for ${a.name} (${planShort(SPEC(a))}), 09:25 to 16:00 New York time. Each evaluation gets its own session and its own hidden date. Switch to this account to accept it.`}); }
  if(n||dirty) carSave();
  if(n && !CHA()){ try{ sfxPlay('alert'); }catch(e){} toast(n===1?'<b>New evaluation session.</b> Open your phone to see which account it is for.':`<b>${n} new evaluation sessions.</b> One for each waiting account.`,5000); }
 }
@@ -6746,17 +6759,17 @@ async function chAccept(tf){ const hard=!!CH.hardNext; CH.hardNext=false;
 async function chAccept2(r,tf,hard){
  phoneClose(); hubOpen('chart');
  CAR.ch.prev=(()=>{ try{ return sessGet(); }catch(e){ return null; } })();
- const t0=nyAt(r.D,9,30), tEnd=nyAt(r.D,16,0);
+ const t0=nyAt(r.D,9,25), tEnd=nyAt(r.D,16,0);
  const ys=window.BT_MANIFEST[r.sym], yb=new Date((r.D-CH_HIST-2)*864e5).getUTCFullYear(), y0=ys.includes(yb)?yb:r.y;
  msg('Preparing your evaluation session...'); CH.loading=true;
  const raw=await loadSymbol(r.sym,y0,r.y); CH.loading=false; const k0=raw.findIndex(b=>b.time>=t0);
  if(k0<0 || raw[k0].time>t0+10*60 || k0<2){ CAR.ch.req=null; CAR.ch.next=0; msgDrop(r.id); carSave(); chTick(); toast('That day had no trading. A new session request is on its way.',4000); return; }
  const p0=raw[k0].open, off=Math.round(p0*(0.08+Math.random()*0.17)*(Math.random()<0.5?-1:1)*4)/4;
- if(!r.daily) CAR.ch.seq=Math.max(CAR.ch.day||0,CAR.ch.seq||0)+1;
+ if(!r.daily){ CAR.ch.seq=Math.max(CAR.ch.day||0,CAR.ch.seq||0)+1; CAR.ch.used=((CAR.ch.used||[]).filter(x=>x!==r.D).concat(r.D)).slice(-400); }
  CAR.ch.act={id:r.id,sym:r.sym,y0,y1:r.y,D:r.D,t0,tEnd,off,tf:chTfNorm(tf),day:r.daily?0:CAR.ch.seq,daily:!!r.daily,dkey:r.key||null,cur:t0,fresh:true,trades:[],markers:[],realized:0,dayPnl:{},pos:null,started:Date.now()};
  if(hard&&!r.daily&&CAR.hardOffer>0){ CAR.ch.act.hard=true; CAR.ch.act.spd=Math.max(30,+CAR.ch.act.spd||0); CAR.hardOffer--; }
  CAR.ch.req=null; msgDrop(r.id); carSave();
- await chLoad(raw); toast(`<b>Evaluation session ${CHS().day} started.</b> Trades now count on your active accounts. The session runs 09:30 to 16:00 New York time.`,6000);
+ await chLoad(raw); toast(`<b>Evaluation session ${CHS().day} started.</b> Trades now count on your active accounts. The session runs 09:25 to 16:00 New York time, five minutes before the open.`,6000);
 }
 async function chPairData(a){   // second symbol for an evaluation session: same time window, shifted like the main chart so the real date stays hidden
  if(!cfg.pair || cfg.pair===a.sym) return [];
