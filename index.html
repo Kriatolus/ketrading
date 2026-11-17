@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261117093725">
+<meta name="ke-build" content="20261117094203">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1578,6 +1578,46 @@ body:not(:has(#hub:not([hidden]))) #toast{right:auto!important;left:64px!importa
 @media(max-width:1640px){#top .chip,#kStats{display:none!important}}
 #walLb{min-width:0!important}#btnCareer{flex-shrink:0!important}
 @media(max-width:600px){ .hub-wal{display:flex!important;font-size:0!important;margin-left:8px} .hub-wal b{font-size:14px!important} }
+
+/* ===== polish round 3 ===== */
+#btnGo{display:none!important}
+#replayBar{flex-wrap:nowrap!important;gap:5px!important}
+#replayBar button{padding:0 8px}
+#sessSel{width:136px!important;min-width:0!important}#gotoBtn{min-width:132px}
+#pnlW .pw-h b{font-size:11px!important;letter-spacing:.08em}
+#pnlW .pw-grip{display:none!important}
+#pnlW .pw-min{width:20px;height:20px;font-size:14px;order:3}#pnlW .pw-x{order:4}
+#pnlW{cursor:move}
+.pf-tro:not(.got){opacity:1!important}.pf-tro:not(.got) i{opacity:.4}.pf-tro:not(.got) em{color:#94a3b8!important}
+.plan-tabs button.act{border:1px solid #3b82f6!important;background:#172554!important}.plan-tabs button.act b{color:#fff}
+.plan-tabs button:has(.lk){opacity:.6}
+.plan-tabs .lk::before{content:'';display:inline-block;width:10px;height:10px;margin-right:4px;vertical-align:-1px;background:no-repeat center/10px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M6 11h12v10H6zM9 11V8a3 3 0 016 0v3'/%3E%3C/svg%3E")}
+.ev-opts .seg button{background:#0f172a!important;color:#94a3b8!important}
+.ev-opts .seg button.act{background:#2563eb!important;color:#fff!important;font-weight:600!important}
+.ac-note{margin-top:4px;color:#cbd5e1!important;font-size:12.5px!important}
+.h2b{vertical-align:middle;margin-left:10px;position:relative;top:-2px}
+.shop-it .acts button.fin{color:#94a3b8!important;text-decoration:none!important}.shop-it .acts button.fin:hover{text-decoration:underline!important;color:var(--text)!important}
+.in-use{display:inline-flex;align-items:center;height:28px;padding:0 12px;border-radius:999px;font-size:12px;font-weight:600;color:#34d399;background:rgba(6,78,59,.45);border:1px solid rgba(16,185,129,.35)}
+.goal,.wearing{margin-top:14px;padding:14px!important}
+.goal .eyebrow,.wearing .eyebrow{display:block;margin-bottom:10px}
+.goal-r{display:flex;align-items:center;gap:12px}.goal-r b{display:block;font-size:14px}
+.goal .m{height:6px;border-radius:3px;background:#1f2937;margin:12px 0 8px;overflow:hidden}.goal .m i{display:block;height:100%;background:linear-gradient(90deg,#2563eb,#60a5fa);border-radius:3px}
+.goal-f{display:flex;justify-content:space-between;align-items:center;font-size:12px}
+.wear-r{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.wear-r span{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.wear-r em{font-style:normal;font-size:11px;color:#94a3b8}
+.goal .dot.thumb,.wearing .dot.thumb{width:44px;height:44px;border-radius:10px;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,#475569 0%,#334155 35%,#1e293b 75%);border:1px solid #334155}
+.goal .dot.thumb svg,.wearing .dot.thumb svg{width:34px;height:34px}
+#hub .jb-tray i{border:1px solid color-mix(in srgb,var(--text) 22%,transparent)!important;border-top:2px solid color-mix(in srgb,var(--text) 30%,transparent)!important;background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(255,255,255,.05))!important;box-shadow:inset 0 6px 10px rgba(0,0,0,.45)}
+#hub .jb-tray i::before{opacity:0!important}
+.jb-stage{padding-bottom:6px!important;margin-bottom:0!important}
+.sk-lane{gap:48px!important}
+@media(max-width:600px){
+ #phone .ph-screen{padding-top:calc(env(safe-area-inset-top) + 20px)!important}
+ #phone .ph-close{top:calc(env(safe-area-inset-top) + 16px)}
+}
+.stk i{border:0!important;background:#1e293b!important}
+.stk i.on{background:transparent!important;box-shadow:inset 0 0 0 1.5px #f59e0b}.stk i.on em{color:#f59e0b!important}
+.stk i.on:not(:has(~ i.on)){background:linear-gradient(180deg,#f59e0b,#d97706)!important}
 /* mobile tab bar */
 #mTabs{display:none}
 @media(max-width:600px){
@@ -1731,10 +1771,10 @@ body.debt-arrears .hub-wal b{outline:1px solid color-mix(in srgb,var(--warn,#f5a
       <option value="1000">CL ($1000/pt)</option><option value="1">Custom / crypto ($1/pt)</option>
      </select></label>
     <label class="fld">Quantity <input id="qty" type="number" value="1" min="0.001" step="0.001"></label>
-    <label class="fld">Commission / side $ <input id="comm" type="number" value="0" min="0" step="0.1"></label>
-    <label class="fld">Stop loss (pts) <input id="slPts" type="number" value="0" min="0" step="0.25"></label>
-    <label class="fld">Take profit (pts) <input id="tpPts" type="number" value="0" min="0" step="0.25"></label>
-    <label class="fld wide">Daily loss limit $ <input id="dailyLimit" type="number" value="0" min="0" step="10"></label>
+    <label class="fld">Commission / side $ <input id="comm" type="number" value="" placeholder="None" min="0" step="0.1"></label>
+    <label class="fld">Stop loss (pts) <input id="slPts" type="number" value="" placeholder="Off" min="0" step="0.25"></label>
+    <label class="fld">Take profit (pts) <input id="tpPts" type="number" value="" placeholder="Off" min="0" step="0.25"></label>
+    <label class="fld wide">Daily loss limit $ <input id="dailyLimit" type="number" value="" placeholder="No limit" min="0" step="10"></label>
    </div>
    <div id="riskLine" class="hint"></div>
    <div class="bs"><button id="btnSell" class="sell">Sell <kbd>S</kbd></button><button id="btnBuy" class="buy">Buy <kbd>B</kbd></button></div>
@@ -4599,7 +4639,7 @@ function evOpts(L,k,o,P){   // the toggles on each store card, as on Lucid's sto
  if(L.id==='flex'||L.id==='daily') rows.push(['Consistency',seg('cons',(L.id==='daily'&&o.dd!=='intra'?[[30,'30%'],[40,'40%'],[50,'50%']]:[[40,'40%'],[50,'50%']]),Math.round(o.cons*100)),d(P.dCons)]);
  if(L.id==='daily') rows.push(['Drawdown in eval',seg('dd',[['eod','EOD'],['intra','Intraday']],o.dd),d(P.dDd)],
   ['Drawdown in funded',seg('fdd',[['intra','Intraday'],['eod','EOD']],o.fdd,o.dd==='intra'),o.dd==='intra'?'<em class="why">EOD needs EOD in eval</em>':d(P.dFdd)]);
- return `<div class="ev-opts">${rows.map(([l,s,x])=>`<span>${l}</span><div>${s}${x}</div>`).join('')}</div><div class="ev-reset"><span>Reset fee</span><b>${usd(P.reset).replace(/\.00$/,'')}</b><i>after a failed evaluation, no coupon</i></div>`; }
+ return `<div class="ev-opts">${rows.map(([l,s,x])=>`<span>${l}</span><div>${s}${x}</div>`).join('')}</div>`; }
 function liveCalc(L,open,today,P){
  const k=P.k, mx=!!P.P.maxx, mll=mx?0:(LIVE.dd[k]||P.mll), lk=LIVE.lock, st=mx?MAXX.start[k]:0, keep=mx?lk+1:lk+mll, minPay=mx?1:FUND.min;
  let bal=st, floor=mx?lk:-mll, day=null, breach=false, pays=0, bonuses=0, bP=0, bD=new Map(), days=new Map(), eb=st;
@@ -4912,9 +4952,9 @@ function acctCard(a,c,full){
  const F=a.stage!=='eval', id=a.id, bl=!!a.blown;
  return `<div class="ac ${a.on?'on':''} ${a.col?'hascol':''} ${a.stage==='live'?'is-live':''} ${bl?'is-blown':''}" style="${a.col?'--acc:'+a.col:''}"><div class="ac-h">${full?`<input class="ac-n" data-nm="${id}" maxlength="16" value="${cesc(a.name)}" title="Rename this account">`:`<b class="ac-t">${cesc(a.name)}</b>`}<span class="badge sz">${planShort(SPEC(a))}</span><span class="badge" data-f="${id}:badge"></span>${full?'<span class="sw-l">Trading</span>':''}<label class="sw" title="${bl?'Reset this evaluation to trade it':'Trade this account'}"><input type="checkbox" data-on="${id}" ${a.on?'checked':''} ${bl?'disabled':''}><i></i></label></div>${optChips(a)}
   ${full?'<div class="ac-body"><div class="ac-left">':''}${full?`<div class="ac-cols"><span class="ac-cl">Colour</span>${ACC_COLS.map(c=>`<button class="ac-col ${a.col===c?'on':''}" data-col="${id}" data-c="${c}" style="background:${c}" title="Colour for this account"></button>`).join('')}</div>`:''}
-  ${full?'</div><div class="ac-right">':''}<div class="meter"><div class="l"><span data-f="${id}:pl"></span><b data-f="${id}:p"></b></div><div class="m"><i data-f="${id}:pb"></i></div></div>
+  ${full?`<div class="hint ac-note" data-f="${id}:note"></div></div><div class="ac-right">`:''}<div class="meter"><div class="l"><span data-f="${id}:pl"></span><b data-f="${id}:p"></b></div><div class="m"><i data-f="${id}:pb"></i></div></div>
   <div class="ac-r"><span>Balance <b data-f="${id}:bal"></b></span><span>Room to max loss <b data-f="${id}:room"></b></span></div>
-  ${full?`<div class="hint" data-f="${id}:note"></div></div></div>`:''}
+  ${full?`</div></div>`:''}
   ${pendFor(id).length?`<div class="ac-proc"><b>Processing</b> ${pendFor(id).map(p=>`${usd(p.net)} · arrives ${payTxt(p.due)}`).join('<br>')}</div>`:''}
   ${a.offer?`<div class="ac-choice"><button class="primary ac-btn" data-golive="${id}">Go live</button><button class="ac-btn" data-cashout="${id}">Cash out ${usd(Math.round(a.offer.cash*FUND.split*100)/100)}</button></div>`:
    bl?`<button class="primary ac-btn" data-reset="${id}" ${CAR.wallet<resetPrice(a)||liveCool()>0?'disabled':''}>Reset for ${usd(resetPrice(a)).replace(/\.00$/,'')}</button>`:F?`<button class="primary ac-btn" data-pay="${id}" ${c.canPay?'':'disabled'}>Request ${a.stage==='live'?'live ':''}payout${c.canPay?' '+usd(c.maxPay):''}</button>`:''}
@@ -4959,7 +4999,7 @@ function acctRender(){
     `<div class="ev-grid ev4">${SIZES.map(k=>{ const o=storeOpt(L.id,k), P=planSpec(L.id,k,L.direct||L.maxx?undefined:o), short=P.price-CAR.wallet, oc=`${o.dll?1:0}:${o.od?1:0}:${Math.round(o.cons*100)}:${o.dd}:${o.fdd}`;
      return `<div class="card prod ev"><div class="card-h"><b>${L.name} ${k}K</b><div class="ev-pr"><span class="price">${money(P.price)}</span>${P.coupon&&P.list>P.price?`<s>${money(P.list)}</s>`:''}</div></div>
       ${evOpts(L,k,o,P)}
-      ${(()=>{ const R=planRules(P), row=([a,b])=>`<span>${a}</span><b>${b}</b>`; return `<div class="rt">${R.slice(0,3).map(row).join('')}</div>${R.length>3?`<details class="rt-more"><summary>Full rules</summary><div class="rt">${R.slice(3).map(row).join('')}</div></details>`:''}`; })()}
+      ${(()=>{ const R=planRules(P).concat(L.direct||L.maxx?[]:[['Reset fee',usd(P.reset).replace(/\.00$/,'')+' after a failed evaluation, no coupon']]), row=([a,b])=>`<span>${a}</span><b>${b}</b>`; return `<div class="rt">${R.slice(0,3).map(row).join('')}</div>${R.length>3?`<details class="rt-more"><summary>Full rules</summary><div class="rt">${R.slice(3).map(row).join('')}</div></details>`:''}`; })()}
       <button class="primary ac-btn" data-buy="${L.id}:${k}"${L.direct||L.maxx?'':` data-oc="${oc}"`} ${lock||full||cool||mxw||short>0?'disabled':''}>${lock?'Locked':mxw?mxw[0].toUpperCase()+mxw.slice(1):cool?`Live cooldown: ${cool} day${cool===1?'':'s'}`:full?`Limit of ${EVAL.max} accounts reached`:short>0?`Need ${money(short)} more`:(L.direct?'Buy funded account':L.maxx?'Buy LucidMaxx':'Buy evaluation')}</button>${!lock&&!full&&short>0?`<button class="link ac-link" data-hub="job">Earn it at the job</button>`:''}</div>`; }).join('')}</div>`; })()}
    <div class="sec">Tools</div><div class="hub-grid2">
     <div class="card prod"><div class="card-h"><b>Trade syncer</b><span class="price">${own?'Owned':money(SYNCER_PRICE)}</span></div>
@@ -6203,6 +6243,13 @@ function skillsHTML(){
 }
 /* ---- family ---- */
 const FAM={wed:2500,kid:1500,maxKids:3};
+function lifeGoalHTML(){
+ const nx=ITEMS.filter(i=>(i.slot==='car'||i.slot==='home')&&i.price>0&&!owns(i.id)&&!(typeof LUX!=='undefined'&&LUX.has(i.id)&&!skill('luxury'))).sort((a,b)=>a.price-b.price)[0];
+ const wear=['top','shoes','head'].map(k=>CAR.eq&&CAR.eq[k]&&ITEM[CAR.eq[k]]).filter(Boolean);
+ const g=nx?`<div class="card goal"><span class="eyebrow">Next goal</span><div class="goal-r"><i class="dot thumb">${itemThumb(nx)}</i><div><b>${nx.name}</b><span class="mut">${money(nx.price)}</span></div></div><div class="m"><i style="width:${Math.min(100,CAR.wallet/nx.price*100).toFixed(1)}%"></i></div><div class="goal-f"><span class="mut">${CAR.wallet>=nx.price?'You can afford it now':money(nx.price-CAR.wallet)+' to go'}</span><button class="link" data-goal="${nx.cat}">View</button></div></div>`:'';
+ const w=wear.length?`<div class="card wearing"><span class="eyebrow">Wearing</span><div class="wear-r">${wear.map(i=>`<span title="${cesc(i.name)}"><i class="dot thumb">${itemThumb(i)}</i><em>${i.name}</em></span>`).join('')}</div></div>`:'';
+ return g+w; }
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-goal]'); if(!b) return; HUB.shop=b.dataset.goal; hubRender(); });
 function famHTML(){
  const f=CAR.fam||{}, kids=f.kids||[], home=eqNow().home;
  if(!skill('family')) return `<div class="card note lockcard"><span><b>Family is locked.</b> Unlock it in Skills for 1 point.</span><button class="primary" data-hub="skills">Open Skills</button></div>`;
@@ -6467,6 +6514,7 @@ async function debtSellClick(b){ const id=b.dataset.sell, i=ITEM[id]; if(CHA()||
  if(!ok) return; if(sellItem(id)){ HUB.try=null; try{ hubRender(); }catch(e){} } }
 /* shop row buttons */
 function debtActs(i,own,on,lux,can){ const arr=inArrears(), ses=CHA(), luxArr=!own&&LUX.has(i.id)&&!lux&&arr;
+ if(on&&SLOT_DEF[i.slot]) return `<span class="in-use">✓ In use</span>`;
  let h=`<button data-act="${i.id}" class="${own?'':'primary'}" ${luxArr?`disabled data-why="${debtWhy()}"`:!own&&!can?'disabled':''}>${on?(SLOT_DEF[i.slot]?'In use':'Remove'):own?'Use':lux?'Luxury living skill':can?'Buy':'Need '+money(i.price-CAR.wallet)}</button>`;
  if(!own&&!lux&&i.price>=200) h+=`<button class="fin" data-fin="${i.id}" title="10% down, the rest as a loan (${Math.round(loanRate()*100)}% fee)" ${arr?`disabled data-why="${debtWhy()}"`:ses?'disabled data-why="Not during an evaluation session"':''}>Finance</button>`;
  if(own&&debtSellable(i.id)) h+=`<button class="fin" data-sell="${i.id}" ${ses?'disabled data-why="Not during an evaluation session"':''}>Sell</button>`;
@@ -6917,7 +6965,7 @@ const ACH=[['eval1','First evaluation','Buy your first evaluation',()=>CAR.accts
  ['home','Homeowner','Own a home',()=>Object.keys(CAR.owned).some(k=>ITEM[k]&&ITEM[k].slot==='home'),100],['villa','Villa life','Own a villa or better',()=>['villa','pent','beach','mansion','skyvilla'].some(k=>CAR.owned[k]),300],
  ['car','Wheels','Own a car',()=>Object.keys(CAR.owned).some(k=>ITEM[k]&&ITEM[k].slot==='car'),100],['wed','Family','Get married',()=>!!(CAR.fam&&CAR.fam.partner),150],
  ['debtfree','Debt free','Pay off a loan',()=>(CAR.loansPaid||0)>=1,100],['hard1','Iron nerves','Finish a hard session in profit',()=>(CAR.hardWins||0)>=1,500],['hard5','Ice cold','Win 5 hard sessions',()=>(CAR.hardWins||0)>=5,1500],['lv10','Level 10','Reach level 10',()=>lvlOf(CAR.xp||0)>=10,0],['three','Fund manager','Have 3 funded accounts at once',()=>CAR.accts.filter(a=>a.stage==='funded').length>=3,600],['live1','Going live','Get a Lucid Live account',()=>(CAR.lives||0)>=1||CAR.accts.some(a=>a.stage==='live'&&!a.offer),1000]];
-function achCheck(){ CAR.ach=CAR.ach||{}; let got=0; for(const [id,n,d,f,x] of ACH){ if(CAR.ach[id]) continue; let ok=false; try{ ok=f(); }catch(e){} if(ok){ CAR.ach[id]=Date.now(); got++; if(x) xpAdd(x*(skill('collector')?1.5:1)); toast(`<b>Achievement unlocked: ${n}.</b> ${d}.`,4500); } } if(got){ carSave(); phoneBadge(); try{ sfxPlay('trophy'); }catch(e){} } }
+function achCheck(){ CAR.ach=CAR.ach||{}; let got=0; for(const [id,n,d,f,x] of ACH){ if(CAR.ach[id]) continue; let ok=false; try{ ok=f(); }catch(e){} if(ok){ CAR.ach[id]=Date.now(); got++; if(x) xpAdd(x*(skill('collector')?1.5:1)); toast(`<b>Achievement unlocked: ${n}.</b> ${d}.`,4500); } } if(got){ carSave(); phoneBadge(); try{ sfxPlay('trophy'); }catch(e){} try{ if(hubShown()&&HUB.page==='profile') hubRender(); }catch(e){} } }
 setInterval(()=>{ try{ achCheck(); }catch(e){} },20000);
 try{ if(payCap()) carSaveLocal(); }catch(e){}
 setInterval(()=>{ try{ payTick(); }catch(e){} },5000); setTimeout(()=>{ try{ payTick(); }catch(e){} },3000);   // payouts arrive after Lucid's processing time, also after a reload
@@ -7153,9 +7201,9 @@ function skLinks(){ const T=document.querySelector('.sk-tree'); if(!T) return; l
  const L=[]; SKILLS.forEach(s=>s.r.forEach(r=>{ const a=T.querySelector(`[data-node="${r}"]`), b=T.querySelector(`[data-node="${s.id}"]`); if(a&&b) L.push({r,id:s.id,A:a.getBoundingClientRect(),B:b.getBoundingClientRect()}); }));
  const inN={}, outN={}, gut={}; L.forEach(l=>{ (inN[l.id]=inN[l.id]||[]).push(l); (outN[l.r]=outN[l.r]||[]).push(l); const g=Math.round(l.B.left); (gut[g]=gut[g]||[]).push(l); });
  Object.values(inN).forEach(a=>a.sort((p,q)=>p.A.top-q.A.top)); Object.values(outN).forEach(a=>a.sort((p,q)=>p.B.top-q.B.top));
- Object.values(gut).forEach(a=>{ a.sort((p,q)=>(p.A.top+p.B.top)-(q.A.top+q.B.top)); a.forEach((l,k)=>{ l.gk=k; l.gn=a.length; }); });
+ Object.values(gut).forEach(a=>{ const ids=[...new Set(a.slice().sort((p,q)=>p.B.top-q.B.top).map(l=>l.id))]; a.forEach(l=>{ l.gk=ids.indexOf(l.id); l.gn=ids.length; }); });   // links into the same skill share one bus (a bracket join)
  L.forEach(l=>{ const ii=inN[l.id].indexOf(l), oi=outN[l.r].indexOf(l), no=outN[l.r].length;
-  const x1=l.A.right-R.left, y1=l.A.top-R.top+l.A.height*(oi+1)/(no+1), x2=l.B.left-R.left, y2=l.B.top-R.top+Math.min(l.B.height-14,26+ii*12);
+  const x1=l.A.right-R.left, y1=l.A.top-R.top+l.A.height*(oi+1)/(no+1), x2=l.B.left-R.left, y2=l.B.top-R.top+Math.min(l.B.height-14,28);
   const gap=x2-x1, mx=Math.round(x1+gap*(l.gk+1)/(l.gn+1)), rr=Math.min(5,Math.abs(y2-y1)/2), dy=y2>y1?1:-1;
   const on=skill(l.r)&&skill(l.id), half=skill(l.r), c=on?'on':half?'half':'';
   const d=Math.abs(y2-y1)<1?`M${x1} ${y1}H${x2}`:`M${x1} ${y1}H${mx-rr}Q${mx} ${y1} ${mx} ${y1+dy*rr}V${y2-dy*rr}Q${mx} ${y2} ${mx+rr} ${y2}H${x2}`;
@@ -7287,7 +7335,7 @@ function hubRender(){
  const B=$('hubBody'), P=HUB.page, name=cesc(CAR.look.name||'You');
  if(P==='props'){
   const rk=hubRank(), nx=hubNext(), A=CAR.accts, C=A.map(acctCalc);
-  B.innerHTML=`<div class="hub-wide"><div class="card-h props-h"><div><h2>Prop firms</h2><p class="sub">Buy an evaluation, pass it under Lucid's rules, then trade the funded account for payouts.</p></div><span class="badge ${rk[1]}">${rk[0]}</span></div>
+  B.innerHTML=`<div class="hub-wide"><div class="card-h props-h"><div><h2>Prop firms <span class="badge ${rk[1]} h2b">${rk[0]}</span></h2><p class="sub">Buy an evaluation, pass it under Lucid's rules, then trade the funded account for payouts.</p></div></div>
    <div class="hub-main">
     <div class="card next"><span class="eyebrow">Next step</span><b>${nx[0]}</b><p>${nx[1]}</p><button class="primary" data-hub="${nx[3]}">${nx[2]}</button></div>
     <div class="stats4">${[['Wallet',usd(CAR.wallet)],['Evaluations passed',CAR.passes],['Payouts taken',CAR.payouts],['Total paid out',usd(CAR.paid)]].map(([l,v])=>`<div><span>${l}</span><b>${v}</b></div>`).join('')}</div>
@@ -7321,7 +7369,7 @@ function hubRender(){
     return `<div class="shop-it ${on?'on':''}" data-it="${i.id}"><i class="dot thumb">${itemThumb(i)}</i><div class="nm"><b>${i.name}</b><span>${i.price?money(i.price):'Free'}${own&&i.price?' · owned':''}</span></div>
      <div class="acts">${debtActs(i,own,on,lux,can)}</div></div>`; }).join('')}</div></div>`).join('')}
     <div class="hint" style="margin-top:12px">Hover an item to preview it on your character.</div>`;
-  B.innerHTML=`<div class="hub-two"><div class="hub-side">${stageHTML()}<div class="who"><b>${name}${CAR.prestige?` <i class="pres">${'★'.repeat(CAR.prestige)}</i>`:''}</b><span class="mut">Lv ${lvlOf(CAR.xp||0)} · ${levelTitle(lvlOf(CAR.xp||0))}</span><button class="link" id="myCard">Profile card</button></div></div>
+  B.innerHTML=`<div class="hub-two"><div class="hub-side">${stageHTML()}<div class="who"><b>${name}${CAR.prestige?` <i class="pres">${'★'.repeat(CAR.prestige)}</i>`:''}</b><span class="mut">Lv ${lvlOf(CAR.xp||0)} · ${levelTitle(lvlOf(CAR.xp||0))}</span><button class="link" id="myCard">Profile card</button></div>${lifeGoalHTML()}</div>
    <div class="hub-main"><h2>Life</h2><p class="sub">Your home, your character and everything you own. Wallet money comes from payouts and the job.${CAR.eq.pet?' Click your dog to pet it.':''}</p>
     <div class="stats4">${[['Wallet',usd(CAR.wallet)],['Savings',usd((CAR.sav&&CAR.sav.bal)||0)],['Living costs',fmt$(dailyCost())+' / day'],['Net worth',usd(netWorth())]].map(([l,v])=>`<div><span>${l}</span><b>${v}</b></div>`).join('')}</div>
     <div class="card house"><div class="card-h"><b>Household</b><button class="link" data-phone="bank">Open bank</button></div>${costLines().length?`<div class="rows">${costLines().map(([a,b])=>`<div><span>${cesc(a)}</span><span class="mut">${fmt$(b)} / day</span></div>`).join('')}</div>`:'<div class="hint">No running costs yet. Homes, cars, family and pets cost a little every day you own them.</div>'}${skill('frugal')?'<div class="hint">Frugal living: −30% applied.</div>':''}</div>
@@ -7404,7 +7452,7 @@ try{ Object.assign(window.__bt,{rebuildSeries,pnlWUpdate}); }catch(e){}
  const gd=document.getElementById('gotoDate'); if(gd && !document.getElementById('gotoBtn')){
   const b=document.createElement('button'); b.id='gotoBtn'; b.type='button'; b.title='Pick a start date (UTC)';
   const lab=()=>{ b.innerHTML='<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4"/></svg><span>'+(gd.value?gd.value.replace('T',' '):'Jump to date')+'</span>'; };
-  lab(); gd.addEventListener('change',lab); gd.addEventListener('input',lab);
+  lab(); gd.addEventListener('input',lab); gd.addEventListener('change',()=>{ lab(); const g=document.getElementById('btnGo'); if(g&&gd.value) g.click(); });
   b.onclick=()=>{ try{ gd.showPicker(); }catch(e){ gd.focus(); gd.click(); } };
   gd.classList.add('gd-hide'); gd.parentNode.insertBefore(b,gd);
  }
@@ -7579,7 +7627,7 @@ async function lbRender(force){
  const off=!cloudOn()||!CLOUD.sb ? 'The leaderboard needs a connection to the online service.' : HUB.lbErr ? 'Could not load the leaderboard: '+HUB.lbErr : (d&&!d.length) ? 'No one is on the board yet.' : '';
  const rows=n=>d.slice(0,n).map((x,i)=>`<tr class="${x.id===me?'me':''} lb-row" data-lbi="${i}" title="Open profile card"><td>${i+1}</td><td>${cesc(x.name||'You')}${x.id===me?' <span class="badge run">YOU</span>':''}${badgesFor(x).map(([t,c])=>`<span class="pbadge sm ${c}">${t}</span>`).join('')}</td><td>${usd(+x.paid||0)}</td><td>${x.passes||0}</td></tr>`).join('');
  if(full) full.innerHTML=off?`<div class="lb-empty"><div class="lb-ico">${troIco('lv10')}</div><b>${d&&!d.length&&!HUB.lbErr&&cloudOn()&&CLOUD.sb?'No one is on the board yet':'Leaderboard is offline'}</b><p>${d&&!d.length&&!HUB.lbErr&&cloudOn()&&CLOUD.sb?'Take a payout from a funded account to be the first name here.':"We couldn't reach the online service. Your progress is still saved in this browser."}</p><button class="primary" id="lbRetry">Try again</button></div><div class="lb-skel">${'<div><i></i><i></i><i></i></div>'.repeat(5)}</div>`:`<table class="lbt"><tr><th>#</th><th>Trader</th><th>Paid out</th><th>Evaluations passed</th></tr>${rows(50)}</table>`;
- { const rb=$('lbRetry'); if(rb) rb.onclick=async()=>{ rb.disabled=true; rb.textContent='Trying...'; await lbRender(true); }; }
+ { const rf=$('lbRef'); if(rf) rf.hidden=!!off; } { const rb=$('lbRetry'); if(rb) rb.onclick=async()=>{ rb.disabled=true; rb.textContent='Trying...'; await lbRender(true); }; }
  if(mini) mini.innerHTML=off?cesc(off):`<table class="lbt sm">${rows(5)}</table>`;
  if(!off) [full,mini].forEach(box=>box&&box.querySelectorAll('[data-lbi]').forEach(tr=>tr.onclick=()=>{ const x=d[+tr.dataset.lbi]; profCard(Object.assign({rank:+tr.dataset.lbi+1},x),x.id===me); }));
 }
