@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261117110635">
+<meta name="ke-build" content="20261117111332">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -3714,7 +3714,7 @@ function drawingSettings(d){
  const c7=v=>(v&&v.startsWith('#')&&v.length===7)?v:'#2962ff';
  const tabs=[]; let style='';
  if(LINE_TOOLS.includes(T)||AREA_TOOLS.includes(T)||T==='fib'){
-  style+=`<div class="dl-row"><span>${AREA_TOOLS.includes(T)?'Border':'Line'}</span><input type="color" id="s_col" value="${c7(col)}">${sel('s_w','<option>1</option><option>2</option><option>3</option><option>4</option>',d.width||2)}${sel('s_dash',DASHES,d.dash||'solid')}</div>`; }
+  style+=`<div class="dl-row"><span>${AREA_TOOLS.includes(T)?'Border':'Line'}</span><input type="color" id="s_col" value="${c7(col)}">${sel('s_w',[0.5,0.75,1,1.5,2,3,4].map(v=>`<option value="${v}">${v}px</option>`).join(''),d.width||2)}${sel('s_dash',DASHES,d.dash||'solid')}</div>`; }
  if(T==='trend'||T==='rect'||T==='fib') style+=`<div class="dl-row"><span>Extend</span>${sel('s_ext','<option value="none">Don\'t extend</option><option value="right">Extend right</option><option value="left">Extend left</option><option value="both">Extend both</option>',d.extend||'none')}</div>`;
  if(T==='hline'||T==='hray') style+=`<label class="dl-row"><input type="checkbox" id="s_pl" ${d.priceLabel!==false?'checked':''}> Price label</label>`;
  if(T==='rect') style+=`<label class="dl-row"><input type="checkbox" id="s_mid" ${d.mid?'checked':''}> Middle line</label>`;
@@ -6995,7 +6995,7 @@ async function rvClose(quiet){
  try{ if(back && await sessApply(back,true)) return; }catch(e){}
  try{ $('symSel').value=cfg.last||$('symSel').value; fillYears(); await openSymbol(); }catch(e){}
 }
-try{ Object.assign(window.__bt,{rvOpen,rvClose,rvRender,refresh,armDraft,confirmDraft,disarmDraft,minStopTicks,DR,setTool,ptFromXY,magNow,select}); }catch(e){}
+try{ Object.assign(window.__bt,{drawingSettings,rvOpen,rvClose,rvRender,refresh,armDraft,confirmDraft,disarmDraft,minStopTicks,DR,setTool,ptFromXY,magNow,select}); }catch(e){}
 function chBar(){
  let b=$('chBar'); if(!b){ b=document.createElement('div'); b.id='chBar'; const c=$('chart'); if(!c) return; c.appendChild(b); }
  const a=CHS();
