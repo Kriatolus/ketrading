@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261117111332">
+<meta name="ke-build" content="20261117112942">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1653,6 +1653,15 @@ body:not(:has(#hub:not([hidden]))) #toast{right:auto!important;left:64px!importa
 .ac-left{row-gap:12px!important}
 .sk-node button.locked{font-size:11.5px}
 @media(max-width:600px){ #phone .ph-screen{padding-top:calc(env(safe-area-inset-top) + 40px)!important} }
+
+/* dollars / ticks / points switch */
+.pu-seg{display:inline-flex;gap:2px;padding:2px;border-radius:8px;background:rgba(148,163,184,.12);border:1px solid rgba(148,163,184,.18)}
+.pu-seg button{height:22px!important;min-width:0!important;padding:0 9px!important;border:0!important;border-radius:6px!important;background:transparent!important;color:#94a3b8!important;font-size:11px!important;font-weight:600;line-height:22px;cursor:pointer;box-shadow:none!important}
+.pu-seg button:hover{color:#e2e8f0!important}
+.pu-seg button.act{background:#2563eb!important;color:#fff!important}
+#pnlW .pu-seg{margin:6px 0 2px}
+#pnlW.min .pu-seg{display:inline-flex!important}
+.pu-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0 4px;font-size:12px;color:var(--muted)}
 /* mobile tab bar */
 #mTabs{display:none}
 @media(max-width:600px){
@@ -1811,7 +1820,7 @@ body.debt-arrears .hub-wal b{outline:1px solid color-mix(in srgb,var(--warn,#f5a
     <label class="fld">Take profit (pts) <input id="tpPts" type="number" value="" placeholder="Off" min="0" step="0.25"></label>
     <label class="fld wide">Daily loss limit $ <input id="dailyLimit" type="number" value="" placeholder="No limit" min="0" step="10"></label>
    </div>
-   <div id="riskLine" class="hint"></div>
+   <div id="riskLine" class="hint"></div><div class="pu-row"><span>Show open trade in</span><div class="pu-seg" role="group" aria-label="Show open trade in"><button data-pu="usd">$</button><button data-pu="ticks">Ticks</button><button data-pu="pts">Pts</button></div></div>
    <div class="bs"><button id="btnSell" class="sell">Sell <kbd>S</kbd></button><button id="btnBuy" class="buy">Buy <kbd>B</kbd></button></div>
    <div class="bs sm"><button id="btnClose">Close position <kbd>C</kbd></button><button id="btnBE">Stop to BE <kbd>E</kbd></button></div>
    <h3>Pending orders</h3>
@@ -3912,7 +3921,7 @@ const noCtl=e=>!(e.target.closest&&e.target.closest('input,select,textarea,label
 function pnlWBuild(){
  if($('pnlW')) return; const host=$('chart'); if(!host) return;
  const w=document.createElement('div'); w.id='pnlW'; w.innerHTML=`<div class="pw-h"><i class="pw-dot"></i><b>LIVE P&amp;L</b><button class="pw-min" title="Expand or collapse">▾</button><span class="pw-grip" title="Drag to move. Double-click to reset."></span><button class="pw-x" title="Hide (turn it back on with the P&L button or in Settings)">&times;</button></div>
-  <div class="pw-big" id="pwBig">$0.00</div><div class="pw-sub" id="pwSub">Flat</div>
+  <div class="pw-big" id="pwBig">$0.00</div><div class="pu-seg" role="group" aria-label="Show open trade in"><button data-pu="usd">$</button><button data-pu="ticks">Ticks</button><button data-pu="pts">Pts</button></div><div class="pw-sub" id="pwSub">Flat</div>
   <div class="pw-grid"><div><span>Open R</span><b id="pwR">–</b></div><div><span>Today</span><b id="pwDay">$0.00</b></div><div id="pwRoomC"><span>Room to max loss</span><b id="pwRoom">–</b></div></div>`;
  host.appendChild(w); w.querySelector('.pw-x').onclick=e=>{ e.stopPropagation(); cfg.pnlW=false; saveCfg(); pnlWSync(); };
  w.classList.toggle('min',cfg.pnlMin!==false); w.querySelector('.pw-min').onclick=e=>{ e.stopPropagation(); cfg.pnlMin=!w.classList.contains('min'); w.classList.toggle('min',cfg.pnlMin); saveCfg(); };
@@ -3923,7 +3932,11 @@ function pnlWSync(){ pnlWBuild(); const w=$('pnlW'); if(!w) return; w.hidden=cfg
 const usd2=v=>(v<0?'−$':'$')+Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const PNL_UNITS=['usd','ticks','pts'];
 function pnlUnit(){ return PNL_UNITS.includes(cfg.pnlUnit)?cfg.pnlUnit:'usd'; }
-function pnlUnitNext(){ cfg.pnlUnit=PNL_UNITS[(PNL_UNITS.indexOf(pnlUnit())+1)%3]; saveCfg(); try{ pnlWUpdate(); }catch(e){} refresh(); msg('Open trade shown in '+({usd:'dollars',ticks:'ticks',pts:'points'})[cfg.pnlUnit]+'. Click the number again to switch.'); }
+function pnlUnitSet(u){ if(!PNL_UNITS.includes(u)) return; cfg.pnlUnit=u; saveCfg(); pnlUnitMark(); try{ pnlWUpdate(); }catch(e){} refresh(); }
+function pnlUnitMark(){ const u=pnlUnit(); document.querySelectorAll('[data-pu]').forEach(b=>{ b.classList.toggle('act',b.dataset.pu===u); b.setAttribute('aria-pressed',b.dataset.pu===u); }); }
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-pu]'); if(!b) return; e.stopPropagation(); pnlUnitSet(b.dataset.pu); },true);
+setTimeout(pnlUnitMark,0);
+function pnlUnitNext(){ cfg.pnlUnit=PNL_UNITS[(PNL_UNITS.indexOf(pnlUnit())+1)%3]; saveCfg(); pnlUnitMark(); try{ pnlWUpdate(); }catch(e){} refresh(); msg('Open trade shown in '+({usd:'dollars',ticks:'ticks',pts:'points'})[cfg.pnlUnit]+'. Click the number again to switch.'); }
 function pnlFmt(pts,usdV){ const u=pnlUnit(), sg=v=>v>0?'+':v<0?'−':''; if(u==='ticks'){ const k=Math.round(pts/tickSz()); return sg(k)+Math.abs(k)+' ticks'; } if(u==='pts') return sg(pts)+Math.abs(pts).toFixed(2)+' pts'; return null; }
 function pnlWUpdate(){
  const w=$('pnlW'); if(!w||w.hidden||!S.bars.length) return;
