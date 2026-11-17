@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261117090904">
+<meta name="ke-build" content="20261117093011">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1418,6 +1418,96 @@ body.pnlw-on #hud{display:none!important}
 #hub .jb-tray b{z-index:1;margin-bottom:30px}
 #hub .shop-it .dot.thumb svg.dk{filter:drop-shadow(0 0 .8px rgba(255,255,255,.55))}
 </style>
+<style id="ke-polish">
+/* ===== polish pass (review round 1) ===== */
+#toast{left:auto!important;right:24px;top:68px;bottom:auto!important;transform:translateY(-8px)!important;max-width:min(360px,calc(100vw - 32px))!important;padding-right:34px!important;cursor:pointer;z-index:260}
+#toast.on{transform:translateY(0)!important}
+#toast .toast-x{position:absolute;top:6px;right:6px;width:22px;height:22px;padding:0;border:0;background:transparent;color:var(--muted);font-size:16px;line-height:22px;border-radius:6px;cursor:pointer}
+#toast .toast-x:hover{background:color-mix(in srgb,var(--text) 10%,transparent);color:var(--text)}
+.hub-lv{height:28px;padding:0 10px;border-radius:999px;font-weight:700;font-size:12px;color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);margin-right:12px;cursor:pointer}
+#hubNav{align-items:center;gap:4px}
+#hubNav button{height:32px!important;border-radius:999px!important;border-bottom:0!important;padding:0 14px}
+#hubNav button:hover{background:color-mix(in srgb,var(--text) 6%,transparent)!important}
+#hubNav button.act{background:color-mix(in srgb,#2563eb 22%,transparent)!important;color:#fff!important}
+#hub #hubLv{height:28px;padding:0 11px;border-radius:999px;font-weight:700;font-size:12px;color:#93c5fd;background:color-mix(in srgb,#3b82f6 16%,transparent);border:1px solid color-mix(in srgb,#3b82f6 40%,transparent)}
+@media(max-width:700px){
+ .hub-top{gap:8px;padding:0 10px}
+ .hub-top .brand span,.hub-top .brand b{display:none}
+ #hubNav{overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;margin-left:0}#hubNav::-webkit-scrollbar{display:none}
+ #hubNav button{flex:none;padding:0 11px}
+ .hub-top .grow{display:none}.hub-wal{font-size:0}.hub-wal b{font-size:13px}#hubUser{display:none}#hub #hubLv{display:none}
+ #toast{top:60px;right:12px}
+}
+#pairSel{min-width:172px}#sessSel{min-width:150px}#gotoDate{min-width:196px;color-scheme:dark}
+#qtbPnl{display:grid!important;place-items:center;width:32px;padding:0!important;color:var(--muted)}#qtbPnl:hover{color:var(--text)}
+.snd-chip{z-index:400}
+/* phone */
+.ph-screen{padding-bottom:48px!important}
+.ph-home::before{content:'';position:absolute;left:-118px;right:-118px;bottom:-22px;height:46px;background:linear-gradient(rgba(5,7,13,0),#05070d 70%);z-index:-1;border-radius:0 0 34px 34px;pointer-events:none}
+.ph-close{display:none}
+@media(max-width:600px){
+ #phone{background:#05070d;backdrop-filter:none}
+ #phone .ph-dev{width:100vw;height:100vh;height:100dvh;border-radius:0;padding:0;background:#05070d;box-shadow:none}
+ #phone .ph-dev::before,#phone .ph-dev::after,#phone .ph-notch,#phone .ph-status,#phone .ph-home{display:none!important}
+ #phone .ph-screen{border-radius:0;padding:16px 16px 32px!important}
+ #phone .ph-close{display:grid;place-items:center;position:absolute;top:14px;right:14px;z-index:5;width:36px;height:36px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#e6efff;font-size:20px;line-height:1}
+ #phone .ph-head{padding-right:48px}
+}
+/* skills */
+.sk-node.lock{opacity:1!important;filter:none!important;background:color-mix(in srgb,var(--panel) 70%,var(--bg))}
+.sk-node.lock .sk-top b{color:#cbd5e1}.sk-node.lock p{color:#94a3b8}
+.sk-node.lock button{color:#94a3b8}
+.sk-svg path{stroke:#334155!important;stroke-width:2!important;stroke-dasharray:none!important}
+.sk-svg path.half{stroke:color-mix(in srgb,#3b82f6 60%,#334155)!important}.sk-svg path.on{stroke:#3b82f6!important}
+.sk-node button.sk-ok{background:transparent;color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 55%,transparent)}
+.sk-node button.sk-ok:hover{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.sk-node:has(.sk-rec){border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 12px 30px -16px var(--accent)}
+.sk-lane{align-items:start!important}.sk-lane .sk-bh{padding-top:14px}
+.sk-perks{padding-bottom:14px}
+/* profile */
+.pf-row{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:10px}
+.pf-tro{display:flex!important;flex-direction:column;align-items:center;gap:6px;width:auto!important;height:auto!important;padding:12px 6px 10px!important;border-radius:12px;border:1px solid var(--border)!important;border-style:solid!important;background:color-mix(in srgb,var(--panel) 75%,var(--bg));color:#64748b;text-align:center;cursor:help}
+.pf-tro i{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:rgba(148,163,184,.08)}
+.pf-tro em{font-style:normal;font-size:11px;line-height:1.25;color:#94a3b8}
+.pf-tro.got{color:#f59e0b;border-color:color-mix(in srgb,#f59e0b 50%,var(--border))!important;background:linear-gradient(180deg,color-mix(in srgb,#f59e0b 10%,var(--panel)),var(--panel))}
+.pf-tro.got i{background:color-mix(in srgb,#f59e0b 16%,transparent);box-shadow:0 0 0 2px #f59e0b}
+.pf-tro.got em{color:var(--text)}
+#cloudBox.warn{border-left:3px solid #f59e0b;background:color-mix(in srgb,#f59e0b 6%,var(--panel));color:#fcd34d}
+/* leaderboard */
+.lb-empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:34px 16px 22px}
+.lb-empty .lb-ico{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;color:#f59e0b;background:color-mix(in srgb,#f59e0b 12%,transparent)}
+.lb-empty .lb-ico svg{width:28px;height:28px}
+.lb-empty b{font-size:16px}.lb-empty p{margin:0 0 6px;color:var(--muted);max-width:380px;font-size:13px}
+.lb-skel{border-top:1px solid var(--border);padding:6px 0;opacity:.55}
+.lb-skel div{display:grid;grid-template-columns:28px 1fr 110px 80px;gap:16px;padding:12px 8px;border-bottom:1px solid color-mix(in srgb,var(--border) 50%,transparent)}
+.lb-skel i{height:10px;border-radius:5px;background:linear-gradient(90deg,rgba(148,163,184,.10),rgba(148,163,184,.20),rgba(148,163,184,.10));background-size:200% 100%;animation:keSk 1.6s linear infinite}
+@keyframes keSk{to{background-position:-200% 0}}
+/* prop firms */
+.ac-grid{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))!important}
+.ac-cols{display:flex;align-items:center;gap:6px}.ac-cl{font-size:11px;color:var(--muted);margin-right:4px}
+.sw-l{font-size:11px;color:var(--muted);margin-right:6px}
+.meter .m{background:#1f2937!important;height:6px!important;border-radius:3px}.meter .m i{border-radius:3px}
+.ac-x{width:auto!important;margin:8px 0 0 auto!important;display:block;border:0!important;background:transparent!important;color:#ef4444!important;font-size:12px;padding:4px 6px!important;height:auto!important}
+.ac-x:hover{text-decoration:underline}
+.plan-tabs{width:100%;display:grid!important;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+/* job */
+.job-feed{font-family:inherit!important;font-size:13px;color:#94a3b8;min-height:0!important}
+.job .meter .m{height:6px;background:#1f2937}.job .meter .m i{background:#3b82f6}
+.job{padding-bottom:24px}
+/* life */
+.pills button.act{background:#2563eb!important;color:#fff!important;border-color:#2563eb!important}
+.pills button.act svg{color:#fff}
+.shop-it .dot.thumb{width:44px;height:44px;border-radius:10px;background:radial-gradient(circle at 50% 35%,#2b3a55,#1e293b 70%)!important;border:1px solid #334155!important}
+/* missions: reward chips */
+.rwc{font-style:normal;display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(18,184,134,.14);color:#34d399}
+.rwc.xp{background:rgba(59,130,246,.16);color:#93c5fd}
+.ph-card.mis .ph-bar{background:rgba(255,255,255,.08)}
+.ph-today{margin-top:22px;border-radius:20px;padding:12px 12px 6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(10px)}
+.ph-tdh{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8fa2c2;margin:0 4px 6px;font-weight:600}
+.ph-trow{display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;padding:10px 6px;border:0;border-top:1px solid rgba(255,255,255,.06);background:none;color:#e6efff;font-size:13px;text-align:left;cursor:pointer;height:auto}
+.ph-trow:first-of-type{border-top:0}.ph-trow i{font-style:normal;color:#64748b;font-size:16px}
+.ph-trow em{font-style:normal;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;background:#2f80ff;color:#fff}
+</style>
 </head>
 <body>
 <style id="v18b">
@@ -1478,7 +1568,7 @@ body.debt-arrears .hub-wal b{outline:1px solid color-mix(in srgb,var(--warn,#f5a
  <div class="grow"></div>
  <div class="chip" id="pxChip"><span id="pxSym">Last</span><b id="pxLast">-</b></div>
  <div class="kstats" id="kStats" title="This replay session"><div class="k-n"><span>Trades</span><b id="kTrades">0</b></div><div class="k-w"><span>Win rate</span><b id="kWr">0.0%</b></div><div class="k-r" title="Average R of closed trades that had a stop loss"><span>Avg R</span><b id="kAr">–</b></div><div class="k-p"><span>Net P&amp;L</span><b id="kPnl">+0.00</b></div></div>
- <nav class="secnav" id="secNav"><button data-sec="chart" class="act">Trading</button><button data-sec="life">Life</button><button data-sec="props">Prop firms</button><button data-sec="job">Job</button></nav><button id="btnPhone" class="ghost icon" title="Phone: bank, loans, messages, missions (P)"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg><em id="phBadge" hidden>0</em></button><button id="btnCareer" title="Your level and wallet. Open Skills"><span class="lvl" id="lvLb">Lv 1</span><span class="wal" id="walLb">$0</span></button>
+ <nav class="secnav" id="secNav"><button data-sec="chart" class="act">Trading</button><button data-sec="life">Life</button><button data-sec="props">Prop firms</button><button data-sec="job">Job</button><button data-sec="skills">Skills</button><button data-sec="leaderboard">Leaderboard</button></nav><button id="btnPhone" class="ghost icon" title="Phone: bank, loans, messages, missions (P)"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg><em id="phBadge" hidden>0</em></button><button id="btnCareer" title="Your level and wallet. Open Skills"><span class="lvl" id="lvLb">Lv 1</span><span class="wal" id="walLb">$0</span></button>
  <button id="btnOP" class="primary" title="Order panel (Shift+T)"><i data-ic="trade"></i>Trade</button>
  <button id="btnSide" class="ghost icon on" title="Show / hide the side panel"><i data-ic="panel"></i></button>
  <div id="dataPanel" hidden>
@@ -3654,7 +3744,7 @@ function pnlWBuild(){
   <div class="pw-grid"><div><span>Open R</span><b id="pwR">–</b></div><div><span>Today</span><b id="pwDay">$0.00</b></div><div id="pwRoomC"><span>Room to max loss</span><b id="pwRoom">–</b></div></div>`;
  host.appendChild(w); w.querySelector('.pw-x').onclick=e=>{ e.stopPropagation(); cfg.pnlW=false; saveCfg(); pnlWSync(); };
  makeDrag(w,'pnl',noCtl);
- const q=$('qtb'); if(q && !$('qtbPnl')){ const b=document.createElement('button'); b.id='qtbPnl'; b.title='Show / hide the live P&L widget'; b.innerHTML='<small>LIVE</small>P&amp;L'; b.onclick=e=>{ e.stopPropagation(); cfg.pnlW=cfg.pnlW===false; saveCfg(); pnlWSync(); }; q.appendChild(b); }
+ const q=$('qtb'); if(q && !$('qtbPnl')){ const b=document.createElement('button'); b.id='qtbPnl'; b.title='Show / hide the live P&L widget'; b.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-9M15 7h5v5"/></svg>'; b.setAttribute('aria-label','Live P&L'); b.onclick=e=>{ e.stopPropagation(); cfg.pnlW=cfg.pnlW===false; saveCfg(); pnlWSync(); }; q.appendChild(b); }
 }
 function pnlWSync(){ pnlWBuild(); const w=$('pnlW'); if(!w) return; w.hidden=cfg.pnlW===false; document.body.classList.toggle('pnlw-on',cfg.pnlW!==false); const b=$('qtbPnl'); if(b) b.classList.toggle('on',cfg.pnlW!==false); const c=$('i_pnlw'); if(c) c.checked=cfg.pnlW!==false; dragApply('pnl'); pnlWUpdate(); }
 const usd2=v=>(v<0?'−$':'$')+Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -4737,8 +4827,8 @@ function evalBuild(){ try{ acctUpdate(); }catch(e){} }
 function evalUpdate(){ acctUpdate(); }
 function acctCard(a,c,full){
  const F=a.stage!=='eval', id=a.id, bl=!!a.blown;
- return `<div class="ac ${a.on?'on':''} ${a.col?'hascol':''} ${a.stage==='live'?'is-live':''} ${bl?'is-blown':''}" style="${a.col?'--acc:'+a.col:''}"><div class="ac-h">${full?`<input class="ac-n" data-nm="${id}" maxlength="16" value="${cesc(a.name)}" title="Rename this account">`:`<b class="ac-t">${cesc(a.name)}</b>`}<span class="badge sz">${planShort(SPEC(a))}</span><span class="badge" data-f="${id}:badge"></span><label class="sw" title="${bl?'Reset this evaluation to trade it':'Trade this account'}"><input type="checkbox" data-on="${id}" ${a.on?'checked':''} ${bl?'disabled':''}><i></i></label></div>${optChips(a)}
-  ${full?`<div class="ac-cols">${ACC_COLS.map(c=>`<button class="ac-col ${a.col===c?'on':''}" data-col="${id}" data-c="${c}" style="background:${c}" title="Colour for this account"></button>`).join('')}</div>`:''}
+ return `<div class="ac ${a.on?'on':''} ${a.col?'hascol':''} ${a.stage==='live'?'is-live':''} ${bl?'is-blown':''}" style="${a.col?'--acc:'+a.col:''}"><div class="ac-h">${full?`<input class="ac-n" data-nm="${id}" maxlength="16" value="${cesc(a.name)}" title="Rename this account">`:`<b class="ac-t">${cesc(a.name)}</b>`}<span class="badge sz">${planShort(SPEC(a))}</span><span class="badge" data-f="${id}:badge"></span>${full?'<span class="sw-l">Trading</span>':''}<label class="sw" title="${bl?'Reset this evaluation to trade it':'Trade this account'}"><input type="checkbox" data-on="${id}" ${a.on?'checked':''} ${bl?'disabled':''}><i></i></label></div>${optChips(a)}
+  ${full?`<div class="ac-cols"><span class="ac-cl">Colour</span>${ACC_COLS.map(c=>`<button class="ac-col ${a.col===c?'on':''}" data-col="${id}" data-c="${c}" style="background:${c}" title="Colour for this account"></button>`).join('')}</div>`:''}
   <div class="meter"><div class="l"><span data-f="${id}:pl"></span><b data-f="${id}:p"></b></div><div class="m"><i data-f="${id}:pb"></i></div></div>
   <div class="ac-r"><span>Balance <b data-f="${id}:bal"></b></span><span>Room to max loss <b data-f="${id}:room"></b></span></div>
   ${full?`<div class="hint" data-f="${id}:note"></div>`:''}
@@ -5217,11 +5307,11 @@ Object.assign(IC,{
  mind:SV(Pa('M3.500 5.500c2.200-.900 4.300-.700 6.500.700 2.200-1.400 4.300-1.600 6.500-.700v9.500c-2.200-.900-4.300-.700-6.500.700-2.200-1.400-4.300-1.600-6.500-.700z')+Pa('M10 6.200v9.500'))
 });
 function shade(hex,p){ const n=parseInt(hex.slice(1),16), f=v=>Math.max(0,Math.min(255,Math.round(v+(p>0?(255-v):v)*p/100))); return '#'+[n>>16&255,n>>8&255,n&255].map(v=>f(v).toString(16).padStart(2,'0')).join(''); }
-function toast(html,ms){ toast.q=toast.q||[];
+function toast(html,ms){ toast.q=toast.q||[]; toast.seen=toast.seen||{}; const nw=Date.now(); if(toast.seen[html]&&nw-toast.seen[html]<60000) return; toast.seen[html]=nw;
  if(toast.busy){ if(toast.cur===html) return; if(!toast.q.some(x=>x[0]===html)){ if(toast.q.length>=4) toast.q.shift(); toast.q.push([html,ms]); } clearTimeout(toast.h); toast.h=setTimeout(toastNext,Math.max(0,toast.at+1800-Date.now())); return; }
  toastShow(html,ms); }
-function toastShow(html,ms){ let t=$('toast'); if(!t){ t=document.createElement('div'); t.id='toast'; document.body.appendChild(t); }
- t.innerHTML=html; t.classList.add('on'); toast.busy=true; toast.cur=html; toast.at=Date.now(); clearTimeout(toast.h); toast.h=setTimeout(toastNext,ms||4500); }
+function toastShow(html,ms){ let t=$('toast'); if(!t){ t=document.createElement('div'); t.id='toast'; document.body.appendChild(t); t.addEventListener('click',()=>{ clearTimeout(toast.h); toastNext(); }); }
+ t.innerHTML=html+'<button class="toast-x" aria-label="Dismiss">×</button>'; t.classList.add('on'); toast.busy=true; toast.cur=html; toast.at=Date.now(); clearTimeout(toast.h); toast.h=setTimeout(toastNext,ms||4500); }
 function toastNext(){ const n=(toast.q||[]).shift(); if(n){ toastShow(n[0],n[1]); return; } const t=$('toast'); if(t) t.classList.remove('on'); toast.busy=false; toast.cur=null; }
 
 /* ---- more indicator math ---- */
@@ -5439,7 +5529,7 @@ function moneyFx(){
 function mfxChip(){ const v=Math.round(MFX.sum*100)/100; MFX.sum=0; MFX.timer=0; if(Math.abs(v)<5||mfxQuiet()) return;
  let a=null; if(hubShown()) a=$('hubWal'); if(!a){ const p=$('phone'); if(p&&p.classList.contains('on')) a=document.querySelector('#phScreen [data-money="wallet"]'); } if(!a) a=$('walLb'); if(!a||!a.isConnected) return;
  if(MFX.chip) MFX.chip.remove(); const c=document.createElement('div'); c.className='snd-chip '+(v>0?'pos':'neg'); c.textContent=(v>0?'+':'-')+fmt$(Math.abs(v)); document.body.appendChild(c);
- const r=a.getBoundingClientRect(); c.style.left=Math.round(Math.max(8,Math.min(innerWidth-c.offsetWidth-8,r.left+r.width/2-c.offsetWidth/2)))+'px'; c.style.top=Math.round(Math.max(8,r.top-c.offsetHeight-4))+'px';
+ const r=a.getBoundingClientRect(); c.style.left=Math.round(Math.max(8,Math.min(innerWidth-c.offsetWidth-8,r.left+r.width/2-c.offsetWidth/2)))+'px'; c.style.top=Math.round(r.bottom+6)+'px';
  MFX.chip=c; setTimeout(()=>{ c.remove(); if(MFX.chip===c) MFX.chip=null; },950); }
 /* run the scanner before paint whenever the hub or the phone changes */
 const SNDO={q:false,seen:new WeakSet()};
@@ -6013,17 +6103,17 @@ function skBuy(id){
 function skillsHTML(){
  const xp=CAR.xp||0, l=lvlOf(xp), a=lvlXp(l), b=lvlXp(l+1), pct=Math.min(100,(xp-a)/(b-a)*100), pts=skPoints();
  const br=[...new Set(SKILLS.map(s=>s.b))], tiers=Math.max(...SKILLS.map(s=>skTier(s)))+1, own=SKILLS.filter(s=>skill(s.id)), rc=respecCost();
- const TN=['Foundation','Advanced','Expert','Master'];
+ const TN=['Foundation','Advanced','Expert','Master']; let skRec=false;
  return `<div class="hub-wide sk-page"><div class="sk-head"><div><h2>Skills</h2><p class="sub">Earn XP by trading evaluation sessions, passing evaluations, payouts, missions and the desk. Every level gives a skill point, plus a bonus point every 5 levels.</p></div>
   <div class="sk-lvl"><div class="sk-ring" style="--p:${pct}"><b>${l}</b><span>LEVEL</span></div><div><div class="sk-title">${levelTitle(l)}${CAR.prestige?` <i class="pres">${'★'.repeat(CAR.prestige)}</i>`:''}</div><div class="sk-xp">${Math.floor(xp).toLocaleString('en-US')} XP <span class="mut">· ${Math.ceil(b-xp).toLocaleString('en-US')} to level ${l+1}</span></div>
   <div class="sk-pts"><b>${pts}</b> skill point${pts===1?'':'s'} to spend</div></div></div></div>
   <div class="sk-perks card"><div class="card-h"><b>Active perks</b><span class="mut">${own.length} of ${SKILLS.length} unlocked${CAR.prestige?` · prestige +${CAR.prestige*10}% XP, +${CAR.prestige*5}% payouts`:''}</span></div>
-   ${own.length?`<div class="perk-chips">${own.map(s=>`<span class="perk" title="${cesc(s.d)}"><i></i>${s.n}</span>`).join('')}</div>`:'<div class="hint">No skills yet. Spend your first point below.</div>'}
-   <div class="sk-actions"><button id="skRespec" ${!own.length?'disabled data-why="No skills to reset"':CAR.wallet<rc?`disabled data-why="${cesc('Needs '+fmt$(rc-CAR.wallet)+' more')}"`:''} title="Refunds every point">Respec all · ${fmt$(rc)}</button></div></div>
+   ${own.length?`<div class="perk-chips">${own.map(s=>`<span class="perk" title="${cesc(s.d)}"><i></i>${s.n}</span>`).join('')}</div>`:`<div class="hint">No perks yet.${pts?` Spend your ${pts} point${pts===1?'':'s'} below. The highlighted skill is a good first pick.`:''}</div>`}
+   ${own.length?'':'<!--'}<div class="sk-actions"><button id="skRespec" ${!own.length?'disabled data-why="No skills to reset"':CAR.wallet<rc?`disabled data-why="${cesc('Needs '+fmt$(rc-CAR.wallet)+' more')}"`:''} title="Refunds every point">Respec all · ${fmt$(rc)}</button></div>${own.length?'':'-->'}</div>
   <div class="sk-tree" style="--tiers:${tiers}"><div class="sk-lane sk-hdr"><div></div>${TN.slice(0,tiers).map(n=>`<div class="sk-th">${n}</div>`).join('')}</div>${br.map(B=>`<div class="sk-lane"><div class="sk-bh">${B}</div>${Array.from({length:tiers},(_,t)=>`<div class="sk-cell">${SKILLS.filter(s=>s.b===B&&skTier(s)===t).map(s=>{
    const o=skill(s.id), reqOk=s.r.every(skill), can=!o&&reqOk&&pts>=s.c, st=o?'own':reqOk?'open':'lock';
    return `<div class="sk-node ${st}" data-node="${s.id}"><div class="sk-top"><b>${s.n}</b><span class="sk-cost">${o?'Unlocked':s.c+' pt'+(s.c>1?'s':'')}</span></div><p>${s.d}</p>
-    ${o?'':`<button class="${can?'primary':''}" data-sk="${s.id}" ${can?'':`disabled data-why="${cesc(!reqOk?'Needs '+s.r.filter(r=>!skill(r)).map(r=>SK[r].n).join(' + '):`Needs ${s.c-pts} more skill point${s.c-pts>1?'s':''}`)}"`}>${!reqOk?'Needs '+s.r.filter(r=>!skill(r)).map(r=>SK[r].n).join(' + '):pts<s.c?`Need ${s.c} point${s.c>1?'s':''}`:'Unlock'}</button>`}</div>`; }).join('')}</div>`).join('')}</div>`).join('')}</div>
+    ${o?'':`<button class="${can?(skRec?'sk-ok':(skRec=true,'primary sk-rec')):''}" data-sk="${s.id}" ${can?'':`disabled data-why="${cesc(!reqOk?'Needs '+s.r.filter(r=>!skill(r)).map(r=>SK[r].n).join(' + '):`Needs ${s.c-pts} more skill point${s.c-pts>1?'s':''}`)}"`}>${!reqOk?'Needs '+s.r.filter(r=>!skill(r)).map(r=>SK[r].n).join(' + '):pts<s.c?`Need ${s.c} point${s.c>1?'s':''}`:`Unlock · ${s.c} pt${s.c>1?'s':''}`}</button>`}</div>`; }).join('')}</div>`).join('')}</div>`).join('')}</div>
   <div class="sec">Prestige</div><div class="card pres-card"><div><b>${(CAR.prestige||0)>=PRES_MAX?'Maximum prestige reached':'Start over, stronger'}</b><p class="hint">After 10 payouts or $25,000 paid out you can prestige: your wallet, accounts, items, skills and XP reset, and you keep your look, family, trophies and Hall of Fame. Each prestige adds +10% XP and +5% on every payout, up to ${PRES_MAX} stars.</p>
    <div class="mut">Progress: ${CAR.payouts||0}/10 payouts · ${fmt$(CAR.paid||0)}/$25,000 paid out · prestige ${CAR.prestige||0}/${PRES_MAX}</div></div>${(()=>{ const why=(CAR.prestige||0)>=PRES_MAX?'Maximum prestige reached':!presOk()?'Needs 10 payouts or $25,000 paid out':CHA()?'Finish your evaluation session first':(CAR.loans||[]).length?'Pay off your loans first':''; return `<button id="presBtn" class="${why?'':'primary'}" ${why?`disabled data-why="${cesc(why)}"`:''}>${why?'Locked':'Prestige now'}</button>`; })()}</div>
   <div class="sec">How to earn XP</div><div class="card"><div class="rows"><div><span>Close a trade in an evaluation session</span><span class="mut">6 XP, 15 XP if it wins</span></div><div><span>Close a practice trade</span><span class="mut">1 XP, 3 XP if it wins</span></div><div><span>Finish an evaluation session</span><span class="mut">30 XP, 70 XP in profit</span></div><div><span>Pass an evaluation</span><span class="mut">300 XP</span></div><div><span>Take a payout</span><span class="mut">200 XP</span></div><div><span>Daily login reward</span><span class="mut">10–70 XP</span></div><div><span>Missions and trophies</span><span class="mut">shown on the phone</span></div><div><span>Process a job ticket</span><span class="mut">0.25 XP</span></div></div></div></div>`;
@@ -6759,7 +6849,7 @@ const PH_APPS=[['bank','Bank','#1b8a5a','M3 10h18M5 10v8M9 10v8M15 10v8M19 10v8M
  ['props','Prop firms','#0f6fd1','M4 19V9l8-5 8 5v10M9 19v-6h6v6'],['skills','Skills','#18a3a3','M12 3v6M12 15v6M3 12h6M15 12h6M12 12m-3 0a3 3 0 106 0 3 3 0 10-6 0'],
  ['rewards','Rewards','#e8a33a','M4 10h16v10H4zM3 7h18v3H3zM12 7v13M12 7c-2-4-6-4-6-1s6 1 6 1zm0 0c2-4 6-4 6-1s-6 1-6 1z'],['life','Shop','#e0567d','M6 7h12l-1 13H7zM9 7a3 3 0 016 0'],['job','Job','#5a6b88','M4 8h16v11H4zM9 8V5h6v3']];
 function phoneBadge(){ const b=$('phBadge'); if(!b) return; const n=(CAR.inbox||[]).filter(m=>!m.read).length+(CAR.mis?CAR.mis.list.filter(m=>m.done&&!m.claimed).length:0)+(CAR.login&&CAR.login.last===today()&&!CAR.login.claimed?1:0)+(typeof chatUnread==='function'?chatUnread():0); b.textContent=n; b.hidden=!n; }
-function phoneOpen(app){ let p=$('phone'); if(!p){ p=document.createElement('div'); p.id='phone'; p.innerHTML=`<div class="ph-dev"><div class="ph-notch"></div><div class="ph-status"><span id="phClock"></span><span class="ph-ico"><i></i><i></i><i></i><b></b></span></div><div class="ph-screen" id="phScreen"></div><div class="ph-home" id="phHome"></div></div>`; document.body.appendChild(p);
+function phoneOpen(app){ let p=$('phone'); if(!p){ p=document.createElement('div'); p.id='phone'; p.__close=()=>phoneClose(); p.innerHTML=`<div class="ph-dev"><button class="ph-close" aria-label="Close phone" onclick="event.stopPropagation();document.getElementById('phone').__close&&document.getElementById('phone').__close()">×</button><div class="ph-notch"></div><div class="ph-status"><span id="phClock"></span><span class="ph-ico"><i></i><i></i><i></i><b></b></span></div><div class="ph-screen" id="phScreen"></div><div class="ph-home" id="phHome"></div></div>`; document.body.appendChild(p);
   p.addEventListener('click',e=>{ if(e.target===p) phoneClose(); }); $('phHome').onclick=()=>{ PH.app=null; phoneRender(); }; }
  const was=p.classList.contains('on'); PH.app=app||null; p.classList.add('on'); phoneRender(); if(!was){ try{ sfxPlay('phone'); }catch(e){} } }
 function phoneClose(){ const p=$('phone'); if(p&&p.classList.contains('on')){ p.classList.remove('on'); try{ sfxPlay('phone'); }catch(e){} } }
@@ -6773,14 +6863,19 @@ function phoneRender(){
  if(!A){ let cu=0; try{ cu=typeof chatUnread==='function'?(+chatUnread()||0):0; }catch(e){} const unread=(CAR.inbox||[]).filter(m=>!m.read).length+cu, mis=misGet().list.filter(m=>m.done&&!m.claimed).length, arr=inArrears();
   h=`<div class="ph-wall"><div class="ph-time">${pad2(d.getHours())}:${pad2(d.getMinutes())}</div><div class="ph-date">${DOW[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]}</div>
    <div class="ph-widget${arr?' debt-arrears':''}"><span>Balance</span><b data-money="wallet">${fmt$(CAR.wallet)}</b><em>Lv ${lvlOf(CAR.xp||0)} · ${levelTitle(lvlOf(CAR.xp||0))}</em>${arr?`<em class="debt-over">${debtOverLine()}</em>`:''}</div>
-   <div class="ph-grid">${PH_APPS.map(([k,n,c,p])=>{ const badge=k==='messages'?unread:k==='missions'?mis:k==='rewards'?(loginTick().claimed?0:1):0; return `<button class="ph-app" data-app="${k}"><i style="--c:${c}">${ico(c,p)}${badge?`<em>${badge}</em>`:''}</i><span>${n}</span></button>`; }).join('')}</div></div>`; }
+   <div class="ph-grid">${PH_APPS.map(([k,n,c,p])=>{ const badge=k==='messages'?unread:k==='missions'?mis:k==='rewards'?(loginTick().claimed?0:1):0; return `<button class="ph-app" data-app="${k}"><i style="--c:${c}">${ico(c,p)}${badge?`<em>${badge}</em>`:''}</i><span>${n}</span></button>`; }).join('')}</div>
+   <div class="ph-today"><span class="ph-tdh">Today</span>${[
+    ['messages',CAR.ch&&CAR.ch.req?'Evaluation session waiting':'No session waiting',CAR.ch&&CAR.ch.req?'Open':''],
+    ['missions',mis?`${mis} mission reward${mis>1?'s':''} to claim`:'Missions in progress',mis?'Claim':''],
+    ['rewards',loginTick().claimed?'Daily reward claimed':'Daily reward ready',loginTick().claimed?'':'Claim']
+   ].map(([k,t,b])=>`<button class="ph-trow" data-app="${k}"><span>${t}</span>${b?`<em>${b}</em>`:'<i>›</i>'}</button>`).join('')}</div></div>`; }
  else if(A==='bank'){ const L=CAR.loans||[];
   h=head('KE Bank','Checking ·· '+String(Math.abs((CAR.uid||'0000').split('').reduce((a,c)=>a*31+c.charCodeAt(0)|0,7))%10000).padStart(4,'0'))+`<div class="ph-card bankcard"><div class="bk-top"><i class="bk-chip"></i><em class="bk-net">KE<b>PRIME</b></em></div><span>Available balance</span><b data-money="wallet">${usd(CAR.wallet)}</b><div class="bk-row"><div><span>Debt</span><b data-money="debt">${fmt$(debt())}</b></div><div><span>Credit score</span><b>${credit()} · ${creditTier(credit())}</b></div><div><span>Paid out</span><b>${fmt$(CAR.paid)}</b></div></div></div>
    ${(CAR.pend||[]).length?`<div class="ph-card"><div class="ln-h"><b>Processing</b><span>${usd(CAR.pend.reduce((s,p)=>s+p.net,0))}</span></div>${CAR.pend.map(p=>`<div class="ph-line"><span>${cesc(p.name)} · arrives ${payTxt(p.due)}</span><b>${usd(p.net)}</b></div>`).join('')}<div class="mut sm">Approved payouts arrive 2 to 5 minutes after the request.</div></div>`:''}
    <div class="ph-card sav"><div class="ln-h"><b>Savings account</b><span>${(savRate()*100).toFixed(1)}% a day</span></div><div class="sav-bal" data-money="sav">${usd((CAR.sav&&CAR.sav.bal)||0)}</div><div class="mut sm">Interest earned so far ${fmt$((CAR.sav&&CAR.sav.earned)||0)}. Paid every day, also while you are away (up to 30 days).</div>
     <div class="sav-in"><input id="savAmt" type="number" min="1" step="10" placeholder="Amount"><button data-sav="1">Deposit</button><button data-sav="-1">Withdraw</button></div></div>
    <div class="ph-card"><div class="ln-h"><b>Daily bills</b><span>${fmt$(dailyCost())} / day</span></div>${costLines().map(([a,b])=>`<div class="ph-line"><span>${cesc(a)}</span><b>${fmt$(b)}</b></div>`).join('')||'<div class="mut sm">Nothing to pay. Homes, cars, family and pets have small daily costs.</div>'}</div>
-   <div class="ph-card"><div class="ln-h"><b>Net worth</b><span>${fmt$(netWorth())}</span></div><div class="mut sm">Wallet + savings + 60% of what you own − loans.</div></div>
+   <div class="ph-card"><div class="ln-h"><b>Net worth</b><span>${usd(netWorth())}</span></div><div class="mut sm">Wallet + savings + 60% of what you own − loans.</div></div>
    <div class="ph-sec">Transactions</div><div class="ph-list">${(CAR.tx||[]).slice(0,40).map(t=>`<div class="ph-tx"><div><b>${cesc(t.d)}</b><span>${new Date(t.t).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span></div>${t.k==='sav'&&!t.a?'<em class="pos">savings</em>':!t.a?'<em class="mut">note</em>':`<em class="${t.a>=0?'pos':'neg'}">${t.a>=0?'+':''}${usd(t.a)}</em>`}</div>`).join('')||'<div class="ph-empty">No transactions yet.</div>'}</div>`; }
  else if(A==='loans'){ h=debtLoansHTML(head); }
  else if(A==='messages'){ chatSnap(); const seg=chatSeg(); if(seg!=='desk'){ h=chatView(head); } else { (CAR.inbox||[]).forEach(m=>m.read=true); const r=CAR.ch&&CAR.ch.req;
@@ -6789,7 +6884,7 @@ function phoneRender(){
  else if(A==='hof'){ const me=CAR.hof||[];
   h=head('Hall of Fame','Best R trades from evaluation sessions')+(CAR.tamper?'<div class="ph-note">This save was edited outside the app, so it can\'t enter the global Hall of Fame.</div>':'')+`<div class="ph-seg"><button data-hof="me" class="${PH.hof==='me'?'act':''}">You</button><button data-hof="all" class="${PH.hof==='all'?'act':''}">Everyone</button></div><div id="hofBox" class="ph-list">${PH.hof==='me'?(me.map((e,i)=>`<div class="ph-tx"><div><b>#${i+1} · ${e.r.toFixed(2)}R</b><span>${e.side} · session ${e.day}</span></div><em class="pos">+${fmt$(e.pnl)}</em></div>`).join('')||'<div class="ph-empty">No entries yet. Win a trade with a stop loss in an evaluation session.</div>'):'<div class="ph-empty">Loading...</div>'}</div>`; }
  else if(A==='missions'){ const M=misGet(), mult=1+Math.min(0.5,((CAR.streak||1)-1)*0.1);
-  h=head('Missions',`Day streak ${CAR.streak||1} · rewards ×${mult.toFixed(1)}`)+`<div class="ph-list">${M.list.map(m=>`<div class="ph-card mis ${m.claimed?'cl':''}"><b>${m.t}</b><div class="ph-bar"><i style="width:${m.p/m.g*100}%"></i></div><div class="ms"><span>${m.p} / ${m.g} · ${fmt$(Math.round(m.c*mult))} + ${Math.round(m.x*mult)} XP</span>${m.claimed?'<em>Claimed</em>':m.done?`<button class="primary" data-mc="${m.id}">Claim</button>`:''}</div></div>`).join('')}</div><div class="ph-note">New missions every day. Come back on consecutive days to grow your reward multiplier.</div>`; }
+  h=head('Missions',`Day streak ${CAR.streak||1} · rewards ×${mult.toFixed(1)}`)+`<div class="ph-list">${M.list.map(m=>`<div class="ph-card mis ${m.claimed?'cl':''}"><b>${m.t}</b><div class="ph-bar"><i style="width:${m.p/m.g*100}%"></i></div><div class="ms"><span>${m.p} / ${m.g} <i class="rwc">${fmt$(Math.round(m.c*mult))}</i><i class="rwc xp">+${Math.round(m.x*mult)} XP</i></span>${m.claimed?'<em>Claimed</em>':m.done?`<button class="primary" data-mc="${m.id}">Claim</button>`:''}</div></div>`).join('')}</div><div class="ph-note">New missions every day. Come back on consecutive days to grow your reward multiplier.</div>`; }
  else if(A==='rewards'){ const L=loginTick(), m=skill('loyal')?1.5:1;
   h=head('Daily rewards',`Day ${L.i+1} of 7${skill('loyal')?' · Loyalty +50%':''}`)+`<div class="rw-grid">${LOGIN_R.map((v,i)=>`<div class="rw ${i<L.i||(i===L.i&&L.claimed)?'got':i===L.i?'now':''}"><span>Day ${i+1}</span><b>${fmt$(Math.round(v*m))}</b><em>${10*(i+1)} XP</em></div>`).join('')}</div>${L.claimed?'<div class="ph-note">Claimed today. Come back tomorrow to keep the streak; missing a day restarts at day 1.</div>':`<button class="primary rw-claim" data-rw>Claim ${fmt$(Math.round(LOGIN_R[L.i]*m))}</button>`}`; }
  else if(A==='trophies'){ const G=CAR.ach||{};
@@ -6831,7 +6926,7 @@ const LOOK_DEF={face:'oval',beard:'none',eye:'#2a1f18'};
 const lk=(L,k)=>(L&&L[k])||LOOK_DEF[k];
 /* --- avatar extras (GFX): empty garage bay, portraits, item thumbnails, small icons --- */
 function garageEmpty(){ return `<g fill="none" stroke="#5a6888" stroke-width="1.1" stroke-dasharray="3 4" opacity=".55"><path d="M84 92h-6q-4 0-4-5v-9q0-6 6-8l26-6 24-16q7-5 16-5h56q10 0 17 6l22 15 28 6q6 2 6 8v9q0 5-4 5h-6"/><path d="M146 92h96"/><circle cx="114" cy="92" r="13"/><circle cx="270" cy="92" r="13"/></g>
- <path d="M200 102v-5M200 90v-5M200 78v-5" stroke="#c9a45a" stroke-width="1.6" opacity=".5"/><text x="200" y="106" text-anchor="middle" fill="#7a88a6" font-size="10" letter-spacing=".3" font-family="Geist,Segoe UI,sans-serif">Your first car parks here</text>`; }
+ <path d="M200 102v-5M200 90v-5M200 78v-5" stroke="#c9a45a" stroke-width="1.6" opacity=".5"/><rect x="134" y="96" width="132" height="15" rx="7.5" fill="#0b1120" opacity=".92"/><text x="200" y="106.5" text-anchor="middle" fill="#93a3bf" font-size="10" letter-spacing=".3" font-family="Geist,Segoe UI,sans-serif">Your first car parks here</text>`; }
 /* head and shoulders portrait of a character, for the profile page and cards */
 function avPortrait(eq,L,size){ const P=gfxId('p'), z=size||96;
  return `<svg class="gfx-portrait" viewBox="-46 -258 92 100" width="${z}" height="${z*100/92}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>${lgrad(P+'bg',[[0,'#2a3a63'],[1,'#121a2e']],0,0,0,1)}</defs><rect x="-46" y="-258" width="92" height="100" fill="url(#${P}bg)"/><circle cx="22" cy="-246" r="40" fill="#4c8dff" opacity=".12"/>${avMe(eq,L,{P:P+'a'})}</svg>`; }
@@ -6893,12 +6988,20 @@ function jobFx(){ const st=$('jbStage'); if(!st) return; const f=HUB.feed[0]; if
 function jobBadge(i,size){ const z=size||28, cols=['#7f93b5','#5d8fd6','#4c8dff','#c9a45a','#d9b25f'], c=cols[Math.min(i,4)];
  return `<svg class="jb-badge" viewBox="0 0 28 32" width="${z}" height="${z*32/28}" aria-hidden="true"><path d="M14 1L26 6V15C26 23 20 28.5 14 31C8 28.5 2 23 2 15V6Z" fill="${c}" fill-opacity=".16" stroke="${c}" stroke-width="1.4"/>${Array.from({length:i+1},(_,k)=>`<path d="M8 ${21-k*4.2}L14 ${17.4-k*4.2}L20 ${21-k*4.2}" stroke="${c}" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`).join('')}</svg>`; }
 /* profile header: portrait, level, rank, key numbers and the trophy shelf */
+const TRO_ICO={eval1:'M9 3h6v3H9zM6 5h12v16H6zM9 11h6M9 15h4',pass1:'M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6zM9 12l2 2 4-4',pass5:'M12 3l2.5 5 5.5.8-4 3.9 1 5.5-5-2.6-5 2.6 1-5.5-4-3.9 5.5-.8z',
+ pay1:'M3 7h18v10H3zM12 9.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM6.5 12h.01M17.5 12h.01',pay10k:'M12 4c4 0 7 1.3 7 3s-3 3-7 3-7-1.3-7-3 3-3 7-3zM5 7v5c0 1.7 3 3 7 3s7-1.3 7-3V7M5 12v5c0 1.7 3 3 7 3s7-1.3 7-3v-5',
+ r5:'M12 3a9 9 0 100 18 9 9 0 000-18zM12 7a5 5 0 100 10 5 5 0 000-10zM12 11a1 1 0 100 2 1 1 0 000-2z',s10:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4M8 14h3',home:'M3 11l9-7 9 7M5 10v10h14V10M10 20v-6h4v6',
+ villa:'M3 20h18M5 20V10l7-5 7 5v10M9 20v-5h6v5M8 12h.01M16 12h.01',pent:'M7 21V3h10v18M4 21h16M10 7h.01M14 7h.01M10 11h.01M14 11h.01M10 15h.01M14 15h.01',
+ car:'M4 16v-4l2.5-5h11L20 12v4zM4 12h16M7.5 19a1.8 1.8 0 100-3.6 1.8 1.8 0 000 3.6zM16.5 19a1.8 1.8 0 100-3.6 1.8 1.8 0 000 3.6z',wed:'M9 9a5 5 0 100 10 5 5 0 000-10zM15 5a5 5 0 100 10 5 5 0 000-10z',
+ debtfree:'M5 11h14v10H5zM8 11V7a4 4 0 017.6-1.8M12 15v2',hard1:'M12 3c1 4 5 5.5 5 10a5 5 0 01-10 0c0-3 2-4.5 2-7.5 1.8 1.2 3 3 3 5',hard5:'M12 2v20M3.5 7l17 10M20.5 7l-17 10M9 4l3 2 3-2M9 20l3-2 3 2',
+ lv10:'M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z',three:'M3 8h18v12H3zM8 8V5h8v3M3 13h18M11 13v2h2v-2',live1:'M12 11a1 1 0 100 2 1 1 0 000-2zM8.5 8.5a5 5 0 000 7M15.5 8.5a5 5 0 010 7M5.5 5.5a9.5 9.5 0 000 13M18.5 5.5a9.5 9.5 0 010 13'};
+function troIco(k){ return `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${TRO_ICO[k]||GFX_ICO.trophy}"/></svg>`; }
 function profHeadHTML(){ const xp=CAR.xp||0, l=lvlOf(xp), a=lvlXp(l), b=lvlXp(l+1), pct=Math.max(0,Math.min(100,(xp-a)/(b-a)*100)), rk=hubRank(), got=CAR.ach||{}, n=ACH.filter(x=>got[x[0]]).length;
- const tro=ACH.map(x=>`<span class="pf-tro${got[x[0]]?' got':''}" title="${cesc(x[1]+': '+x[2])}" aria-label="${cesc(x[1])}">${gfxIco('trophy')}</span>`).join('');
+ const tro=ACH.map(x=>`<span class="pf-tro${got[x[0]]?' got':''}" title="${cesc(x[1]+': '+x[2])}" aria-label="${cesc(x[1])}"><i>${troIco(x[0])}</i><em>${cesc(x[1])}</em></span>`).join('');
  return `<div class="card pf-head"><div class="pf-top"><div class="pf-av">${avPortrait(eqNow(),CAR.look,96)}</div>
   <div class="pf-id"><b class="pf-n">${cesc(CAR.look.name||'You')}${CAR.prestige?` <i class="pres">${'★'.repeat(CAR.prestige)}</i>`:''}</b><span class="pf-t">Level ${l} · ${levelTitle(l)}</span><span class="badge ${rk[1]}">${rk[0]}</span>
    <div class="pf-xp"><div class="m"><i style="width:${pct.toFixed(1)}%"></i></div><span>${Math.max(0,Math.ceil(b-xp)).toLocaleString('en-US')} XP to level ${l+1}</span></div></div></div>
-  <div class="pf-stats">${[['Net worth',fmt$(netWorth())],['Paid out',fmt$(CAR.paid||0)],['Payouts',CAR.payouts||0],['Evaluations passed',CAR.passes||0]].map(([k,v])=>`<div><span>${k}</span><b>${v}</b></div>`).join('')}</div>
+  <div class="pf-stats">${[['Net worth',usd(netWorth())],['Paid out',fmt$(CAR.paid||0)],['Payouts',CAR.payouts||0],['Evaluations passed',CAR.passes||0]].map(([k,v])=>`<div><span>${k}</span><b>${v}</b></div>`).join('')}</div>
   <div class="pf-shelf"><div class="pf-sh"><b>Trophies</b><span class="mut">${n} of ${ACH.length}</span></div><div class="pf-row">${tro}</div></div></div>`; }
 /* job desk visual, markup only; jobFx animates it */
 function jobStageHTML(){ const f=HUB.feed[0], m=f?(/^(BUY|SELL) (\d+) (\S+) @ ([\d,.]+)/.exec(f[0])||[]):[];
@@ -6943,7 +7046,7 @@ function savMove(dir,amt,el){ const S0=CAR.sav=CAR.sav||{bal:0,last:dayIdx(),ear
  else { amt=Math.min(amt,S0.bal); if(amt<=0) return debtDeny(el||null,'Nothing to move'); S0.bal=Math.round((S0.bal-amt)*100)/100; CAR.wallet=Math.round((CAR.wallet+amt)*100)/100; txAdd('Transfer from savings',amt,'refund'); }
  debtSfx('bank'); carSave(); careerSync(); try{ phoneRender(); }catch(e){} }
 const assetValue=()=>Math.round(Object.keys(CAR.owned||{}).reduce((a,k)=>a+(ITEM[k]&&!ITEM[k].tool?ITEM[k].price*0.6:0),0));
-const netWorth=()=>Math.round(CAR.wallet+((CAR.sav&&CAR.sav.bal)||0)+assetValue()-debt());
+const netWorth=()=>Math.round((CAR.wallet+((CAR.sav&&CAR.sav.bal)||0)+assetValue()-debt())*100)/100;
 /* --- prestige --- */
 const PRES_MAX=5;
 const presOk=()=>(CAR.prestige||0)<PRES_MAX && ((CAR.payouts||0)>=10 || (CAR.paid||0)>=25000);
@@ -7088,7 +7191,7 @@ function hubRender(){
  if(!$('hub')) return;
  $('hubNav').innerHTML=HUB_PAGES.map(([k,l])=>`<button data-p="${k}" class="${k===HUB.page?'act':''}">${l}</button>`).join('');
  $('hubNav').querySelectorAll('button').forEach(b=>b.onclick=()=>hubOpen(b.dataset.p));
- $('hubWal').textContent=usd(CAR.wallet);
+ $('hubWal').textContent=usd(CAR.wallet); { const hl=$('hubLv'); if(hl) hl.textContent='Lv '+lvlOf(CAR.xp||0); }
  const ub=$('hubUser'); ub.textContent=CLOUD.user?(CLOUD.user.email||'Signed in'):'Sign in'; ub.title=CLOUD.user?'Your online account':'Sign in to save your career online';
  if(HUB_ALIAS[HUB.page]) HUB.page=HUB_ALIAS[HUB.page];
  const B=$('hubBody'), P=HUB.page, name=cesc(CAR.look.name||'You');
@@ -7131,7 +7234,7 @@ function hubRender(){
     <div class="hint" style="margin-top:12px">Hover an item to preview it on your character.</div>`;
   B.innerHTML=`<div class="hub-two"><div class="hub-side">${stageHTML()}<div class="who"><b>${name}${CAR.prestige?` <i class="pres">${'★'.repeat(CAR.prestige)}</i>`:''}</b><span class="mut">Lv ${lvlOf(CAR.xp||0)} · ${levelTitle(lvlOf(CAR.xp||0))}</span><button class="link" id="myCard">Profile card</button></div></div>
    <div class="hub-main"><h2>Life</h2><p class="sub">Your home, your character and everything you own. Wallet money comes from payouts and the job.${CAR.eq.pet?' Click your dog to pet it.':''}</p>
-    <div class="stats4">${[['Wallet',usd(CAR.wallet)],['Savings',usd((CAR.sav&&CAR.sav.bal)||0)],['Living costs',fmt$(dailyCost())+' / day'],['Net worth',fmt$(netWorth())]].map(([l,v])=>`<div><span>${l}</span><b>${v}</b></div>`).join('')}</div>
+    <div class="stats4">${[['Wallet',usd(CAR.wallet)],['Savings',usd((CAR.sav&&CAR.sav.bal)||0)],['Living costs',fmt$(dailyCost())+' / day'],['Net worth',usd(netWorth())]].map(([l,v])=>`<div><span>${l}</span><b>${v}</b></div>`).join('')}</div>
     <div class="card house"><div class="card-h"><b>Household</b><button class="link" data-phone="bank">Open bank</button></div>${costLines().length?`<div class="rows">${costLines().map(([a,b])=>`<div><span>${cesc(a)}</span><span class="mut">${fmt$(b)} / day</span></div>`).join('')}</div>`:'<div class="hint">No running costs yet. Homes, cars, family and pets cost a little every day you own them.</div>'}${skill('frugal')?'<div class="hint">Frugal living: −30% applied.</div>':''}</div>
     ${needsHTML()}<div class="pills">${tabs.map(t=>`<button data-st="${t}" class="${t===HUB.shop?'act':''}">${gfxIco(t)}${t}</button>`).join('')}</div>${body}</div></div>`;
   stageBind(); famBind(B); lifeBind(B); { const mc=$('myCard'); if(mc) mc.onclick=myProfCard; } B.querySelectorAll('[data-phone]').forEach(b=>b.onclick=()=>{ hubOpen('chart'); phoneOpen(b.dataset.phone); });
@@ -7166,7 +7269,7 @@ function hubRender(){
    <div class="sec">Career</div><div class="card note"><span>Start over with ${money(EVAL.price)} in your wallet, no accounts and nothing owned. Your look is kept.</span><button id="crReset">Reset career</button></div></div>`;
   $('crName').oninput=()=>{ CAR.look.name=$('crName').value; carSave(); };
   $('crReset').onclick=()=>{ const b=$('crReset'); if(CHA()){ toast('Finish your evaluation session first.',3000); return; } if(b.dataset.arm){ const look=CAR.look; Object.keys(CAR).forEach(k=>{ if(k!=='uid') delete CAR[k]; }); Object.assign(CAR,carDefault(),{look}); SYNC.prev={}; carSave(); careerSync(); toast('Career reset.',2500); } else { b.dataset.arm='1'; b.textContent='Click again to erase everything'; } };
-  cloudAccountUI();
+  cloudAccountUI(); { const cb=$('cloudBox'); if(cb && /could not|no connection/i.test(cb.textContent)) cb.classList.add('warn'); }
  }
  B.querySelectorAll('[data-hub]').forEach(e=>{ if(!e.onclick) e.onclick=()=>hubOpen(e.dataset.hub); });
  try{ acctRender(); }catch(e){}
@@ -7195,8 +7298,8 @@ function hubOpen(page){
  const toStore=page==='store'; if(HUB_ALIAS[page]) page=HUB_ALIAS[page];
  if(!$('hub')){
   document.body.insertAdjacentHTML('beforeend',`<div id="hub" hidden><div class="hub-top"><div class="brand">${document.querySelector('#top .brand').innerHTML}</div><nav id="hubNav"></nav><div class="grow"></div>
-   <div class="hub-wal">Wallet<b id="hubWal"></b></div><button id="hubUser" class="ghost"></button><button id="hubBack">Back to trading</button></div><div class="hub-body" id="hubBody"></div></div>`);
-  $('hubBack').onclick=()=>hubOpen('chart'); $('hubUser').onclick=()=>hubOpen('profile');
+   <button id="hubLv" class="hub-lv" title="Your profile"></button><div class="hub-wal">Wallet<b id="hubWal"></b></div><button id="hubUser" class="ghost"></button></div><div class="hub-body" id="hubBody"></div></div>`);
+  $('hubLv').onclick=()=>hubOpen('profile'); $('hubUser').onclick=()=>hubOpen('profile');
  }
  if(page) HUB.page=page; HUB.try=null;
  $('hub').hidden=false; hubRender(); $('hubBody').scrollTop=0; secMark(HUB.page);
@@ -7366,7 +7469,8 @@ async function lbRender(force){
  const d=await lbLoad(force), me=CLOUD.user&&CLOUD.user.id, full=$('lbBox'), mini=$('lbMini');
  const off=!cloudOn()||!CLOUD.sb ? 'The leaderboard needs a connection to the online service.' : HUB.lbErr ? 'Could not load the leaderboard: '+HUB.lbErr : (d&&!d.length) ? 'No one is on the board yet.' : '';
  const rows=n=>d.slice(0,n).map((x,i)=>`<tr class="${x.id===me?'me':''} lb-row" data-lbi="${i}" title="Open profile card"><td>${i+1}</td><td>${cesc(x.name||'You')}${x.id===me?' <span class="badge run">YOU</span>':''}${badgesFor(x).map(([t,c])=>`<span class="pbadge sm ${c}">${t}</span>`).join('')}</td><td>${usd(+x.paid||0)}</td><td>${x.passes||0}</td></tr>`).join('');
- if(full) full.innerHTML=off?`<div class="hint">${cesc(off)}</div>`:`<table class="lbt"><tr><th>#</th><th>Trader</th><th>Paid out</th><th>Evaluations passed</th></tr>${rows(50)}</table>`;
+ if(full) full.innerHTML=off?`<div class="lb-empty"><div class="lb-ico">${troIco('lv10')}</div><b>${d&&!d.length&&!HUB.lbErr&&cloudOn()&&CLOUD.sb?'No one is on the board yet':'Leaderboard is offline'}</b><p>${d&&!d.length&&!HUB.lbErr&&cloudOn()&&CLOUD.sb?'Take a payout from a funded account to be the first name here.':"We couldn't reach the online service. Your progress is still saved in this browser."}</p><button class="primary" id="lbRetry">Try again</button></div><div class="lb-skel">${'<div><i></i><i></i><i></i></div>'.repeat(5)}</div>`:`<table class="lbt"><tr><th>#</th><th>Trader</th><th>Paid out</th><th>Evaluations passed</th></tr>${rows(50)}</table>`;
+ { const rb=$('lbRetry'); if(rb) rb.onclick=async()=>{ rb.disabled=true; rb.textContent='Trying...'; await lbRender(true); }; }
  if(mini) mini.innerHTML=off?cesc(off):`<table class="lbt sm">${rows(5)}</table>`;
  if(!off) [full,mini].forEach(box=>box&&box.querySelectorAll('[data-lbi]').forEach(tr=>tr.onclick=()=>{ const x=d[+tr.dataset.lbi]; profCard(Object.assign({rank:+tr.dataset.lbi+1},x),x.id===me); }));
 }
