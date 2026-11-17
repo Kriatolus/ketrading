@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261117095019">
+<meta name="ke-build" content="20261117095111">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1647,6 +1647,12 @@ body:not(:has(#hub:not([hidden]))) #toast{right:auto!important;left:64px!importa
 .ac-x{border:1px solid rgba(239,68,68,.45)!important;border-radius:8px!important;padding:5px 12px!important;margin-top:12px!important}
 .ac-x:hover{background:rgba(239,68,68,.1)!important;text-decoration:none!important}
 @media(max-width:600px){ #phone .ph-screen{padding-top:calc(env(safe-area-inset-top) + 28px)!important} }
+
+/* ===== final polish ===== */
+#toast{background:#141b2b!important;backdrop-filter:none!important;color:#e6efff!important}
+.ac-left{row-gap:12px!important}
+.sk-node button.locked{font-size:11.5px}
+@media(max-width:600px){ #phone .ph-screen{padding-top:calc(env(safe-area-inset-top) + 40px)!important} }
 /* mobile tab bar */
 #mTabs{display:none}
 @media(max-width:600px){
@@ -4503,7 +4509,7 @@ function armDraft(side){
  OP.slOn=sl>0; if(sl>0) OP.slT=Math.max(1,Math.round(sl/t));
  OP.tpOn=tp>0; if(tp>0) OP.tpT=Math.max(1,Math.round(tp/t));
  opUpdate(true); refresh();
- msg(`${side>0?'Buy':'Sell'} armed. Set your stop and target on the chart if you want them, then press CONFIRM on the chart. Esc cancels.`); toast(`<b>${side>0?'Buy':'Sell'} armed.</b> Drag the lines to set your stop and target, then press <b>CONFIRM</b> on the chart. Esc cancels.`,5000);
+ msg(`${side>0?'Buy':'Sell'} armed · Esc cancels`); toast(`<b>${side>0?'Buy':'Sell'} armed.</b> Drag the lines to set your stop and target, then press <b>CONFIRM</b> on the chart. Esc cancels.`,5000);
 }
 function draftRef(){   // the draft's reference price: frozen when armed so its lines do not follow the market; reset when the side changes
  const side=OP.side;
