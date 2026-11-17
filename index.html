@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261117153352">
+<meta name="ke-build" content="20261117164226">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -2745,7 +2745,9 @@ function manualClose(){
 }
 function breakeven(){
  if(!S.pos){ msg('No open position.'); return; }
- S.pos.sl=S.pos.entry; drawLines(); msg('Stop moved to breakeven.'); refresh();
+ const p=S.pos, now=p.side>0?bidPx():askPx();
+ if((now-p.entry)*p.side<=0){ msg('Price is not past your entry yet, so a breakeven stop would close the trade at once. Try again once the trade is in profit.'); try{ sfxPlay('deny'); }catch(e){} return; }   // a stop on the wrong side of the market fills immediately
+ p.sl=p.entry; drawLines(); msg('Stop moved to breakeven.'); refresh();
 }
 function clearLines(){ S.lines.forEach(l=>candles.removePriceLine(l)); S.lines=[]; }
 function drawLines(){ clearLines(); }   // position lines are drawn by posRender()
@@ -4119,7 +4121,7 @@ window.addEventListener('mouseup',e=>{
  if(d.which==='tp'&&p) msg(`Take profit moved to ${fmtP(p.tp)}.`); else if(d.which==='sl'&&p) msg(`Stop loss moved to ${fmtP(p.sl)}.`); else if(d.which==='order') { drawOrders(); msg('Order moved.'); }
  refresh();
 },true);
-document.addEventListener('keydown',e=>{ if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)) return; if(e.shiftKey && e.key.toLowerCase()==='t'){ e.preventDefault(); toggleOP(); } },true);
+document.addEventListener('keydown',e=>{ if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)) return; if(e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey && e.key.toLowerCase()==='t'){ e.preventDefault(); toggleOP(); } },true);
 
 /* ---------- horizontal lines ---------- */
 function setHMode(v){ S.hMode=v; $('btnHline').classList.toggle('on', v); }
@@ -4431,10 +4433,11 @@ document.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>b.
 document.addEventListener('keydown',e=>{
  if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)) return;
  const k=e.key.toLowerCase();
+ if((e.ctrlKey||e.metaKey||e.altKey) && k!=='escape') return;   // Ctrl+C, Ctrl+E etc. are browser shortcuts, never trade commands
  if(e.code==='ArrowRight'){ e.preventDefault(); manualStep(); }
  else if(e.code==='Space'){ e.preventDefault(); togglePlay(); }
- else if(k==='b'&&!e.ctrlKey&&!e.metaKey) armDraft(1);
- else if(k==='s'&&!e.ctrlKey&&!e.metaKey) armDraft(-1);
+ else if(k==='b') armDraft(1);
+ else if(k==='s') armDraft(-1);
  else if(k==='c') manualClose();
  else if(k==='e') breakeven();
  else if(k==='h') setTool('hline');
@@ -4470,7 +4473,7 @@ on('btnReplayToggle',()=>{ $('replayBar').classList.toggle('hidden'); $('btnRepl
 $('mode').addEventListener('change',syncModeUI);
 document.addEventListener('keydown',e=>{
  if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)) return;
- if(e.key==='r'||e.key==='R') resetView();
+ if((e.key==='r'||e.key==='R')&&!e.ctrlKey&&!e.metaKey&&!e.altKey) resetView();
  if(e.key==='Escape') setSelect(false);
 });
 /* ================= v2 features ================= */
@@ -5727,7 +5730,15 @@ function mfxChip(){ const v=Math.round(MFX.sum*100)/100; MFX.sum=0; MFX.timer=0;
  MFX.chip=c; setTimeout(()=>{ c.remove(); if(MFX.chip===c) MFX.chip=null; },950); }
 /* run the scanner before paint whenever the hub or the phone changes */
 const SNDO={q:false,seen:new WeakSet()};
-setInterval(()=>{ try{ moneyFx(); const lv=$('lvLb'); if(lv){ const t='Lv '+lvlOf(CAR.xp||0); if(lv.textContent!==t) lv.textContent=t; } }catch(e){} },500);   // header wallet and level follow every change (rewards, payouts, interest), not only hub redraws
+function pillFit(){   // the session/practice banner must never cover the chart's Buy/Sell buttons
+ const pl=$('chBar'), q=$('qtb'); if(!pl||!q||pl.hidden) return;
+ pl.style.top=''; const a=pl.getBoundingClientRect(), b=q.getBoundingClientRect();
+ if(!b.width||!a.width) return;
+ const hit=a.left<b.right+8 && a.right>b.left-8 && a.top<b.bottom && a.bottom>b.top;
+ if(hit) pl.style.top=Math.round(b.bottom-q.offsetParent.getBoundingClientRect().top+8)+'px';
+}
+window.addEventListener('resize',()=>{ try{ pillFit(); }catch(e){} });
+setInterval(()=>{ try{ pillFit(); }catch(e){} try{ moneyFx(); const lv=$('lvLb'); if(lv){ const t='Lv '+lvlOf(CAR.xp||0); if(lv.textContent!==t) lv.textContent=t; } }catch(e){} },500);   // header wallet and level follow every change (rewards, payouts, interest), not only hub redraws
 function sndKick(){ if(SNDO.q) return; SNDO.q=true; queueMicrotask(()=>{ SNDO.q=false; try{ sndScan(); }catch(e){} try{ moneyFx(); }catch(e){} }); }
 function sndWatch(){ ['hub','phone'].forEach(id=>{ const el=document.getElementById(id); if(el&&!SNDO.seen.has(el)){ SNDO.seen.add(el); new MutationObserver(sndKick).observe(el,{childList:true,subtree:true}); sndKick(); } }); }
 try{ new MutationObserver(sndWatch).observe(document.body,{childList:true}); sndWatch(); }catch(e){}
