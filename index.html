@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261117093011">
+<meta name="ke-build" content="20261117093725">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1459,7 +1459,7 @@ body.pnlw-on #hud{display:none!important}
 .sk-node.lock button{color:#94a3b8}
 .sk-svg path{stroke:#334155!important;stroke-width:2!important;stroke-dasharray:none!important}
 .sk-svg path.half{stroke:color-mix(in srgb,#3b82f6 60%,#334155)!important}.sk-svg path.on{stroke:#3b82f6!important}
-.sk-node button.sk-ok{background:transparent;color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 55%,transparent)}
+.sk-node button.sk-ok{background:transparent!important;color:#60a5fa!important;border:1px solid color-mix(in srgb,#3b82f6 60%,transparent)!important}
 .sk-node button.sk-ok:hover{background:color-mix(in srgb,var(--accent) 12%,transparent)}
 .sk-node:has(.sk-rec){border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 12px 30px -16px var(--accent)}
 .sk-lane{align-items:start!important}.sk-lane .sk-bh{padding-top:14px}
@@ -1502,11 +1502,93 @@ body.pnlw-on #hud{display:none!important}
 .rwc{font-style:normal;display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(18,184,134,.14);color:#34d399}
 .rwc.xp{background:rgba(59,130,246,.16);color:#93c5fd}
 .ph-card.mis .ph-bar{background:rgba(255,255,255,.08)}
-.ph-today{margin-top:22px;border-radius:20px;padding:12px 12px 6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(10px)}
+.ph-today{margin-top:16px;border-radius:20px;padding:12px 12px 6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(10px)}
 .ph-tdh{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8fa2c2;margin:0 4px 6px;font-weight:600}
 .ph-trow{display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;padding:10px 6px;border:0;border-top:1px solid rgba(255,255,255,.06);background:none;color:#e6efff;font-size:13px;text-align:left;cursor:pointer;height:auto}
 .ph-trow:first-of-type{border-top:0}.ph-trow i{font-style:normal;color:#64748b;font-size:16px}
 .ph-trow em{font-style:normal;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;background:#2f80ff;color:#fff}
+
+/* ===== polish round 2 ===== */
+#toast{top:auto!important;bottom:24px!important;right:24px!important;left:auto!important;transform:translateY(8px)!important}
+#toast.on{transform:translateY(0)!important}
+body:not(:has(#hub:not([hidden]))) #toast{right:auto!important;left:64px!important;bottom:118px!important}
+#toast:hover{outline:1px solid var(--border)}
+#symSel{width:auto!important;flex:0 0 auto!important;min-width:0!important;max-width:170px}
+#pairSel{min-width:0!important;width:auto!important;max-width:140px}
+#walLb{min-width:110px;flex-shrink:0!important;text-align:right}
+#top .secnav button{padding:0 9px}
+.gd-hide{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none;padding:0!important;border:0!important}
+#gotoBtn{gap:7px;min-width:150px;justify-content:flex-start;color:var(--text)}#gotoBtn svg{color:var(--muted)}
+#pnlW .pw-min{margin-left:auto;width:22px;height:22px;padding:0;border:0;background:transparent;color:var(--muted);font-size:12px;transition:transform .15s}
+#pnlW.min .pw-min{transform:rotate(-90deg)}
+#pnlW.min .pw-grid,#pnlW.min .pw-sub{display:none!important}
+#pnlW.min .pw-big{font-size:20px!important;margin:2px 0 0!important}
+#pnlW .pw-grip{margin-left:6px}
+/* phone footer: content scrolls under a solid strip, never under the bar */
+.ph-home::before{background:#070b14!important;height:40px!important;bottom:-20px!important}
+.ph-screen{padding-bottom:58px!important}
+#phone:has(.ph-back) .ph-close{display:none!important}
+.ph-streak{margin-bottom:12px}.stk{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:10px 0 8px}
+.stk i{height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08)}
+.stk i em{font-style:normal;font-size:11px;color:#8fa2c2;font-weight:600}
+.stk i.on{background:linear-gradient(180deg,#f59e0b,#d97706);border-color:#f59e0b}.stk i.on em{color:#1b1304}
+/* trophies 9 + 8, locked vs earned */
+.pf-row{grid-template-columns:repeat(9,minmax(0,1fr))!important}
+@media(max-width:900px){.pf-row{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
+.pf-tro{position:relative}
+.pf-tro:not(.got){opacity:.6}
+.pf-tro:not(.got)::after{content:'';position:absolute;top:7px;right:7px;width:12px;height:12px;background:no-repeat center/12px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M6 11h12v10H6zM9 11V8a3 3 0 016 0v3'/%3E%3C/svg%3E")}
+.pf-tro.got{box-shadow:0 0 18px -6px #f59e0b}
+/* skills: tier caption per card, no empty column headers */
+.sk-hdr{display:none!important}
+.sk-tcap{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:#64748b;font-weight:700;margin-bottom:-4px}
+.sk-node.own .sk-tcap,.sk-node:has(.sk-rec) .sk-tcap{color:var(--accent)}
+/* account card two columns */
+.ac-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:24px;align-items:start;margin-top:4px}
+.ac-left{display:flex;flex-direction:column;gap:10px}
+.ac-right .meter{margin-top:0}
+.ac-right .ac-r{display:grid!important;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.ac-right .ac-r span{display:flex;flex-direction:column;gap:3px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:color-mix(in srgb,var(--panel) 70%,var(--bg));font-size:11px;color:var(--muted)}
+.ac-right .ac-r b{font-size:18px;font-weight:600;color:var(--text)}
+.ac-right .hint{margin-top:8px}
+@media(max-width:800px){.ac-body{grid-template-columns:1fr}}
+/* eval store: options block + collapsed rules */
+.ev-opts{position:relative;background:#0f172a;border:1px solid var(--border);border-radius:12px;padding:30px 12px 12px!important;margin:8px 0 12px}
+.ev-opts::before{content:'Your options';position:absolute;left:12px;top:9px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#94a3b8;font-weight:700}
+.ev .rt{grid-template-columns:minmax(96px,42%) 1fr!important}.ev .rt b{text-align:left!important;font-weight:500!important}
+.rt-more{margin:-4px 0 12px}.rt-more summary{cursor:pointer;color:var(--accent);font-size:12px;font-weight:600;list-style:none;padding:4px 0}
+.rt-more summary::-webkit-details-marker{display:none}.rt-more summary::after{content:' ▾'}.rt-more[open] summary::after{content:' ▴'}
+/* job: Done badge on the tray */
+#hub .jb-tray b.jb-cnt{position:absolute;top:8px;right:-2px;z-index:2;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:#2563eb;color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;line-height:1}
+.jb-stage{padding-bottom:16px!important}
+/* shop: Finance as a quiet link, Buy as an outlined button */
+.shop-it .acts button.fin{background:transparent!important;border:0!important;color:var(--muted)!important;min-width:0!important;padding:0 6px!important;text-decoration:underline;text-underline-offset:3px}
+.shop-it .acts button.fin:hover{color:var(--text)!important}
+.shop-it .acts button.primary{background:transparent!important;color:#60a5fa!important;border:1px solid color-mix(in srgb,#3b82f6 60%,transparent)!important}
+.shop-it .acts button.primary:hover{background:color-mix(in srgb,#3b82f6 14%,transparent)!important}
+.shop-it .dot.thumb{background:radial-gradient(circle at 50% 40%,#475569 0%,#334155 35%,#1e293b 75%)!important}
+/* leaderboard */
+#lbRetry{height:36px;font-size:14px;padding:0 18px}
+.lb-skel div{grid-template-columns:32px 1fr 120px!important}
+.lb-skel i:nth-child(3){justify-self:end;width:90px}
+.lb-me{display:flex;align-items:center;gap:12px}
+.lb-av{width:36px;height:36px;border-radius:50%;overflow:hidden;flex:none;background:#1e293b}.lb-av svg,.lb-av img{width:100%;height:100%}
+.lb-mt{display:flex;flex-direction:column;flex:1;min-width:0}.lb-mt em{font-style:normal;color:var(--muted);font-size:12px}
+.lb-lv{height:24px;padding:0 10px;border-radius:999px;font-weight:700;font-size:12px;color:#93c5fd;background:color-mix(in srgb,#3b82f6 16%,transparent);display:grid;place-items:center}
+@media(max-width:1640px){#top .chip,#kStats{display:none!important}}
+#walLb{min-width:0!important}#btnCareer{flex-shrink:0!important}
+@media(max-width:600px){ .hub-wal{display:flex!important;font-size:0!important;margin-left:8px} .hub-wal b{font-size:14px!important} }
+/* mobile tab bar */
+#mTabs{display:none}
+@media(max-width:600px){
+ #mTabs{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:230;height:calc(64px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:color-mix(in srgb,var(--panel) 94%,transparent);backdrop-filter:blur(14px);border-top:1px solid var(--border)}
+ #mTabs button{height:100%;flex-direction:column;gap:3px;border:0;background:none;color:var(--muted);font-size:11px;border-radius:0}
+ #mTabs button.act{color:#60a5fa}
+ #hubNav{display:none!important}
+ #hub #hubLv{display:grid!important;place-items:center;margin-left:auto}
+ .hub-body{padding-bottom:84px!important}
+ #toast{left:12px!important;right:12px!important;bottom:80px!important;max-width:none!important}
+}
 </style>
 </head>
 <body>
@@ -2636,10 +2718,10 @@ const yr=t=>new Date(t*1000).getUTCFullYear();
 async function refreshSymbols(selectName){
  META=await listSymbols();
  const cur=selectName ?? $('symSel').value;
- $('symSel').innerHTML = META.map(m=>`<option value="${m.name}">${symLabel(m.name)}</option>`).join('') +
+ $('symSel').innerHTML = META.map(m=>`<option value="${m.name}" title="${symLabel(m.name)}">${symLabel(m.name).split(' (')[0]}</option>`).join('') +
   '<option value="__demo">Demo data</option><option value="__add">+ Add symbol from CSV&hellip;</option>';
  if(META.find(m=>m.name===cur) || cur==='__demo') $('symSel').value=cur;
- $('pairSel').innerHTML='<option value="">None</option>'+META.map(m=>`<option value="${m.name}">${symLabel(m.name)}</option>`).join('');
+ $('pairSel').innerHTML='<option value="">No SMT pair</option>'+META.map(m=>`<option value="${m.name}" title="${symLabel(m.name)}">SMT vs ${symLabel(m.name).split(' · ')[0]}</option>`).join('');
  $('pairSel').value = META.find(m=>m.name===cfg.pair) ? cfg.pair : '';
  $('symList').innerHTML = META.length ? META.map(m=>`<div class="symrow"><span>${symLabel(m.name)}: ${yr(m.from)}&ndash;${yr(m.to)}, ${m.file?'built-in data folder':(m.n/1e6).toFixed(2)+'M bars'}</span>${m.file?'':`<button data-del="${m.name}">Delete</button>`}</div>`).join('') : 'None yet.';
  $('symList').querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{ { await deleteSymbol(b.dataset.del); if(cfg.pair===b.dataset.del){cfg.pair='';saveCfg();} await refreshSymbols(); msg('Deleted '+b.dataset.del+'.'); } });
@@ -3739,10 +3821,11 @@ const noCtl=e=>!(e.target.closest&&e.target.closest('input,select,textarea,label
 /* mini live P&L widget */
 function pnlWBuild(){
  if($('pnlW')) return; const host=$('chart'); if(!host) return;
- const w=document.createElement('div'); w.id='pnlW'; w.innerHTML=`<div class="pw-h"><i class="pw-dot"></i><b>LIVE P&amp;L</b><span class="pw-grip" title="Drag to move. Double-click to reset."></span><button class="pw-x" title="Hide (turn it back on with the P&L button or in Settings)">&times;</button></div>
+ const w=document.createElement('div'); w.id='pnlW'; w.innerHTML=`<div class="pw-h"><i class="pw-dot"></i><b>LIVE P&amp;L</b><button class="pw-min" title="Expand or collapse">▾</button><span class="pw-grip" title="Drag to move. Double-click to reset."></span><button class="pw-x" title="Hide (turn it back on with the P&L button or in Settings)">&times;</button></div>
   <div class="pw-big" id="pwBig">$0.00</div><div class="pw-sub" id="pwSub">Flat</div>
   <div class="pw-grid"><div><span>Open R</span><b id="pwR">–</b></div><div><span>Today</span><b id="pwDay">$0.00</b></div><div id="pwRoomC"><span>Room to max loss</span><b id="pwRoom">–</b></div></div>`;
  host.appendChild(w); w.querySelector('.pw-x').onclick=e=>{ e.stopPropagation(); cfg.pnlW=false; saveCfg(); pnlWSync(); };
+ w.classList.toggle('min',cfg.pnlMin!==false); w.querySelector('.pw-min').onclick=e=>{ e.stopPropagation(); cfg.pnlMin=!w.classList.contains('min'); w.classList.toggle('min',cfg.pnlMin); saveCfg(); };
  makeDrag(w,'pnl',noCtl);
  const q=$('qtb'); if(q && !$('qtbPnl')){ const b=document.createElement('button'); b.id='qtbPnl'; b.title='Show / hide the live P&L widget'; b.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-9M15 7h5v5"/></svg>'; b.setAttribute('aria-label','Live P&L'); b.onclick=e=>{ e.stopPropagation(); cfg.pnlW=cfg.pnlW===false; saveCfg(); pnlWSync(); }; q.appendChild(b); }
 }
@@ -4828,10 +4911,10 @@ function evalUpdate(){ acctUpdate(); }
 function acctCard(a,c,full){
  const F=a.stage!=='eval', id=a.id, bl=!!a.blown;
  return `<div class="ac ${a.on?'on':''} ${a.col?'hascol':''} ${a.stage==='live'?'is-live':''} ${bl?'is-blown':''}" style="${a.col?'--acc:'+a.col:''}"><div class="ac-h">${full?`<input class="ac-n" data-nm="${id}" maxlength="16" value="${cesc(a.name)}" title="Rename this account">`:`<b class="ac-t">${cesc(a.name)}</b>`}<span class="badge sz">${planShort(SPEC(a))}</span><span class="badge" data-f="${id}:badge"></span>${full?'<span class="sw-l">Trading</span>':''}<label class="sw" title="${bl?'Reset this evaluation to trade it':'Trade this account'}"><input type="checkbox" data-on="${id}" ${a.on?'checked':''} ${bl?'disabled':''}><i></i></label></div>${optChips(a)}
-  ${full?`<div class="ac-cols"><span class="ac-cl">Colour</span>${ACC_COLS.map(c=>`<button class="ac-col ${a.col===c?'on':''}" data-col="${id}" data-c="${c}" style="background:${c}" title="Colour for this account"></button>`).join('')}</div>`:''}
-  <div class="meter"><div class="l"><span data-f="${id}:pl"></span><b data-f="${id}:p"></b></div><div class="m"><i data-f="${id}:pb"></i></div></div>
+  ${full?'<div class="ac-body"><div class="ac-left">':''}${full?`<div class="ac-cols"><span class="ac-cl">Colour</span>${ACC_COLS.map(c=>`<button class="ac-col ${a.col===c?'on':''}" data-col="${id}" data-c="${c}" style="background:${c}" title="Colour for this account"></button>`).join('')}</div>`:''}
+  ${full?'</div><div class="ac-right">':''}<div class="meter"><div class="l"><span data-f="${id}:pl"></span><b data-f="${id}:p"></b></div><div class="m"><i data-f="${id}:pb"></i></div></div>
   <div class="ac-r"><span>Balance <b data-f="${id}:bal"></b></span><span>Room to max loss <b data-f="${id}:room"></b></span></div>
-  ${full?`<div class="hint" data-f="${id}:note"></div>`:''}
+  ${full?`<div class="hint" data-f="${id}:note"></div></div></div>`:''}
   ${pendFor(id).length?`<div class="ac-proc"><b>Processing</b> ${pendFor(id).map(p=>`${usd(p.net)} · arrives ${payTxt(p.due)}`).join('<br>')}</div>`:''}
   ${a.offer?`<div class="ac-choice"><button class="primary ac-btn" data-golive="${id}">Go live</button><button class="ac-btn" data-cashout="${id}">Cash out ${usd(Math.round(a.offer.cash*FUND.split*100)/100)}</button></div>`:
    bl?`<button class="primary ac-btn" data-reset="${id}" ${CAR.wallet<resetPrice(a)||liveCool()>0?'disabled':''}>Reset for ${usd(resetPrice(a)).replace(/\.00$/,'')}</button>`:F?`<button class="primary ac-btn" data-pay="${id}" ${c.canPay?'':'disabled'}>Request ${a.stage==='live'?'live ':''}payout${c.canPay?' '+usd(c.maxPay):''}</button>`:''}
@@ -4876,7 +4959,7 @@ function acctRender(){
     `<div class="ev-grid ev4">${SIZES.map(k=>{ const o=storeOpt(L.id,k), P=planSpec(L.id,k,L.direct||L.maxx?undefined:o), short=P.price-CAR.wallet, oc=`${o.dll?1:0}:${o.od?1:0}:${Math.round(o.cons*100)}:${o.dd}:${o.fdd}`;
      return `<div class="card prod ev"><div class="card-h"><b>${L.name} ${k}K</b><div class="ev-pr"><span class="price">${money(P.price)}</span>${P.coupon&&P.list>P.price?`<s>${money(P.list)}</s>`:''}</div></div>
       ${evOpts(L,k,o,P)}
-      <div class="rt">${planRules(P).map(([a,b])=>`<span>${a}</span><b>${b}</b>`).join('')}</div>
+      ${(()=>{ const R=planRules(P), row=([a,b])=>`<span>${a}</span><b>${b}</b>`; return `<div class="rt">${R.slice(0,3).map(row).join('')}</div>${R.length>3?`<details class="rt-more"><summary>Full rules</summary><div class="rt">${R.slice(3).map(row).join('')}</div></details>`:''}`; })()}
       <button class="primary ac-btn" data-buy="${L.id}:${k}"${L.direct||L.maxx?'':` data-oc="${oc}"`} ${lock||full||cool||mxw||short>0?'disabled':''}>${lock?'Locked':mxw?mxw[0].toUpperCase()+mxw.slice(1):cool?`Live cooldown: ${cool} day${cool===1?'':'s'}`:full?`Limit of ${EVAL.max} accounts reached`:short>0?`Need ${money(short)} more`:(L.direct?'Buy funded account':L.maxx?'Buy LucidMaxx':'Buy evaluation')}</button>${!lock&&!full&&short>0?`<button class="link ac-link" data-hub="job">Earn it at the job</button>`:''}</div>`; }).join('')}</div>`; })()}
    <div class="sec">Tools</div><div class="hub-grid2">
     <div class="card prod"><div class="card-h"><b>Trade syncer</b><span class="price">${own?'Owned':money(SYNCER_PRICE)}</span></div>
@@ -6112,7 +6195,7 @@ function skillsHTML(){
    ${own.length?'':'<!--'}<div class="sk-actions"><button id="skRespec" ${!own.length?'disabled data-why="No skills to reset"':CAR.wallet<rc?`disabled data-why="${cesc('Needs '+fmt$(rc-CAR.wallet)+' more')}"`:''} title="Refunds every point">Respec all · ${fmt$(rc)}</button></div>${own.length?'':'-->'}</div>
   <div class="sk-tree" style="--tiers:${tiers}"><div class="sk-lane sk-hdr"><div></div>${TN.slice(0,tiers).map(n=>`<div class="sk-th">${n}</div>`).join('')}</div>${br.map(B=>`<div class="sk-lane"><div class="sk-bh">${B}</div>${Array.from({length:tiers},(_,t)=>`<div class="sk-cell">${SKILLS.filter(s=>s.b===B&&skTier(s)===t).map(s=>{
    const o=skill(s.id), reqOk=s.r.every(skill), can=!o&&reqOk&&pts>=s.c, st=o?'own':reqOk?'open':'lock';
-   return `<div class="sk-node ${st}" data-node="${s.id}"><div class="sk-top"><b>${s.n}</b><span class="sk-cost">${o?'Unlocked':s.c+' pt'+(s.c>1?'s':'')}</span></div><p>${s.d}</p>
+   return `<div class="sk-node ${st}" data-node="${s.id}"><span class="sk-tcap">${TN[t]}</span><div class="sk-top"><b>${s.n}</b><span class="sk-cost">${o?'Unlocked':s.c+' pt'+(s.c>1?'s':'')}</span></div><p>${s.d}</p>
     ${o?'':`<button class="${can?(skRec?'sk-ok':(skRec=true,'primary sk-rec')):''}" data-sk="${s.id}" ${can?'':`disabled data-why="${cesc(!reqOk?'Needs '+s.r.filter(r=>!skill(r)).map(r=>SK[r].n).join(' + '):`Needs ${s.c-pts} more skill point${s.c-pts>1?'s':''}`)}"`}>${!reqOk?'Needs '+s.r.filter(r=>!skill(r)).map(r=>SK[r].n).join(' + '):pts<s.c?`Need ${s.c} point${s.c>1?'s':''}`:`Unlock · ${s.c} pt${s.c>1?'s':''}`}</button>`}</div>`; }).join('')}</div>`).join('')}</div>`).join('')}</div>
   <div class="sec">Prestige</div><div class="card pres-card"><div><b>${(CAR.prestige||0)>=PRES_MAX?'Maximum prestige reached':'Start over, stronger'}</b><p class="hint">After 10 payouts or $25,000 paid out you can prestige: your wallet, accounts, items, skills and XP reset, and you keep your look, family, trophies and Hall of Fame. Each prestige adds +10% XP and +5% on every payout, up to ${PRES_MAX} stars.</p>
    <div class="mut">Progress: ${CAR.payouts||0}/10 payouts · ${fmt$(CAR.paid||0)}/$25,000 paid out · prestige ${CAR.prestige||0}/${PRES_MAX}</div></div>${(()=>{ const why=(CAR.prestige||0)>=PRES_MAX?'Maximum prestige reached':!presOk()?'Needs 10 payouts or $25,000 paid out':CHA()?'Finish your evaluation session first':(CAR.loans||[]).length?'Pay off your loans first':''; return `<button id="presBtn" class="${why?'':'primary'}" ${why?`disabled data-why="${cesc(why)}"`:''}>${why?'Locked':'Prestige now'}</button>`; })()}</div>
@@ -6866,7 +6949,6 @@ function phoneRender(){
    <div class="ph-grid">${PH_APPS.map(([k,n,c,p])=>{ const badge=k==='messages'?unread:k==='missions'?mis:k==='rewards'?(loginTick().claimed?0:1):0; return `<button class="ph-app" data-app="${k}"><i style="--c:${c}">${ico(c,p)}${badge?`<em>${badge}</em>`:''}</i><span>${n}</span></button>`; }).join('')}</div>
    <div class="ph-today"><span class="ph-tdh">Today</span>${[
     ['messages',CAR.ch&&CAR.ch.req?'Evaluation session waiting':'No session waiting',CAR.ch&&CAR.ch.req?'Open':''],
-    ['missions',mis?`${mis} mission reward${mis>1?'s':''} to claim`:'Missions in progress',mis?'Claim':''],
     ['rewards',loginTick().claimed?'Daily reward claimed':'Daily reward ready',loginTick().claimed?'':'Claim']
    ].map(([k,t,b])=>`<button class="ph-trow" data-app="${k}"><span>${t}</span>${b?`<em>${b}</em>`:'<i>›</i>'}</button>`).join('')}</div></div>`; }
  else if(A==='bank'){ const L=CAR.loans||[];
@@ -6884,7 +6966,7 @@ function phoneRender(){
  else if(A==='hof'){ const me=CAR.hof||[];
   h=head('Hall of Fame','Best R trades from evaluation sessions')+(CAR.tamper?'<div class="ph-note">This save was edited outside the app, so it can\'t enter the global Hall of Fame.</div>':'')+`<div class="ph-seg"><button data-hof="me" class="${PH.hof==='me'?'act':''}">You</button><button data-hof="all" class="${PH.hof==='all'?'act':''}">Everyone</button></div><div id="hofBox" class="ph-list">${PH.hof==='me'?(me.map((e,i)=>`<div class="ph-tx"><div><b>#${i+1} · ${e.r.toFixed(2)}R</b><span>${e.side} · session ${e.day}</span></div><em class="pos">+${fmt$(e.pnl)}</em></div>`).join('')||'<div class="ph-empty">No entries yet. Win a trade with a stop loss in an evaluation session.</div>'):'<div class="ph-empty">Loading...</div>'}</div>`; }
  else if(A==='missions'){ const M=misGet(), mult=1+Math.min(0.5,((CAR.streak||1)-1)*0.1);
-  h=head('Missions',`Day streak ${CAR.streak||1} · rewards ×${mult.toFixed(1)}`)+`<div class="ph-list">${M.list.map(m=>`<div class="ph-card mis ${m.claimed?'cl':''}"><b>${m.t}</b><div class="ph-bar"><i style="width:${m.p/m.g*100}%"></i></div><div class="ms"><span>${m.p} / ${m.g} <i class="rwc">${fmt$(Math.round(m.c*mult))}</i><i class="rwc xp">+${Math.round(m.x*mult)} XP</i></span>${m.claimed?'<em>Claimed</em>':m.done?`<button class="primary" data-mc="${m.id}">Claim</button>`:''}</div></div>`).join('')}</div><div class="ph-note">New missions every day. Come back on consecutive days to grow your reward multiplier.</div>`; }
+  h=head('Missions',`Day streak ${CAR.streak||1} · rewards ×${mult.toFixed(1)}`)+`<div class="ph-card ph-streak"><div class="ln-h"><b>Daily streak</b><span>×${mult.toFixed(1)} rewards</span></div><div class="stk">${Array.from({length:7},(_,i)=>`<i class="${i<Math.min(7,CAR.streak||1)?'on':''}"><em>${i+1}</em></i>`).join('')}</div><div class="mut sm">Play on consecutive days to grow the multiplier.</div></div><div class="ph-list">${M.list.map(m=>`<div class="ph-card mis ${m.claimed?'cl':''}"><b>${m.t}</b><div class="ph-bar"><i style="width:${m.p/m.g*100}%"></i></div><div class="ms"><span>${m.p} / ${m.g} <i class="rwc">${fmt$(Math.round(m.c*mult))}</i><i class="rwc xp">+${Math.round(m.x*mult)} XP</i></span>${m.claimed?'<em>Claimed</em>':m.done?`<button class="primary" data-mc="${m.id}">Claim</button>`:''}</div></div>`).join('')}</div><div class="ph-note">New missions every day. Come back on consecutive days to grow your reward multiplier.</div>`; }
  else if(A==='rewards'){ const L=loginTick(), m=skill('loyal')?1.5:1;
   h=head('Daily rewards',`Day ${L.i+1} of 7${skill('loyal')?' · Loyalty +50%':''}`)+`<div class="rw-grid">${LOGIN_R.map((v,i)=>`<div class="rw ${i<L.i||(i===L.i&&L.claimed)?'got':i===L.i?'now':''}"><span>Day ${i+1}</span><b>${fmt$(Math.round(v*m))}</b><em>${10*(i+1)} XP</em></div>`).join('')}</div>${L.claimed?'<div class="ph-note">Claimed today. Come back tomorrow to keep the streak; missing a day restarts at day 1.</div>':`<button class="primary rw-claim" data-rw>Claim ${fmt$(Math.round(LOGIN_R[L.i]*m))}</button>`}`; }
  else if(A==='trophies'){ const G=CAR.ach||{};
@@ -7008,7 +7090,7 @@ function jobStageHTML(){ const f=HUB.feed[0], m=f?(/^(BUY|SELL) (\d+) (\S+) @ ([
  return `<div class="jb-stage" id="jbStage" aria-hidden="true"><div class="jb-desk"></div>
   <div class="jb-in"><i></i><i></i><i></i><span>Inbox</span></div>
   <div class="jb-tk"><div class="jb-h"><span class="jb-side ${m[1]==='SELL'?'neg':'pos'}">${m[1]||'BUY'}</span><b class="jb-sym">${m[3]||'NQ'}</b></div><div class="jb-qty">${m[2]?m[2]+' @ '+m[4]:'Market order'}</div><div class="jb-f"><span>Order ticket</span><b class="jb-pay">${f?'+'+usd(f[1]):''}</b></div><div class="jb-stamp">Filled</div></div>
-  <div class="jb-tray"><i></i><b id="jbDone">${(CAR.job.clicks||0).toLocaleString('en-US')}</b><span>Done</span></div></div>`; }
+  <div class="jb-tray"><i></i><b id="jbDone" class="jb-cnt">${(CAR.job.clicks||0).toLocaleString('en-US')}</b><span>Done</span></div></div>`; }
 function jobRolesHTML(){ const c=CAR.job.clicks||0, cur=jobRole().i;
  return JOBS.map((j,k)=>`<div class="jb-role${k===cur?' now':k<cur?' done':''}">${jobBadge(k,22)}<span class="nm">${j[1]}</span><span class="mut">${k<=cur?(k===cur?'Your role':'Reached'):(j[0]-c).toLocaleString('en-US')+' tickets to go'} · ${usd(j[2])} per ticket</span></div>`).join(''); }
 try{ Object.assign(window.__bt,{ITEMS,ITEM,careerScene,itemThumb,avScene,avMe,avPortrait,ACH,jobFx,HOMES,CARS}); }catch(e){}
@@ -7067,9 +7149,17 @@ function skRespec(){ const n=Object.keys(CAR.skills||{}).length, cost=respecCost
 function skTier(s,seen){ seen=seen||{}; if(!s.r.length) return 0; if(seen[s.id]) return 0; seen[s.id]=1; return 1+Math.max(...s.r.map(r=>skTier(SK[r],seen))); }
 function skLinks(){ const T=document.querySelector('.sk-tree'); if(!T) return; let sv=T.querySelector('svg.sk-svg'); if(!sv){ sv=document.createElementNS('http://www.w3.org/2000/svg','svg'); sv.setAttribute('class','sk-svg'); T.prepend(sv); }
  const R=T.getBoundingClientRect(); sv.setAttribute('width',R.width); sv.setAttribute('height',R.height); let h='';
- SKILLS.forEach(s=>s.r.forEach(r=>{ const a=T.querySelector(`[data-node="${r}"]`), b=T.querySelector(`[data-node="${s.id}"]`); if(!a||!b) return; const A=a.getBoundingClientRect(), B=b.getBoundingClientRect();
-  const x1=A.right-R.left, y1=A.top+A.height/2-R.top, x2=B.left-R.left, y2=B.top+B.height/2-R.top, mx=(x1+x2)/2, on=skill(r)&&skill(s.id), half=skill(r);
-  h+=`<path d="M${x1} ${y1}C${mx} ${y1} ${mx} ${y2} ${x2} ${y2}" class="${on?'on':half?'half':''}"/><circle cx="${x2}" cy="${y2}" r="3" class="${on?'on':half?'half':''}"/>`; }));
+ // orthogonal routing: out of the source, along its own lane in the gutter, into the target; parallel lines are spaced apart so none overlap
+ const L=[]; SKILLS.forEach(s=>s.r.forEach(r=>{ const a=T.querySelector(`[data-node="${r}"]`), b=T.querySelector(`[data-node="${s.id}"]`); if(a&&b) L.push({r,id:s.id,A:a.getBoundingClientRect(),B:b.getBoundingClientRect()}); }));
+ const inN={}, outN={}, gut={}; L.forEach(l=>{ (inN[l.id]=inN[l.id]||[]).push(l); (outN[l.r]=outN[l.r]||[]).push(l); const g=Math.round(l.B.left); (gut[g]=gut[g]||[]).push(l); });
+ Object.values(inN).forEach(a=>a.sort((p,q)=>p.A.top-q.A.top)); Object.values(outN).forEach(a=>a.sort((p,q)=>p.B.top-q.B.top));
+ Object.values(gut).forEach(a=>{ a.sort((p,q)=>(p.A.top+p.B.top)-(q.A.top+q.B.top)); a.forEach((l,k)=>{ l.gk=k; l.gn=a.length; }); });
+ L.forEach(l=>{ const ii=inN[l.id].indexOf(l), oi=outN[l.r].indexOf(l), no=outN[l.r].length;
+  const x1=l.A.right-R.left, y1=l.A.top-R.top+l.A.height*(oi+1)/(no+1), x2=l.B.left-R.left, y2=l.B.top-R.top+Math.min(l.B.height-14,26+ii*12);
+  const gap=x2-x1, mx=Math.round(x1+gap*(l.gk+1)/(l.gn+1)), rr=Math.min(5,Math.abs(y2-y1)/2), dy=y2>y1?1:-1;
+  const on=skill(l.r)&&skill(l.id), half=skill(l.r), c=on?'on':half?'half':'';
+  const d=Math.abs(y2-y1)<1?`M${x1} ${y1}H${x2}`:`M${x1} ${y1}H${mx-rr}Q${mx} ${y1} ${mx} ${y1+dy*rr}V${y2-dy*rr}Q${mx} ${y2} ${mx+rr} ${y2}H${x2}`;
+  h+=`<path d="${d}" class="${c}"/><circle cx="${x2}" cy="${y2}" r="3" class="${c}"/>`; });
  sv.innerHTML=h; }
 window.addEventListener('resize',()=>{ try{ if(typeof HUB!=='undefined'&&HUB.page==='skills') skLinks(); }catch(e){} });
 /* --- badges & profile cards --- */
@@ -7201,7 +7291,6 @@ function hubRender(){
    <div class="hub-main">
     <div class="card next"><span class="eyebrow">Next step</span><b>${nx[0]}</b><p>${nx[1]}</p><button class="primary" data-hub="${nx[3]}">${nx[2]}</button></div>
     <div class="stats4">${[['Wallet',usd(CAR.wallet)],['Evaluations passed',CAR.passes],['Payouts taken',CAR.payouts],['Total paid out',usd(CAR.paid)]].map(([l,v])=>`<div><span>${l}</span><b>${v}</b></div>`).join('')}</div>
-    <div class="card firm"><div class="card-h"><b>Lucid Trading</b><span class="badge run">PROP FIRM</span></div><div class="hint">Four account types in 25K, 50K, 100K and 150K: LucidFlex, LucidPro and LucidDaily evaluations, and LucidDirect instant funded accounts. Each one follows Lucid's own rules for the evaluation and the funded stage.</div></div>
     <div id="hubAccts"></div>
     <div class="hub-grid2" hidden>
      <div class="card"><div class="card-h"><b>Accounts</b><button class="link" data-hub="accounts">${A.length?'Manage':'Eval store'}</button></div>
@@ -7258,7 +7347,7 @@ function hubRender(){
   $('jbBtn').onclick=jobClick; $('jbBtn').addEventListener('keydown',e=>{ if(e.repeat) e.preventDefault(); });
   jobPaint();
  } else if(P==='leaderboard'){
-  B.innerHTML=`<div class="hub-narrow"><div class="card-h"><h2>Leaderboard</h2><button id="lbRef">Refresh</button></div><p class="sub">Ranked by total paid out from funded accounts. Job money does not count. Click a trader to open their profile card.</p><div class="card note"><span>Your card: Lv ${lvlOf(CAR.xp||0)} ${levelTitle(lvlOf(CAR.xp||0))}${CAR.prestige?' · '+'★'.repeat(CAR.prestige):''}</span><button class="primary" id="lbMe">View my card</button></div>
+  B.innerHTML=`<div class="hub-narrow"><div class="card-h"><h2>Leaderboard</h2><button id="lbRef">Refresh</button></div><p class="sub">Ranked by total paid out from funded accounts. Job money does not count. Click a trader to open their profile card.</p><div class="card note lb-me"><span class="lb-av">${avPortrait(eqNow(),CAR.look,36)}</span><span class="lb-mt"><b>${cesc(CAR.look.name||'You')}</b><em>${levelTitle(lvlOf(CAR.xp||0))}${CAR.prestige?' · '+'★'.repeat(CAR.prestige):''}</em></span><span class="lb-lv">Lv ${lvlOf(CAR.xp||0)}</span><button class="primary" id="lbMe">View my card</button></div>
    ${cloudOn()&&!CLOUD.user?`<div class="card note"><span>Sign in to put your name on the board.</span><button class="primary" data-hub="profile">Sign in</button></div>`:''}
    <div class="card" id="lbBox"><div class="hint">Loading...</div></div></div>`;
   $('lbRef').onclick=()=>lbRender(true); lbRender(); $('lbMe').onclick=myProfCard;
@@ -7309,6 +7398,26 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape' && hubShown() && !/
 
 try{ Object.assign(window.__bt,{LF,foodBuy,gymJoin,gymRep,partyCheck,partyGo,famDo,lifeTick,chTicks,chSpd,chClockStop,chClockRun,CH,chart,eqChart,oscChart,chAfterPull,chSnap,txAdd,financeItem,loanPay,chAccept,chEnd,chTick,CHS,phoneOpen,misBump,misClaim,achCheck,credit,hofAdd,openPos,closePos,CAR,careerSync,hubOpen,HUB,jobClick,skBuy,xpAdd,skill,planSpec,chartFull,bgfxSync,cfg:()=>cfg,famScene,sfxPlay,sessSave,sessApply}); }catch(e){}
 try{ Object.assign(window.__bt,{rebuildSeries,pnlWUpdate}); }catch(e){}
+
+/* ---- polish: date button in the replay bar, mobile tab bar ---- */
+(function(){
+ const gd=document.getElementById('gotoDate'); if(gd && !document.getElementById('gotoBtn')){
+  const b=document.createElement('button'); b.id='gotoBtn'; b.type='button'; b.title='Pick a start date (UTC)';
+  const lab=()=>{ b.innerHTML='<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4"/></svg><span>'+(gd.value?gd.value.replace('T',' '):'Jump to date')+'</span>'; };
+  lab(); gd.addEventListener('change',lab); gd.addEventListener('input',lab);
+  b.onclick=()=>{ try{ gd.showPicker(); }catch(e){ gd.focus(); gd.click(); } };
+  gd.classList.add('gd-hide'); gd.parentNode.insertBefore(b,gd);
+ }
+ if(!document.getElementById('mTabs')){
+  const T=[['chart','Trading','M3 17l5-5 4 4 8-9'],['life','Life','M3 11l9-7 9 7M5 10v10h14V10'],['props','Props','M4 7h16v12H4zM9 7V4h6v3'],['job','Job','M5 4h14v16H5zM9 9h6M9 13h6'],['skills','More','M5 12h.01M12 12h.01M19 12h.01']];
+  const n=document.createElement('nav'); n.id='mTabs';
+  n.innerHTML=T.map(([k,l,d])=>`<button data-mt="${k}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg><span>${l}</span></button>`).join('');
+  n.querySelectorAll('[data-mt]').forEach(b=>b.onclick=()=>{ const k=b.dataset.mt; if(k==='skills'){ const cur=(typeof HUB!=='undefined'&&HUB.page); hubOpen(cur==='skills'?'leaderboard':cur==='leaderboard'?'profile':'skills'); } else hubOpen(k); });
+  document.body.appendChild(n);
+  const mark=()=>{ let p='chart'; try{ if(hubShown()) p=HUB.page; }catch(e){} n.querySelectorAll('[data-mt]').forEach(b=>b.classList.toggle('act',b.dataset.mt===p||(b.dataset.mt==='skills'&&['skills','leaderboard','profile'].includes(p)))); };
+  setInterval(mark,400); mark();
+ }
+})();
 /* ---- self-update: picks up a new version of the site without Ctrl+F5 ---- */
 (()=>{ const meta=document.querySelector('meta[name="ke-build"]'), mine=meta&&meta.content; if(!mine||location.protocol==='file:') return;
  let ready=null;
