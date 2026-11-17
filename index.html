@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261117164226">
+<meta name="ke-build" content="20261117164953">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -7697,12 +7697,26 @@ async function cloudPull(){
  CLOUD.state='saved'; cloudStat(); try{ chAfterPull(); }catch(e){}
 }
 function cloudStat(){ const e=$('cloudStat'); if(e) e.textContent=CLOUD.err?'Sync problem: '+CLOUD.err:CLOUD.state==='saving'?'Saving...':'Your career is saved online.'; }
+/* Start over: erases this character's career progress (online and in this browser). Keeps the login, name, look and the anti-cheat flag. */
+function carStartOver(){
+ if(!window.confirm('Start over with this character? All career progress (wallet, evaluations, accounts, skills, trophies, job and Life) will be erased, online and in this browser. Your login, name and look are kept. This cannot be undone.')) return;
+ const keep={uid:CAR.uid, look:CAR.look, tamper:CAR.tamper};
+ Object.keys(CAR).forEach(k=>delete CAR[k]);
+ Object.assign(CAR, carDefault(), {uid:keep.uid, look:keep.look});
+ if(keep.tamper) CAR.tamper=keep.tamper;
+ try{ localStorage.removeItem('ke_sess_v1'); }catch(e){} SAVE.cur=null;
+ SYNC.prev={}; carSaveLocal();
+ if(CLOUD.user&&CLOUD.sb){ carSave(); setTimeout(()=>location.reload(),2500); } else location.reload();
+}
+window.__bt=Object.assign(window.__bt||{},{carStartOver});
 function cloudAccountUI(){
  const b=$('cloudBox'); if(!b) return;
  if(!cloudOn()||!CLOUD.sb){ b.innerHTML='<div class="hint">Online accounts could not load (no connection to the sign-in service). Your career still saves in this browser.</div>'; return; }
  if(CLOUD.user){ const m=CLOUD.user.email||'';
   b.innerHTML=`<div class="acc-row"><i class="acc-av">${cesc((m[0]||'?').toUpperCase())}</i><div class="nm"><b>${cesc(m)}</b><span class="mut" id="cloudStat"></span></div><button id="cloudOut">Sign out</button></div>`;
-  cloudStat(); $('cloudOut').onclick=async()=>{ await CLOUD.sb.auth.signOut(); }; return; }
+  cloudStat(); $('cloudOut').onclick=async()=>{ await CLOUD.sb.auth.signOut(); };
+  b.insertAdjacentHTML('beforeend','<div class="acc-reset"><button id="cloudReset" class="link" type="button">Start over with this character</button></div>');
+  $('cloudReset').onclick=()=>carStartOver(); return; }
  const up=HUB.auth==='up';
  b.innerHTML=`<div class="pills"><button data-am="in" class="${up?'':'act'}">Sign in</button><button data-am="up" class="${up?'act':''}">Create account</button></div>
   <form id="auForm" class="au-form"><label class="fld">Email<input id="auMail" type="email" autocomplete="email" placeholder="you@example.com" required></label>
