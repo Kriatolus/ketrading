@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="ke-build" content="20261117165127">
+<meta name="ke-build" content="20261117165807">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -7517,9 +7517,9 @@ function hubRender(){
   B.innerHTML=`<div class="hub-narrow"><h2>Profile</h2><p class="sub">Your online account, your name on the leaderboard, and your saved career.</p>${profHeadHTML()}
    <div class="sec" style="margin-top:0">Online account</div><div class="card" id="cloudBox"></div>
    <div class="sec">Name</div><div class="card"><label class="fld">Shown on your character and on the leaderboard<input id="crName" maxlength="16" value="${name}"></label></div>
-   <div class="sec">Career</div><div class="card note"><span>Start over with ${money(EVAL.price)} in your wallet, no accounts and nothing owned. Your look is kept.</span><button id="crReset">Reset career</button></div></div>`;
+   <div class="sec">Career</div><div class="card note"><span>Start this character from zero: ${money(EVAL.price)} in your wallet, no accounts, skills, trophies or Life progress. Your login, name and look are kept. This cannot be undone.</span><button id="crReset" class="danger">Start over</button></div></div>`;
   $('crName').oninput=()=>{ CAR.look.name=$('crName').value; carSave(); };
-  $('crReset').onclick=()=>{ const b=$('crReset'); if(CHA()){ toast('Finish your evaluation session first.',3000); return; } if(b.dataset.arm){ const look=CAR.look; Object.keys(CAR).forEach(k=>{ if(k!=='uid') delete CAR[k]; }); Object.assign(CAR,carDefault(),{look}); SYNC.prev={}; carSave(); careerSync(); toast('Career reset.',2500); } else { b.dataset.arm='1'; b.textContent='Click again to erase everything'; } };
+  $('crReset').onclick=()=>{ const b=$('crReset'); if(CHA()){ toast('Finish your evaluation session first.',3000); return; } if(b.dataset.arm){ b.disabled=true; b.textContent='Resetting...'; carStartOver(); } else { b.dataset.arm='1'; b.textContent='Click again to erase everything'; } };
   cloudAccountUI(); { const cb=$('cloudBox'); if(cb && /could not|no connection/i.test(cb.textContent)) cb.classList.add('warn'); }
  }
  B.querySelectorAll('[data-hub]').forEach(e=>{ if(!e.onclick) e.onclick=()=>hubOpen(e.dataset.hub); });
@@ -7702,8 +7702,7 @@ async function cloudPull(){
 function cloudStat(){ const e=$('cloudStat'); if(e) e.textContent=CLOUD.err?'Sync problem: '+CLOUD.err:CLOUD.state==='saving'?'Saving...':'Your career is saved online.'; }
 /* Start over: erases this character's career progress (online and in this browser). Keeps the login, name, look and the anti-cheat flag. */
 function carStartOver(){
- if(!window.confirm('Start over with this character? All career progress (wallet, evaluations, accounts, skills, trophies, job and Life) will be erased, online and in this browser. Your login, name and look are kept. This cannot be undone.')) return;
- const keep={uid:CAR.uid, look:CAR.look, tamper:CAR.tamper};
+  const keep={uid:CAR.uid, look:CAR.look, tamper:CAR.tamper};
  Object.keys(CAR).forEach(k=>delete CAR[k]);
  Object.assign(CAR, carDefault(), {uid:keep.uid, look:keep.look});
  if(keep.tamper) CAR.tamper=keep.tamper;
@@ -7718,8 +7717,7 @@ function cloudAccountUI(){
  if(CLOUD.user){ const m=CLOUD.user.email||'';
   b.innerHTML=`<div class="acc-row"><i class="acc-av">${cesc((m[0]||'?').toUpperCase())}</i><div class="nm"><b>${cesc(m)}</b><span class="mut" id="cloudStat"></span></div><button id="cloudOut">Sign out</button></div>`;
   cloudStat(); $('cloudOut').onclick=async()=>{ await CLOUD.sb.auth.signOut(); };
-  b.insertAdjacentHTML('beforeend','<div class="acc-reset"><button id="cloudReset" class="link" type="button">Start over with this character</button></div>');
-  $('cloudReset').onclick=()=>carStartOver(); return; }
+return; }
  const up=HUB.auth==='up';
  b.innerHTML=`<div class="pills"><button data-am="in" class="${up?'':'act'}">Sign in</button><button data-am="up" class="${up?'act':''}">Create account</button></div>
   <form id="auForm" class="au-form"><label class="fld">Email<input id="auMail" type="email" autocomplete="email" placeholder="you@example.com" required></label>
